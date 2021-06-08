@@ -6,35 +6,9 @@
   </head>
   <body>
 
-    <button>Connect</button>
+    <button class="connect">Connect</button>
 
-    <script>
+    <script src="app.js"></script>
 
-      if ("serial" in navigator) {
-
-        console.log('Web Serial is supported');
-
-        let button = document.querySelector('button');
-
-        button.addEventListener('click', function() {
-
-          console.log('Connect button was clicked');
-
-          // Call start
-          (async() => {
-
-            console.log('This runs before port request');
-
-            const port = await navigator.serial.requestPort();
-
-            console.log('This runs after port request');
-
-          })();
-
-        })
-
-      }
-
-    </script>
   </body>
 </html>
