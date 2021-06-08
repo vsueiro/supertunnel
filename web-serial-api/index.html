@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+  </head>
+  <body>
+
+    <button>Connect</button>
+
+    <script>
+
+      if ("serial" in navigator) {
+
+        console.log('Web Serial is supported');
+
+        let button = document.querySelector('button');
+
+        button.addEventListener('click', function() {
+
+          console.log('Connect button was clicked');
+
+          // Call start
+          (async() => {
+
+            console.log('This runs before port request');
+
+            const port = await navigator.serial.requestPort();
+
+            console.log('This runs after port request');
+
+          })();
+
+        })
+
+      }
+
+    </script>
+  </body>
+</html>
