@@ -34,6 +34,8 @@ let app = {
       json : undefined,
     },
 
+    seconds : 0
+
   },
 
   three : {
@@ -66,14 +68,15 @@ let app = {
 
     render : function( time ) {
 
-      time *= .001;
+      app.data.seconds = time * .001;
 
       app.three.resize()
 
-      let speed = 1
-      let rotation = time * speed
-      app.three.tunnel.rotation.x = rotation
-      app.three.tunnel.rotation.z = rotation
+      let degrees = 45
+      let radians = degrees * ( Math.PI / 180 )
+
+      app.three.tunnel.rotation.x = radians
+      app.three.tunnel.rotation.z = radians
 
       app.three.renderer.render(
         app.three.scene,
