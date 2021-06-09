@@ -75,8 +75,11 @@ let app = {
       let degrees = 45
       let radians = degrees * ( Math.PI / 180 )
 
-      app.three.tunnel.rotation.x = radians
-      app.three.tunnel.rotation.z = radians
+      // app.three.tunnel.rotation.x = radians
+      // app.three.tunnel.rotation.z = radians
+
+      app.three.tunnel.rotation.x = app.data.seconds
+      app.three.tunnel.rotation.z = app.data.seconds
 
       app.three.renderer.render(
         app.three.scene,
@@ -108,8 +111,11 @@ let app = {
 
       {
 
+        let material = new THREE.MeshPhongMaterial({ color: 0xFF0000 });
         let geometry = new THREE.CylinderGeometry( 1, 1, 32, 8, 1 );
-        let material = new THREE.MeshPhongMaterial({ color: 0xFF0000 })
+
+        // Rotate around end, not center
+        geometry.translate( 0, -32/2, 0 );
 
         app.three.tunnel = new THREE.Mesh( geometry, material );
 
