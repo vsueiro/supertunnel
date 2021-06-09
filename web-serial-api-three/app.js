@@ -39,41 +39,41 @@ let app = {
   three : {
 
     renderer : undefined,
-    camera : undefined,
-    scene : undefined,
+    camera   : undefined,
+    light    : undefined,
+    scene    : undefined,
 
-    cubes : undefined,
+    tunnel   : undefined,
 
-    resizeRendererToDisplaySize : function( renderer ) {
+    resize : function() {
 
-      const canvas = renderer.domElement;
-      const width = canvas.clientWidth;
-      const height = canvas.clientHeight;
-      const needResize = canvas.width !== width || canvas.height !== height;
+      let c = app.elements.canvas;
 
-      if (needResize)
-        renderer.setSize(width, height, false);
+      if ( c.width !== c.clientWidth || c.height !== c.clientHeight ) {
 
-      return needResize;
+        app.three.renderer.setSize(
+          c.clientWidth,
+          c.clientHeight,
+          false
+        );
+
+        app.three.camera.aspect = c.clientWidth / c.clientHeight;
+        app.three.camera.updateProjectionMatrix();
+
+      }
 
     },
 
     render : function( time ) {
 
-      time *= 0.001;
+      time *= .001;
 
-      if ( app.three.resizeRendererToDisplaySize( app.three.renderer )) {
-        const canvas = app.three.renderer.domElement;
-        app.three.camera.aspect = canvas.clientWidth / canvas.clientHeight;
-        app.three.camera.updateProjectionMatrix();
-      }
+      app.three.resize()
 
-      app.three.cubes.forEach((cube, ndx) => {
-        const speed = 1 + ndx * .1;
-        const rot = time * speed;
-        cube.rotation.x = rot;
-        cube.rotation.y = rot;
-      });
+      let speed = 1
+      let rotation = time * speed
+      app.three.tunnel.rotation.x = rotation
+      app.three.tunnel.rotation.z = rotation
 
       app.three.renderer.render(
         app.three.scene,
@@ -91,43 +91,29 @@ let app = {
     initialize : function() {
 
       app.three.renderer = new THREE.WebGLRenderer({
-        canvas : app.elements.canvas
+        canvas : app.elements.canvas,
+        alpha : true
       });
 
-      app.three.camera = new THREE.PerspectiveCamera(75, 2, 0.1, 5);
-      app.three.camera.position.z = 2;
+      app.three.camera = new THREE.PerspectiveCamera( 50, 1, .1, 2000 );
+      app.three.camera.position.z = 100;
+
+      app.three.light = new THREE.DirectionalLight( 0xFFFFFF, 1 );
+      app.three.light.position.set( -1, 2, 4 );
 
       app.three.scene = new THREE.Scene();
 
       {
-        const color = 0xFFFFFF;
-        const intensity = 1;
-        const light = new THREE.DirectionalLight(color, intensity);
-        light.position.set(-1, 2, 4);
-        app.three.scene.add(light);
+
+        let geometry = new THREE.CylinderGeometry( 1, 1, 32, 8, 1 );
+        let material = new THREE.MeshPhongMaterial({ color: 0xFF0000 })
+
+        app.three.tunnel = new THREE.Mesh( geometry, material );
+
       }
 
-      const boxWidth = 1;
-      const boxHeight = 1;
-      const boxDepth = 1;
-      const geometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
-
-      function makeInstance(geometry, color, x) {
-        const material = new THREE.MeshPhongMaterial({color});
-
-        const cube = new THREE.Mesh(geometry, material);
-        app.three.scene.add(cube);
-
-        cube.position.x = x;
-
-        return cube;
-      }
-
-      app.three.cubes = [
-        makeInstance(geometry, 0x44aa88,  0),
-        makeInstance(geometry, 0x8844aa, -2),
-        makeInstance(geometry, 0xaa8844,  2),
-      ];
+      app.three.scene.add( app.three.light );
+      app.three.scene.add( app.three.tunnel );
 
       requestAnimationFrame( app.three.render );
 
