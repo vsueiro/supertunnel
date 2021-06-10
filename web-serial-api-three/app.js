@@ -103,7 +103,7 @@ let app = {
 
       app.data.seconds = time * .001;
 
-      app.three.tunnel.rotation.x = THREE.Math.degToRad( -45 )
+      app.three.tunnel.rotation.x = THREE.Math.degToRad( 0 )
       app.three.tunnel.rotation.z = THREE.Math.degToRad( 0 )
 
       let rotation = app.data.seconds / 10;
@@ -114,8 +114,13 @@ let app = {
         app.three.camera
       );
 
-      app.three.controls.update()
+      // app.three.controls.update()
       requestAnimationFrame( app.three.render );
+
+      // Rotate Earth so user location is at the “North Pole”
+      app.three.crust.rotation.x = THREE.Math.degToRad( 90 )
+      app.three.crust.rotation.y = THREE.Math.degToRad( -90 )
+      app.three.crust.rotation.z = THREE.Math.degToRad( 180 )
 
     },
 
@@ -135,8 +140,8 @@ let app = {
       app.three.camera = new THREE.PerspectiveCamera( 50, 1, .1, app.data.earth.radius.crust * 6 );
       app.three.camera.position.y = app.data.earth.radius.crust * 3;
 
-      // app.three.light = new THREE.DirectionalLight( 0xFFFFFF, 1 );
-      // app.three.light.position.set( -1, 2, 4 );
+      app.three.light = new THREE.DirectionalLight( 0xFFFFFF, 1 );
+      app.three.light.position.set( -1, 2, 4 );
 
       app.three.scene = new THREE.Scene();
 
@@ -152,10 +157,12 @@ let app = {
 
         let material = new THREE.MeshBasicMaterial({
           color: 0xFFFFFF,
-          wireframe: true,
-          opacity: 0.25,
+          // wireframe: true,
+          opacity: 0.5,
           transparent: true
         });
+
+        material.map = THREE.ImageUtils.loadTexture('texture.jpg')
 
         let geometry = new THREE.SphereGeometry( app.data.earth.radius.crust, 16, 16 );
 
@@ -232,7 +239,7 @@ let app = {
       // Z = blue
       app.three.scene.add( new THREE.AxesHelper( 1000 ) );
 
-      // app.three.scene.add( app.three.light );
+      app.three.scene.add( app.three.light );
       app.three.scene.add( app.three.crust );
       app.three.scene.add( app.three.tunnel );
 
