@@ -52,6 +52,14 @@ let app = {
 
   },
 
+  get : {
+
+    radians : function( degrees) {
+      return degrees * ( Math.PI / 180 )
+    }
+
+  },
+
   three : {
 
     renderer : undefined,
@@ -62,6 +70,11 @@ let app = {
     crust    : undefined,
     tunnel   : undefined,
 
+    radians : function( degrees ) {
+
+      return degrees * ( Math.PI / 180 )
+
+    },
 
     resize : function() {
 
@@ -88,14 +101,14 @@ let app = {
 
       app.three.resize()
 
-      let degrees = 45
-      let radians = degrees * ( Math.PI / 180 )
-
-      // app.three.tunnel.rotation.x = radians
-      // app.three.tunnel.rotation.z = radians
+      // app.three.tunnel.rotation.x = app.get.radians(189)
+      // app.three.tunnel.rotation.z = app.get.radians(90)
 
       app.three.tunnel.rotation.x = app.data.seconds
       app.three.tunnel.rotation.z = app.data.seconds
+
+      app.three.crust.rotation.y = app.data.seconds / 10
+      app.three.crust.rotation.z = app.get.radians( app.data.earth.tilt )
 
       app.three.renderer.render(
         app.three.scene,
