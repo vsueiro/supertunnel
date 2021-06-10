@@ -29,6 +29,20 @@ let app = {
 
   data : {
 
+    earth : {
+
+      tilt : 23.4365, // degrees
+
+      radius : { // km
+        crust : 6371,
+        core : {
+          inner : 1216,
+          outer : 3486,
+        }
+      }
+
+    },
+
     incoming : {
       stream : '',
       json : undefined,
@@ -45,7 +59,9 @@ let app = {
     light    : undefined,
     scene    : undefined,
 
+    crust    : undefined,
     tunnel   : undefined,
+
 
     resize : function() {
 
@@ -101,15 +117,15 @@ let app = {
         alpha : true
       });
 
-      app.three.camera = new THREE.PerspectiveCamera( 50, 1, .1, 2000 );
-      app.three.camera.position.z = 100;
+      app.three.camera = new THREE.PerspectiveCamera( 50, 1, .1, app.data.earth.radius.crust * 8 );
+      app.three.camera.position.z = app.data.earth.radius.crust * 4;
 
-      app.three.light = new THREE.DirectionalLight( 0xFFFFFF, 1 );
-      app.three.light.position.set( -1, 2, 4 );
+      // app.three.light = new THREE.DirectionalLight( 0xFFFFFF, 1 );
+      // app.three.light.position.set( -1, 2, 4 );
 
       app.three.scene = new THREE.Scene();
 
-      {
+      { // Tunnel
 
         let material = new THREE.MeshPhongMaterial({ color: 0xFF0000 });
         let geometry = new THREE.CylinderGeometry( 1, 1, 32, 8, 1 );
@@ -121,7 +137,29 @@ let app = {
 
       }
 
+      { // Crust
+
+        let material = new THREE.MeshBasicMaterial({
+          color: 0xFFFFFF,
+          wireframe: true,
+          opacity: 0.25,
+          transparent: true
+        });
+
+        let geometry = new THREE.SphereGeometry( app.data.earth.radius.crust, 16, 16 );
+
+        app.three.crust = new THREE.Mesh( geometry, material );
+
+      }
+
+
+      // X = red
+      // Y = green
+      // Z = blue
+      app.three.scene.add( new THREE.AxesHelper( 1000 ) );
+
       app.three.scene.add( app.three.light );
+      app.three.scene.add( app.three.crust );
       app.three.scene.add( app.three.tunnel );
 
       requestAnimationFrame( app.three.render );
