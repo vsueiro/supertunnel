@@ -115,12 +115,12 @@ let app = {
       let tilt = app.get.radians( app.data.earth.tilt )
 
       app.three.crust.rotation.y = rotation
-      app.three.core.outer.rotation.y = rotation
-      app.three.core.inner.rotation.y = rotation
+      // app.three.core.outer.rotation.y = rotation
+      // app.three.core.inner.rotation.y = rotation
 
       app.three.crust.rotation.z = tilt
-      app.three.core.outer.rotation.z = tilt
-      app.three.core.inner.rotation.z = tilt
+      // app.three.core.outer.rotation.z = tilt
+      // app.three.core.inner.rotation.z = tilt
 
       app.three.renderer.render(
         app.three.scene,
@@ -152,8 +152,20 @@ let app = {
 
       { // Tunnel
 
-        let material = new THREE.MeshPhongMaterial({ color: 0xFF0000 });
-        let geometry = new THREE.CylinderGeometry( 1, 1, 32, 8, 1 );
+        let material = new THREE.MeshBasicMaterial({
+          color: 0xFF0000,
+          wireframe: true,
+          opacity: .8,
+          transparent: true
+        });
+        let geometry = new THREE.CylinderGeometry(
+          app.data.earth.radius.crust / 50,
+          app.data.earth.radius.crust / 50,
+          app.data.earth.radius.crust * 2,
+          6,
+          32,
+          true
+        );
 
         // Rotate around end, not center
         geometry.translate( 0, -32/2, 0 );
@@ -176,6 +188,8 @@ let app = {
         app.three.crust = new THREE.Mesh( geometry, material );
 
       }
+
+      /*
 
       { // Outer core
 
@@ -207,6 +221,8 @@ let app = {
 
       }
 
+      */
+
 
       // X = red
       // Y = green
@@ -215,8 +231,8 @@ let app = {
 
       app.three.scene.add( app.three.light );
       app.three.scene.add( app.three.crust );
-      app.three.scene.add( app.three.core.outer );
-      app.three.scene.add( app.three.core.inner );
+      // app.three.scene.add( app.three.core.outer );
+      // app.three.scene.add( app.three.core.inner );
       app.three.scene.add( app.three.tunnel );
 
       requestAnimationFrame( app.three.render );
