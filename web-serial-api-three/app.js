@@ -67,6 +67,8 @@ let app = {
     light    : undefined,
     scene    : undefined,
 
+    earth    : undefined, // group
+
     crust    : undefined,
     tunnel   : undefined,
     core     : {
@@ -108,17 +110,21 @@ let app = {
       // app.three.tunnel.rotation.x = app.get.radians(189)
       // app.three.tunnel.rotation.z = app.get.radians(90)
 
-      app.three.tunnel.rotation.x = app.data.seconds
-      app.three.tunnel.rotation.z = app.data.seconds
+      // app.three.tunnel.rotation.x = app.data.seconds
+      // app.three.tunnel.rotation.z = app.data.seconds
 
       let rotation = app.data.seconds / 10
       let tilt = app.get.radians( app.data.earth.tilt )
 
-      app.three.crust.rotation.y = rotation
+      app.three.earth.rotation.y = rotation
+      app.three.earth.rotation.z = tilt
+
+
+      // app.three.crust.rotation.y = rotation
       // app.three.core.outer.rotation.y = rotation
       // app.three.core.inner.rotation.y = rotation
 
-      app.three.crust.rotation.z = tilt
+      // app.three.crust.rotation.z = tilt
       // app.three.core.outer.rotation.z = tilt
       // app.three.core.inner.rotation.z = tilt
 
@@ -150,6 +156,21 @@ let app = {
 
       app.three.scene = new THREE.Scene();
 
+      { // Crust
+
+        let material = new THREE.MeshBasicMaterial({
+          color: 0xFFFFFF,
+          wireframe: true,
+          opacity: 0.25,
+          transparent: true
+        });
+
+        let geometry = new THREE.SphereGeometry( app.data.earth.radius.crust, 16, 16 );
+
+        app.three.crust = new THREE.Mesh( geometry, material );
+
+      }
+
       { // Tunnel
 
         let material = new THREE.MeshBasicMaterial({
@@ -168,26 +189,20 @@ let app = {
         );
 
         // Rotate around end, not center
-        geometry.translate( 0, app.data.earth.radius.crust, 0 );
+        // geometry.translate( 0, app.data.earth.radius.crust, 0 );
 
         app.three.tunnel = new THREE.Mesh( geometry, material );
 
-      }
-
-      { // Crust
-
-        let material = new THREE.MeshBasicMaterial({
-          color: 0xFFFFFF,
-          wireframe: true,
-          opacity: 0.25,
-          transparent: true
-        });
-
-        let geometry = new THREE.SphereGeometry( app.data.earth.radius.crust, 16, 16 );
-
-        app.three.crust = new THREE.Mesh( geometry, material );
+        // object.translateZ( 10 );
 
       }
+
+      app.three.earth = new THREE.Group
+
+      app.three.earth.add(
+        app.three.crust,
+        app.three.tunnel
+      )
 
       /*
 
@@ -230,10 +245,11 @@ let app = {
       app.three.scene.add( new THREE.AxesHelper( 1000 ) );
 
       app.three.scene.add( app.three.light );
-      app.three.scene.add( app.three.crust );
+      app.three.scene.add( app.three.earth );
+      // app.three.scene.add( app.three.crust );
       // app.three.scene.add( app.three.core.outer );
       // app.three.scene.add( app.three.core.inner );
-      app.three.scene.add( app.three.tunnel );
+      // app.three.scene.add( app.three.tunnel );
 
       requestAnimationFrame( app.three.render );
 
