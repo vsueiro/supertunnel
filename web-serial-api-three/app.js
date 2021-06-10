@@ -31,7 +31,7 @@ let app = {
 
     earth : {
 
-      tilt : 23.4365, // degrees
+      tilt : 23.4365, // decimal degrees
 
       radius : { // km
         crust : 6371,
@@ -48,13 +48,18 @@ let app = {
       json : undefined,
     },
 
+    user : { // decimal degrees
+      latitude : -23.5505, // south
+      longitude : -46.6333 // west
+    },
+
     seconds : 0
 
   },
 
   get : {
 
-    radians : function( degrees) {
+    radians : function( degrees ) {
       return degrees * ( Math.PI / 180 )
     }
 
@@ -74,12 +79,6 @@ let app = {
     core     : {
       inner  : undefined,
       outer  : undefined
-    },
-
-    radians : function( degrees ) {
-
-      return degrees * ( Math.PI / 180 )
-
     },
 
     resize : function() {
@@ -105,7 +104,11 @@ let app = {
 
       app.data.seconds = time * .001;
 
-      app.three.resize()
+      app.three.resize();
+
+      // cube.rotateOnWorldAxis(worldY, THREE.Math.degToRad(45));
+
+
 
       // app.three.tunnel.rotation.x = app.get.radians(189)
       // app.three.tunnel.rotation.z = app.get.radians(90)
@@ -113,11 +116,11 @@ let app = {
       // app.three.tunnel.rotation.x = app.data.seconds
       // app.three.tunnel.rotation.z = app.data.seconds
 
-      let rotation = app.data.seconds / 10
-      let tilt = app.get.radians( app.data.earth.tilt )
+      let rotation = app.data.seconds / 10;
+      let tilt = app.get.radians( app.data.earth.tilt );
 
-      app.three.earth.rotation.y = rotation
-      app.three.earth.rotation.z = tilt
+      // app.three.earth.rotation.y = rotation
+      // app.three.earth.rotation.z = tilt
 
 
       // app.three.crust.rotation.y = rotation
@@ -180,8 +183,8 @@ let app = {
           transparent: true
         });
         let geometry = new THREE.CylinderGeometry(
-          app.data.earth.radius.crust / 50,
-          app.data.earth.radius.crust / 50,
+          app.data.earth.radius.crust / 20,
+          app.data.earth.radius.crust / 200,
           app.data.earth.radius.crust * 2,
           6,
           32,
@@ -189,7 +192,11 @@ let app = {
         );
 
         // Rotate around end, not center
-        // geometry.translate( 0, app.data.earth.radius.crust, 0 );
+        // geometry.translate(
+        //   0, //app.data.earth.radius.crust,
+        //   0, //app.data.earth.radius.crust,
+        //   app.data.earth.radius.crust
+        // );
 
         app.three.tunnel = new THREE.Mesh( geometry, material );
 
@@ -197,12 +204,7 @@ let app = {
 
       }
 
-      app.three.earth = new THREE.Group
-
-      app.three.earth.add(
-        app.three.crust,
-        app.three.tunnel
-      )
+      app.three.earth = new THREE.Group();
 
       /*
 
@@ -238,18 +240,39 @@ let app = {
 
       */
 
+      app.three.earth.add(
+        app.three.crust,
+        app.three.tunnel
+      )
 
       // X = red
       // Y = green
       // Z = blue
       app.three.scene.add( new THREE.AxesHelper( 1000 ) );
-
       app.three.scene.add( app.three.light );
       app.three.scene.add( app.three.earth );
       // app.three.scene.add( app.three.crust );
       // app.three.scene.add( app.three.core.outer );
       // app.three.scene.add( app.three.core.inner );
       // app.three.scene.add( app.three.tunnel );
+
+
+      let world = {
+        x : new THREE.Vector3(1, 0, 0),
+        y : new THREE.Vector3(0, 1, 0),
+        z : new THREE.Vector3(0, 0, 1)
+      }
+
+      // Make a tunnel from user location
+      app.three.tunnel.rotateOnWorldAxis(
+        world.x,
+        THREE.Math.degToRad( 90 - app.data.user.latitude )
+      );
+      app.three.tunnel.rotateOnWorldAxis(
+        world.y,
+        THREE.Math.degToRad( app.data.user.longitude )
+      );
+
 
       requestAnimationFrame( app.three.render );
 
