@@ -1,3 +1,26 @@
+// obj - your object (THREE.Object3D or derived)
+// point - the point of rotation (THREE.Vector3)
+// axis - the axis of rotation (normalized THREE.Vector3)
+// theta - radian value of rotation
+// pointIsWorld - boolean indicating the point is in world coordinates (default = false)
+function rotateAboutPoint(obj, point, axis, theta, pointIsWorld){
+    pointIsWorld = (pointIsWorld === undefined)? false : pointIsWorld;
+
+    if(pointIsWorld){
+        obj.parent.localToWorld(obj.position); // compensate for world coordinate
+    }
+
+    obj.position.sub(point); // remove the offset
+    obj.position.applyAxisAngle(axis, theta); // rotate the POSITION
+    obj.position.add(point); // re-add the offset
+
+    if(pointIsWorld){
+        obj.parent.worldToLocal(obj.position); // undo world coordinates compensation
+    }
+
+    obj.rotateOnAxis(axis, theta); // rotate the OBJECT
+}
+
 let app = {
 
   elements : {
@@ -106,14 +129,29 @@ let app = {
 
       app.three.resize();
 
-      // app.three.tunnel.rotation.x = app.data.seconds
-      // app.three.tunnel.rotation.z = app.data.seconds
+      app.three.tunnel.rotation.x = app.data.seconds
+      app.three.tunnel.rotation.z = app.data.seconds
+
+
+      // console.log( app.three.tunnel )
+      /*
+      rotateAboutPoint(
+        app.three.tunnel, // obj - your object (THREE.Object3D or derived)
+        new THREE.Vector3( 0, 0, 0 ), // point - the point of rotation (THREE.Vector3)
+        new THREE.Vector3( 0, 0, 1 ), // axis - the axis of rotation (normalized THREE.Vector3)
+        THREE.Math.degToRad( 1 ), // theta - radian value of rotation
+        false // pointIsWorld - boolean indicating the point is in world coordinates (default = false)
+      )
+      */
+
+
+
 
       let rotation = app.data.seconds / 10;
       let tilt = app.get.radians( app.data.earth.tilt );
 
-      app.three.earth.rotation.y = rotation
-      app.three.earth.rotation.z = tilt
+      // app.three.earth.rotation.y = rotation
+      // app.three.earth.rotation.z = tilt
 
 
       // app.three.crust.rotation.y = rotation
@@ -185,11 +223,11 @@ let app = {
         );
 
         // Rotate around end, not center
-        // geometry.translate(
-        //   0,
-        //   -app.data.earth.radius.crust,
-        //   0,
-        // );
+        geometry.translate(
+          0,
+          -app.data.earth.radius.crust,
+          0,
+        );
 
         app.three.tunnel = new THREE.Mesh( geometry, material );
 
@@ -242,12 +280,11 @@ let app = {
       // Y = green
       // Z = blue
       app.three.scene.add( new THREE.AxesHelper( 1000 ) );
+
       app.three.scene.add( app.three.light );
       app.three.scene.add( app.three.earth );
-      // app.three.scene.add( app.three.crust );
-      // app.three.scene.add( app.three.core.outer );
-      // app.three.scene.add( app.three.core.inner );
-      // app.three.scene.add( app.three.tunnel );
+
+
 
 
       let world = {
@@ -256,6 +293,9 @@ let app = {
         z : new THREE.Vector3(0, 0, 1)
       }
 
+      app.three.tunnel.translateY( app.data.earth.radius.crust )
+
+      /*
       // Make a tunnel from user location
       app.three.tunnel.rotateOnWorldAxis(
         world.x,
@@ -266,6 +306,7 @@ let app = {
         THREE.Math.degToRad( app.data.user.longitude )
       );
 
+      */
 
       requestAnimationFrame( app.three.render );
 
