@@ -69,6 +69,10 @@ let app = {
 
     crust    : undefined,
     tunnel   : undefined,
+    core     : {
+      inner  : undefined,
+      outer  : undefined
+    },
 
     radians : function( degrees ) {
 
@@ -107,8 +111,16 @@ let app = {
       app.three.tunnel.rotation.x = app.data.seconds
       app.three.tunnel.rotation.z = app.data.seconds
 
-      app.three.crust.rotation.y = app.data.seconds / 10
-      app.three.crust.rotation.z = app.get.radians( app.data.earth.tilt )
+      let rotation = app.data.seconds / 10
+      let tilt = app.get.radians( app.data.earth.tilt )
+
+      app.three.crust.rotation.y = rotation
+      app.three.core.outer.rotation.y = rotation
+      app.three.core.inner.rotation.y = rotation
+
+      app.three.crust.rotation.z = tilt
+      app.three.core.outer.rotation.z = tilt
+      app.three.core.inner.rotation.z = tilt
 
       app.three.renderer.render(
         app.three.scene,
@@ -130,8 +142,8 @@ let app = {
         alpha : true
       });
 
-      app.three.camera = new THREE.PerspectiveCamera( 50, 1, .1, app.data.earth.radius.crust * 8 );
-      app.three.camera.position.z = app.data.earth.radius.crust * 4;
+      app.three.camera = new THREE.PerspectiveCamera( 50, 1, .1, app.data.earth.radius.crust * 6 );
+      app.three.camera.position.z = app.data.earth.radius.crust * 3;
 
       // app.three.light = new THREE.DirectionalLight( 0xFFFFFF, 1 );
       // app.three.light.position.set( -1, 2, 4 );
@@ -165,6 +177,36 @@ let app = {
 
       }
 
+      { // Outer core
+
+        let material = new THREE.MeshBasicMaterial({
+          color: 0xFFFF00,
+          wireframe: true,
+          opacity: 0.25,
+          transparent: true
+        });
+
+        let geometry = new THREE.SphereGeometry( app.data.earth.radius.core.outer, 12, 12 );
+
+        app.three.core.outer = new THREE.Mesh( geometry, material );
+
+      }
+
+      { // Inner core
+
+        let material = new THREE.MeshBasicMaterial({
+          color: 0xFF0000,
+          wireframe: true,
+          opacity: 0.25,
+          transparent: true
+        });
+
+        let geometry = new THREE.SphereGeometry( app.data.earth.radius.core.inner, 8, 8 );
+
+        app.three.core.inner = new THREE.Mesh( geometry, material );
+
+      }
+
 
       // X = red
       // Y = green
@@ -173,6 +215,8 @@ let app = {
 
       app.three.scene.add( app.three.light );
       app.three.scene.add( app.three.crust );
+      app.three.scene.add( app.three.core.outer );
+      app.three.scene.add( app.three.core.inner );
       app.three.scene.add( app.three.tunnel );
 
       requestAnimationFrame( app.three.render );
