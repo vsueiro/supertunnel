@@ -125,12 +125,14 @@ let app = {
 
     render : function( time ) {
 
-      app.data.seconds = time * .001;
-
       app.three.resize();
 
-      app.three.tunnel.rotation.x = app.data.seconds
-      app.three.tunnel.rotation.z = app.data.seconds
+      app.data.seconds = time * .001;
+
+
+
+      // app.three.tunnel.rotation.x = THREE.Math.degToRad( 0 )
+      // app.three.tunnel.rotation.z =
 
 
       // console.log( app.three.tunnel )
@@ -150,8 +152,8 @@ let app = {
       let rotation = app.data.seconds / 10;
       let tilt = app.get.radians( app.data.earth.tilt );
 
-      // app.three.earth.rotation.y = rotation
-      // app.three.earth.rotation.z = tilt
+      app.three.earth.rotation.y = rotation
+      app.three.earth.rotation.z = tilt
 
 
       // app.three.crust.rotation.y = rotation
@@ -231,6 +233,8 @@ let app = {
 
         app.three.tunnel = new THREE.Mesh( geometry, material );
 
+        app.three.tunnel.translateY( app.data.earth.radius.crust )
+
         // object.translateZ( 10 );
 
       }
@@ -293,9 +297,9 @@ let app = {
         z : new THREE.Vector3(0, 0, 1)
       }
 
-      app.three.tunnel.translateY( app.data.earth.radius.crust )
 
-      /*
+
+
       // Make a tunnel from user location
       app.three.tunnel.rotateOnWorldAxis(
         world.x,
@@ -306,7 +310,7 @@ let app = {
         THREE.Math.degToRad( app.data.user.longitude )
       );
 
-      */
+
 
       requestAnimationFrame( app.three.render );
 
