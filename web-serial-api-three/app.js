@@ -168,7 +168,7 @@ let app = {
         );
 
         // Rotate around end, not center
-        geometry.translate( 0, -32/2, 0 );
+        geometry.translate( 0, app.data.earth.radius.crust, 0 );
 
         app.three.tunnel = new THREE.Mesh( geometry, material );
 
