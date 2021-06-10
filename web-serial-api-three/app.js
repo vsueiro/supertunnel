@@ -106,21 +106,14 @@ let app = {
 
       app.three.resize();
 
-      // cube.rotateOnWorldAxis(worldY, THREE.Math.degToRad(45));
-
-
-
-      // app.three.tunnel.rotation.x = app.get.radians(189)
-      // app.three.tunnel.rotation.z = app.get.radians(90)
-
       // app.three.tunnel.rotation.x = app.data.seconds
       // app.three.tunnel.rotation.z = app.data.seconds
 
       let rotation = app.data.seconds / 10;
       let tilt = app.get.radians( app.data.earth.tilt );
 
-      // app.three.earth.rotation.y = rotation
-      // app.three.earth.rotation.z = tilt
+      app.three.earth.rotation.y = rotation
+      app.three.earth.rotation.z = tilt
 
 
       // app.three.crust.rotation.y = rotation
@@ -193,9 +186,9 @@ let app = {
 
         // Rotate around end, not center
         // geometry.translate(
-        //   0, //app.data.earth.radius.crust,
-        //   0, //app.data.earth.radius.crust,
-        //   app.data.earth.radius.crust
+        //   0,
+        //   -app.data.earth.radius.crust,
+        //   0,
         // );
 
         app.three.tunnel = new THREE.Mesh( geometry, material );
