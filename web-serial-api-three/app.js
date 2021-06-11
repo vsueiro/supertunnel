@@ -47,8 +47,8 @@ let app = {
     },
 
     user : { // In decimal degrees
-      latitude : -23.5505, // south is negative
-      longitude : -46.6333 // west is negative
+      latitude : 55.5791, // south is negative
+      longitude : 13.0109 // west is negative
     },
 
     seconds : 0
@@ -62,6 +62,8 @@ let app = {
     light    : undefined,
     scene    : undefined,
     controls : undefined,
+
+    earth    : undefined,
 
     crust    : undefined,
     tunnel   : undefined,
@@ -112,14 +114,23 @@ let app = {
         app.three.camera
       );
 
+      // Rotates crust so default location is at latitude and longitude 0
+      app.three.crust.rotation.y = THREE.Math.degToRad( -90 )
+
+      // Rotates crust so it looks like the pivot point is the user location
+      if ( app.data.user.latitude && app.data.user.longitude ) {
+        app.three.crust.rotation.x = THREE.Math.degToRad( app.data.user.latitude )
+        app.three.crust.rotation.y = THREE.Math.degToRad( -90 - app.data.user.longitude )
+      }
+
+      // Rotates Earth (group) to counter-act previous rotation so OrbitControls work better
+      app.three.earth.rotation.x = THREE.Math.degToRad( - app.data.user.latitude )
+
       // Makes camera orbit
       app.three.controls.update();
 
       // Recursion: this function calls itself to draw frames of 3D animation
       requestAnimationFrame( app.three.render );
-
-      // Rotate Earth so default location is at latitude and longitude 0
-      app.three.crust.rotation.y = THREE.Math.degToRad( -90 )
 
     },
 
@@ -131,31 +142,6 @@ let app = {
     },
 
     initialize : function() {
-
-      // Begins renderer with transparent background
-      app.three.renderer = new THREE.WebGLRenderer({
-        canvas : app.elements.canvas,
-        alpha : true
-      });
-
-      // Creates camera
-      app.three.camera = new THREE.PerspectiveCamera( 50, 1, .1, app.data.earth.radius.crust * 30 );
-      app.three.camera.position.z = app.data.earth.radius.crust * 3;
-
-      // Let there be light
-      app.three.light = new THREE.DirectionalLight( 0xFFFFFF, 1 );
-      app.three.light.position.set( -1, 2, 4 );
-
-      // Makes camera move with mouse
-      app.three.controls = new THREE.OrbitControls(
-        app.three.camera,
-        app.elements.canvas
-      );
-
-      // Makes camera move automatically and with inertia
-      app.three.controls.autoRotate = true;
-      app.three.controls.enableDamping = true;
-
 
       { // Crust
 
@@ -191,7 +177,7 @@ let app = {
           true
         );
 
-        // Rotate around end, not center
+        // Rotates around end, not center
         geometry.translate( 0, -app.data.earth.radius.crust, 0);
 
         app.three.tunnel = new THREE.Mesh( geometry, material );
@@ -199,45 +185,47 @@ let app = {
 
       }
 
-      /*
+      { // Earth (group)
 
-      { // Outer core
-
-        let material = new THREE.MeshBasicMaterial({
-          color: 0xFFFF00,
-          wireframe: true,
-          opacity: 0.25,
-          transparent: true
-        });
-
-        let geometry = new THREE.SphereGeometry( app.data.earth.radius.core.outer, 12, 12 );
-
-        app.three.core.outer = new THREE.Mesh( geometry, material );
+        app.three.earth = new THREE.Group();
+        app.three.earth.add(
+          app.three.crust,
+          app.three.tunnel
+        );
 
       }
 
-      { // Inner core
+      // Begins renderer with transparent background
+      app.three.renderer = new THREE.WebGLRenderer({
+        canvas : app.elements.canvas,
+        alpha : true
+      });
 
-        let material = new THREE.MeshBasicMaterial({
-          color: 0xFF0000,
-          wireframe: true,
-          opacity: 0.25,
-          transparent: true
-        });
+      // Let there be light
+      app.three.light = new THREE.DirectionalLight( 0xFFFFFF, 1 );
+      app.three.light.position.set( -1, 2, 4 );
 
-        let geometry = new THREE.SphereGeometry( app.data.earth.radius.core.inner, 8, 8 );
+      // Creates camera
+      app.three.camera = new THREE.PerspectiveCamera( 50, 1, .1, app.data.earth.radius.crust * 30 );
+      app.three.camera.position.z = app.data.earth.radius.crust * 3;
 
-        app.three.core.inner = new THREE.Mesh( geometry, material );
+      // Makes camera move with mouse
+      app.three.controls = new THREE.OrbitControls(
+        app.three.camera,
+        app.elements.canvas
+      );
 
-      }
+      // Makes camera move automatically and with inertia
+      app.three.controls.autoRotate = true;
+      app.three.controls.enableDamping = true;
 
-      */
 
       // Creates scene
       app.three.scene = new THREE.Scene();
       app.three.scene.add( app.three.light );
-      app.three.scene.add( app.three.crust );
-      app.three.scene.add( app.three.tunnel );
+      // app.three.scene.add( app.three.crust );
+      // app.three.scene.add( app.three.tunnel );
+      app.three.scene.add( app.three.earth );
 
       // Plot axis for debugging
       // X = red
