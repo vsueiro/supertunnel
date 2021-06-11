@@ -1,3 +1,26 @@
+// obj - your object (THREE.Object3D or derived)
+// point - the point of rotation (THREE.Vector3)
+// axis - the axis of rotation (normalized THREE.Vector3)
+// theta - radian value of rotation
+// pointIsWorld - boolean indicating the point is in world coordinates (default = false)
+function rotateAboutPoint(obj, point, axis, theta, pointIsWorld){
+    pointIsWorld = (pointIsWorld === undefined)? false : pointIsWorld;
+
+    if(pointIsWorld){
+        obj.parent.localToWorld(obj.position); // compensate for world coordinate
+    }
+
+    obj.position.sub(point); // remove the offset
+    obj.position.applyAxisAngle(axis, theta); // rotate the POSITION
+    obj.position.add(point); // re-add the offset
+
+    if(pointIsWorld){
+        obj.parent.worldToLocal(obj.position); // undo world coordinates compensation
+    }
+
+    obj.rotateOnAxis(axis, theta); // rotate the OBJECT
+}
+
 let app = {
 
   elements : {
@@ -25,13 +48,15 @@ let app = {
 
   },
 
+  // options : {},
+
   data : {
 
     earth : {
 
-      tilt : 23.4365, // In decimal degrees
+      tilt : 23.4365, // decimal degrees
 
-      radius : { // In km
+      radius : { // km
         crust : 6371,
         core : {
           inner : 1216,
@@ -46,12 +71,20 @@ let app = {
       json : undefined,
     },
 
-    user : { // In decimal degrees
-      latitude : -23.5505, // south is negative
-      longitude : -46.6333 // west is negative
+    user : { // decimal degrees
+      latitude : -23.5505, // south
+      longitude : -46.6333 // west
     },
 
     seconds : 0
+
+  },
+
+  get : {
+
+    radians : function( degrees ) {
+      return degrees * ( Math.PI / 180 )
+    }
 
   },
 
@@ -61,7 +94,8 @@ let app = {
     camera   : undefined,
     light    : undefined,
     scene    : undefined,
-    controls : undefined,
+
+    earth    : undefined, // group
 
     crust    : undefined,
     tunnel   : undefined,
@@ -74,17 +108,14 @@ let app = {
 
       let c = app.elements.canvas;
 
-      // If canvas dimensions are different from window dimensios
       if ( c.width !== c.clientWidth || c.height !== c.clientHeight ) {
 
-        // Resize
         app.three.renderer.setSize(
           c.clientWidth,
           c.clientHeight,
           false
         );
 
-        // Updates camera accordingly
         app.three.camera.aspect = c.clientWidth / c.clientHeight;
         app.three.camera.updateProjectionMatrix();
 
@@ -94,79 +125,81 @@ let app = {
 
     render : function( time ) {
 
-      // Makes canvas responsive
       app.three.resize();
 
-      // Just a counter since the animation started
       app.data.seconds = time * .001;
 
-      // Values to be updated based on the inclination sensor
-      let northsouth = 0; // +90 to -90
-      let eastwest   = 0; // +90 to -90
-      app.three.tunnel.rotation.x = THREE.Math.degToRad( 90 + northsouth );
-      app.three.tunnel.rotation.z = THREE.Math.degToRad( eastwest );
 
+
+      // app.three.tunnel.rotation.x = THREE.Math.degToRad( 0 )
+      // app.three.tunnel.rotation.z =
+
+
+      // console.log( app.three.tunnel )
+      /*
+      rotateAboutPoint(
+        app.three.tunnel, // obj - your object (THREE.Object3D or derived)
+        new THREE.Vector3( 0, 0, 0 ), // point - the point of rotation (THREE.Vector3)
+        new THREE.Vector3( 0, 0, 1 ), // axis - the axis of rotation (normalized THREE.Vector3)
+        THREE.Math.degToRad( 1 ), // theta - radian value of rotation
+        false // pointIsWorld - boolean indicating the point is in world coordinates (default = false)
+      )
+      */
+
+
+
+
+      let rotation = app.data.seconds / 10;
+      let tilt = app.get.radians( app.data.earth.tilt );
+
+      app.three.earth.rotation.y = rotation
+      app.three.earth.rotation.z = tilt
+
+
+      // app.three.crust.rotation.y = rotation
+      // app.three.core.outer.rotation.y = rotation
+      // app.three.core.inner.rotation.y = rotation
+
+      // app.three.crust.rotation.z = tilt
+      // app.three.core.outer.rotation.z = tilt
+      // app.three.core.inner.rotation.z = tilt
 
       app.three.renderer.render(
         app.three.scene,
         app.three.camera
       );
 
-      // Makes camera orbit
-      app.three.controls.update();
-
-      // Recursion: this function calls itself to draw frames of 3D animation
       requestAnimationFrame( app.three.render );
-
-      // Rotate Earth so default location is at latitude and longitude 0
-      app.three.crust.rotation.y = THREE.Math.degToRad( -90 )
 
     },
 
     update : function() {
-
-      // Placeholder for handling data coming from inclination sensor
       console.log( app.data.incoming.json )
-
     },
 
     initialize : function() {
 
-      // Begins renderer with transparent background
       app.three.renderer = new THREE.WebGLRenderer({
         canvas : app.elements.canvas,
         alpha : true
       });
 
-      // Creates camera
-      app.three.camera = new THREE.PerspectiveCamera( 50, 1, .1, app.data.earth.radius.crust * 30 );
+      app.three.camera = new THREE.PerspectiveCamera( 50, 1, .1, app.data.earth.radius.crust * 6 );
       app.three.camera.position.z = app.data.earth.radius.crust * 3;
 
-      // Let there be light
-      app.three.light = new THREE.DirectionalLight( 0xFFFFFF, 1 );
-      app.three.light.position.set( -1, 2, 4 );
+      // app.three.light = new THREE.DirectionalLight( 0xFFFFFF, 1 );
+      // app.three.light.position.set( -1, 2, 4 );
 
-      // Makes camera move with mouse
-      app.three.controls = new THREE.OrbitControls(
-        app.three.camera,
-        app.elements.canvas
-      );
-
-      // Makes camera move automatically and with inertia
-      app.three.controls.autoRotate = true;
-      app.three.controls.enableDamping = true;
-
+      app.three.scene = new THREE.Scene();
 
       { // Crust
 
         let material = new THREE.MeshBasicMaterial({
           color: 0xFFFFFF,
-          wireframe: false,
-          opacity: 0.5,
+          wireframe: true,
+          opacity: 0.25,
           transparent: true
         });
-
-        material.map = THREE.ImageUtils.loadTexture('texture.jpg')
 
         let geometry = new THREE.SphereGeometry( app.data.earth.radius.crust, 16, 16 );
 
@@ -192,12 +225,21 @@ let app = {
         );
 
         // Rotate around end, not center
-        geometry.translate( 0, -app.data.earth.radius.crust, 0);
+        geometry.translate(
+          0,
+          -app.data.earth.radius.crust,
+          0,
+        );
 
         app.three.tunnel = new THREE.Mesh( geometry, material );
-        app.three.tunnel.position.z = app.data.earth.radius.crust;
+
+        app.three.tunnel.translateY( app.data.earth.radius.crust )
+
+        // object.translateZ( 10 );
 
       }
+
+      app.three.earth = new THREE.Group();
 
       /*
 
@@ -233,19 +275,43 @@ let app = {
 
       */
 
-      // Creates scene
-      app.three.scene = new THREE.Scene();
-      app.three.scene.add( app.three.light );
-      app.three.scene.add( app.three.crust );
-      app.three.scene.add( app.three.tunnel );
+      app.three.earth.add(
+        app.three.crust,
+        app.three.tunnel
+      )
 
-      // Plot axis for debugging
       // X = red
       // Y = green
       // Z = blue
       app.three.scene.add( new THREE.AxesHelper( 1000 ) );
 
-      // Animate 3D elements
+      app.three.scene.add( app.three.light );
+      app.three.scene.add( app.three.earth );
+
+
+
+
+      let world = {
+        x : new THREE.Vector3(1, 0, 0),
+        y : new THREE.Vector3(0, 1, 0),
+        z : new THREE.Vector3(0, 0, 1)
+      }
+
+
+
+
+      // Make a tunnel from user location
+      app.three.tunnel.rotateOnWorldAxis(
+        world.x,
+        THREE.Math.degToRad( 90 - app.data.user.latitude )
+      );
+      app.three.tunnel.rotateOnWorldAxis(
+        world.y,
+        THREE.Math.degToRad( app.data.user.longitude )
+      );
+
+
+
       requestAnimationFrame( app.three.render );
 
     }
@@ -338,7 +404,6 @@ let app = {
 
     initialize : function() {
 
-      // Connect to serial port when button is clicked
       app.elements.connectButton.addEventListener( 'click', app.serial.connect );
 
     }
@@ -354,5 +419,4 @@ let app = {
 
 }
 
-// Start everything
 app.initialize()
