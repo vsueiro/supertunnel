@@ -422,7 +422,7 @@ let app = {
           app.data.incoming.json = JSON.parse( string );
 
           // Call function to handle the newly received data
-          app.globe.update();
+          app.three.update();
 
         }
 
