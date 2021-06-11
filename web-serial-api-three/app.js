@@ -48,8 +48,8 @@ let app = {
     },
 
     user : { // In decimal degrees
-      latitude : -23.5505, // south is negative
-      longitude : -46.6333, // west is negative
+      latitude : 0, // south is negative
+      longitude : 0, // west is negative
     },
 
     seconds : 0
@@ -119,10 +119,23 @@ let app = {
       // Rotates crust so default location is at latitude and longitude 0
       app.three.crust.rotation.y = THREE.Math.degToRad( -90 )
 
-      // Rotates crust so it looks like the pivot point is the user location
+      // Rotates countries so default location is at latitude and longitude 0
+      if ( app.three.land ) {
+        app.three.land.rotation.y = THREE.Math.degToRad( -180)
+      }
+
+      // Rotates crust & countries so it looks like the pivot point is the user location
       if ( app.data.user.latitude && app.data.user.longitude ) {
+
+        // Crust
         app.three.crust.rotation.x = THREE.Math.degToRad( app.data.user.latitude )
         app.three.crust.rotation.y = THREE.Math.degToRad( -90 - app.data.user.longitude )
+
+        // Countries
+        if ( app.three.land ) {
+          app.three.land.rotation.y = THREE.Math.degToRad( -180 - app.data.user.longitude )
+        }
+
       }
 
       // Rotates Earth (group) to counter-act previous rotation so OrbitControls work better
@@ -244,7 +257,7 @@ let app = {
 
         let material = new THREE.MeshBasicMaterial({
           color: 0xFFFFFF,
-          wireframe: true,
+          wireframe: false,
           opacity: 0.5,
           transparent: true
         });
