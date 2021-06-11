@@ -55,14 +55,6 @@ let app = {
 
   },
 
-  get : {
-
-    radians : function( degrees ) {
-      return degrees * ( Math.PI / 180 )
-    }
-
-  },
-
   three : {
 
     renderer : undefined,
@@ -103,24 +95,28 @@ let app = {
 
       app.data.seconds = time * .001;
 
-      app.three.tunnel.rotation.x = THREE.Math.degToRad( 0 )
-      app.three.tunnel.rotation.z = THREE.Math.degToRad( 0 )
+      // Values to be updated based on the inclination sensor
+
+      let northsouth = 0; // +90 to -90
+      let eastwest = 0; // +90 to -90
+      app.three.tunnel.rotation.x = THREE.Math.degToRad( 90 + northsouth );
+      app.three.tunnel.rotation.z = THREE.Math.degToRad( eastwest )
 
       let rotation = app.data.seconds / 10;
-      let tilt = app.get.radians( app.data.earth.tilt );
+      let tilt = THREE.Math.degToRad( app.data.earth.tilt );
 
       app.three.renderer.render(
         app.three.scene,
         app.three.camera
       );
 
-      // app.three.controls.update()
+      app.three.controls.update()
       requestAnimationFrame( app.three.render );
 
       // Rotate Earth so user location is at the “North Pole”
-      app.three.crust.rotation.x = THREE.Math.degToRad( 90 )
-      app.three.crust.rotation.y = THREE.Math.degToRad( -90 )
-      app.three.crust.rotation.z = THREE.Math.degToRad( 180 )
+      // app.three.crust.rotation.x = THREE.Math.degToRad( 90 )
+      // app.three.crust.rotation.y = THREE.Math.degToRad( -90 )
+      // app.three.crust.rotation.z = THREE.Math.degToRad( 180 )
 
     },
 
@@ -137,8 +133,8 @@ let app = {
         alpha : true
       });
 
-      app.three.camera = new THREE.PerspectiveCamera( 50, 1, .1, app.data.earth.radius.crust * 6 );
-      app.three.camera.position.y = app.data.earth.radius.crust * 3;
+      app.three.camera = new THREE.PerspectiveCamera( 50, 1, .1, app.data.earth.radius.crust * 30 );
+      app.three.camera.position.z = app.data.earth.radius.crust * 3;
 
       app.three.light = new THREE.DirectionalLight( 0xFFFFFF, 1 );
       app.three.light.position.set( -1, 2, 4 );
@@ -157,12 +153,12 @@ let app = {
 
         let material = new THREE.MeshBasicMaterial({
           color: 0xFFFFFF,
-          // wireframe: true,
+          wireframe: true,
           opacity: 0.5,
           transparent: true
         });
 
-        material.map = THREE.ImageUtils.loadTexture('texture.jpg')
+        // material.map = THREE.ImageUtils.loadTexture('texture.jpg')
 
         let geometry = new THREE.SphereGeometry( app.data.earth.radius.crust, 16, 16 );
 
@@ -195,8 +191,10 @@ let app = {
         );
 
         app.three.tunnel = new THREE.Mesh( geometry, material );
+        app.three.tunnel.position.z = app.data.earth.radius.crust;
 
-        app.three.tunnel.translateY( app.data.earth.radius.crust );
+
+        // app.three.tunnel.translateY( app.data.earth.radius.crust );
 
       }
 
