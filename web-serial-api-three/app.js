@@ -64,7 +64,8 @@ let app = {
     scene    : undefined,
     controls : undefined,
 
-    earth    : undefined,
+    earth    : undefined, // group
+    land     : undefined, // group
 
     crust    : undefined,
     tunnel   : undefined,
@@ -142,20 +143,119 @@ let app = {
 
     },
 
+    create : {
+
+      map3DGeometry : function( data ) {
+
+        THREE.Geometry.call (this);
+
+        // data.vertices = [lat, lon, ...]
+        // data.polygons = [[poly indices, hole i-s, ...], ...]
+        // data.triangles = [tri i-s, ...]
+        let i, uvs = [];
+        for (i = 0; i < data.vertices.length; i += 2) {
+          let lon = data.vertices[i];
+          let lat = data.vertices[i + 1];
+
+          // colatitude
+          let phi = +(90 - lat) * 0.01745329252;
+
+          // azimuthal angle
+          let the = +(180 - lon) * 0.01745329252;
+
+          // translate into XYZ coordinates
+          let wx = Math.sin (the) * Math.sin (phi) * -1;
+          let wz = Math.cos (the) * Math.sin (phi);
+          let wy = Math.cos (phi);
+
+          // equirectangular projection
+          let wu = 0.25 + lon / 360.0;
+          let wv = 0.5 + lat / 180.0;
+
+          this.vertices.push (new THREE.Vector3 (wx, wy, wz));
+
+          uvs.push (new THREE.Vector2 (wu, wv));
+        }
+
+        let n = this.vertices.length;
+
+        for (i = 0; i < n; i++) {
+          let v = this.vertices[i];
+          this.vertices.push (v.clone ().multiplyScalar (0));
+        }
+
+        for (i = 0; i < data.triangles.length; i += 3) {
+          let a = data.triangles[i];
+          let b = data.triangles[i + 1];
+          let c = data.triangles[i + 2];
+
+          this.faces.push( new THREE.Face3( a, b, c, [ this.vertices[a], this.vertices[b], this.vertices[c] ] ) );
+          this.faceVertexUvs[ 0 ].push( [ uvs[ a ], uvs[ b ], uvs[ c ] ]);
+        }
+
+        this.computeFaceNormals ();
+
+        this.boundingSphere = new THREE.Sphere( new THREE.Vector3 (), 1 );
+
+      },
+
+      countries : function( json ) {
+
+        app.data.countries = json
+
+        app.three.create.map3DGeometry.prototype = Object.create( THREE.Geometry.prototype );
+
+        let material = new THREE.MeshNormalMaterial()
+        material.side = THREE.DoubleSide;
+
+        app.three.land = new THREE.Group();
+        app.three.land.scale.set(
+          app.data.earth.radius.crust,
+          app.data.earth.radius.crust,
+          app.data.earth.radius.crust
+        );
+
+        let countries = app.data.countries
+
+        for ( let name in countries ) {
+          geometry = new app.three.create.map3DGeometry( countries[ name ] );
+          app.three.land.add( countries[ name ].mesh = new THREE.Mesh( geometry, material ) );
+          countries[name].mesh.name = name;
+        }
+
+        app.three.scene.add( app.three.land );
+
+      }
+
+    },
+
     initialize : function() {
+
+      { // Countries
+
+        // Gets countries geometries
+        fetch( 'countries.json' )
+         .then( response => response.json() )
+         .then( json => app.three.create.countries( json ) )
+
+      }
 
       { // Crust
 
         let material = new THREE.MeshBasicMaterial({
           color: 0xFFFFFF,
-          wireframe: false,
+          wireframe: true,
           opacity: 0.5,
           transparent: true
         });
 
         material.map = THREE.ImageUtils.loadTexture('texture.jpg')
 
-        let geometry = new THREE.SphereGeometry( app.data.earth.radius.crust, 16, 16 );
+        let geometry = new THREE.SphereGeometry(
+          app.data.earth.radius.crust * 0.99,
+          16,
+          16
+        );
 
         app.three.crust = new THREE.Mesh( geometry, material );
 
@@ -199,7 +299,8 @@ let app = {
       // Begins renderer with transparent background
       app.three.renderer = new THREE.WebGLRenderer({
         canvas : app.elements.canvas,
-        alpha : true
+        alpha : true,
+        logarithmicDepthBuffer: true // prevents z fighting
       });
 
       // Let there be light
@@ -219,6 +320,7 @@ let app = {
       // Makes camera move automatically and with inertia
       app.three.controls.autoRotate = true;
       app.three.controls.enableDamping = true;
+      app.three.controls.enableZoom = false;
 
 
       // Creates scene
@@ -386,7 +488,6 @@ let app = {
 
     app.events.initialize()
     app.three.initialize()
-
 
   }
 
