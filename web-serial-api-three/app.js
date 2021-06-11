@@ -2,8 +2,9 @@ let app = {
 
   elements : {
 
+    canvas        : document.querySelector( '.canvas'  ),
     connectButton : document.querySelector( '.connect' ),
-    canvas        : document.querySelector( '.canvas' )
+    findButton    : document.querySelector( '.find'    ),
 
   },
 
@@ -47,8 +48,8 @@ let app = {
     },
 
     user : { // In decimal degrees
-      latitude : 55.5791, // south is negative
-      longitude : 13.0109 // west is negative
+      latitude : -23.5505, // south is negative
+      longitude : -46.6333, // west is negative
     },
 
     seconds : 0
@@ -240,6 +241,51 @@ let app = {
 
   },
 
+  geolocation : {
+
+    found : function() {
+
+
+      app.data.user.latitude && app.data.user.longitude
+      alert( position.coords.latitude, position.coords.longitude );
+    },
+
+    error : function() {
+
+      let prompt = window.prompt(
+
+        'Sorry, there was an error. ' +
+        'Please type in your latitude and longitude as decimal degrees ' +
+        '(West and South are negative):',
+
+        '-23.5505,-46.6333');
+
+      let coordinates = prompt.split(',')
+
+      app.data.user.latitude  = parseFloat( coordinates[ 0 ] );
+      app.data.user.longitude = parseFloat( coordinates[ 1 ] );
+
+    },
+
+    find : function() {
+
+      if ( navigator.geolocation ) {
+
+        navigator.geolocation.getCurrentPosition(
+          app.geolocation.found,
+          app.geolocation.error
+        );
+
+      } else {
+
+        app.geolocation.error();
+
+      }
+
+    }
+
+  },
+
   serial : {
 
     split : function() {
@@ -329,6 +375,9 @@ let app = {
       // Connect to serial port when button is clicked
       app.elements.connectButton.addEventListener( 'click', app.serial.connect );
 
+      // Find user’s location when button is clicked
+      app.elements.findButton.addEventListener( 'click', app.geolocation.find );
+
     }
 
   },
@@ -337,6 +386,7 @@ let app = {
 
     app.events.initialize()
     app.three.initialize()
+
 
   }
 
