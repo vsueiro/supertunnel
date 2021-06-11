@@ -113,10 +113,8 @@ let app = {
       app.three.controls.update()
       requestAnimationFrame( app.three.render );
 
-      // Rotate Earth so user location is at the “North Pole”
-      // app.three.crust.rotation.x = THREE.Math.degToRad( 90 )
-      // app.three.crust.rotation.y = THREE.Math.degToRad( -90 )
-      // app.three.crust.rotation.z = THREE.Math.degToRad( 180 )
+      // Rotate Earth so default location is at latitude and longitude 0
+      app.three.crust.rotation.y = THREE.Math.degToRad( -90 )
 
     },
 
@@ -153,12 +151,12 @@ let app = {
 
         let material = new THREE.MeshBasicMaterial({
           color: 0xFFFFFF,
-          wireframe: true,
+          wireframe: false,
           opacity: 0.5,
           transparent: true
         });
 
-        // material.map = THREE.ImageUtils.loadTexture('texture.jpg')
+        material.map = THREE.ImageUtils.loadTexture('texture.jpg')
 
         let geometry = new THREE.SphereGeometry( app.data.earth.radius.crust, 16, 16 );
 
@@ -192,9 +190,6 @@ let app = {
 
         app.three.tunnel = new THREE.Mesh( geometry, material );
         app.three.tunnel.position.z = app.data.earth.radius.crust;
-
-
-        // app.three.tunnel.translateY( app.data.earth.radius.crust );
 
       }
 
