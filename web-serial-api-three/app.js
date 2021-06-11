@@ -107,6 +107,11 @@ let app = {
       // Values to be updated based on the inclination sensor
       let northsouth = 0; // +90 to -90
       let eastwest   = 0; // +90 to -90
+      if ( app.data.incoming.json ) {
+        northsouth = app.data.incoming.json.x;
+        eastwest   = - app.data.incoming.json.z;
+      }
+
       app.three.tunnel.rotation.x = THREE.Math.degToRad( 90 + northsouth );
       app.three.tunnel.rotation.z = THREE.Math.degToRad( eastwest );
 
