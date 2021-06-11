@@ -1,0 +1,334 @@
+<html>
+
+	<head>
+		<meta charset="utf8">
+		<style>
+			* {
+				margin: 0;
+				padding: 0;
+				font-family: sans-serif;
+			}
+			#demo {
+				position: relative;
+				width: 100%;
+				height: 100%;
+				overflow: hidden;
+			}
+			#demo > canvas {
+				z-index: 1;
+			}
+			#demo > div {
+				position: absolute;
+				z-index: 2;
+			}
+			.balloon {
+				padding: 8px;
+				background: black;
+				color: white;
+			}
+			.balloon:empty {
+				display: none;
+			}
+		</style>
+	</head>
+
+	<body>
+
+	<div id="demo"></div>
+
+	<script src="http://cdnjs.cloudflare.com/ajax/libs/three.js/r71/three.min.js"></script>
+	<script>
+
+	function Map3DGeometry (data, innerRadius) {
+		if ((arguments.length < 2) || isNaN(parseFloat(innerRadius)) || !isFinite(innerRadius) || (innerRadius < 0)) {
+			// if no valid inner radius is given, do not extrude
+			innerRadius = 42;
+		}
+
+		THREE.Geometry.call (this);
+		// data.vertices = [lat, lon, ...]
+		// data.polygons = [[poly indices, hole i-s, ...], ...]
+		// data.triangles = [tri i-s, ...]
+		var i, uvs = [];
+		for (i = 0; i < data.vertices.length; i += 2) {
+			var lon = data.vertices[i];
+			var lat = data.vertices[i + 1];
+			// colatitude
+			var phi = +(90 - lat) * 0.01745329252;
+			// azimuthal angle
+			var the = +(180 - lon) * 0.01745329252;
+			// translate into XYZ coordinates
+			var wx = Math.sin (the) * Math.sin (phi) * -1;
+			var wz = Math.cos (the) * Math.sin (phi);
+			var wy = Math.cos (phi);
+			// equirectangular projection
+			var wu = 0.25 + lon / 360.0;
+			var wv = 0.5 + lat / 180.0;
+
+			this.vertices.push (new THREE.Vector3 (wx, wy, wz));
+
+			uvs.push (new THREE.Vector2 (wu, wv));
+		}
+
+		var n = this.vertices.length;
+
+		if (innerRadius <= 1) {
+			for (i = 0; i < n; i++) {
+				var v = this.vertices[i];
+				this.vertices.push (v.clone ().multiplyScalar (innerRadius));
+			}
+		}
+
+		for (i = 0; i < data.triangles.length; i += 3) {
+			var a = data.triangles[i];
+			var b = data.triangles[i + 1];
+			var c = data.triangles[i + 2];
+
+			this.faces.push( new THREE.Face3( a, b, c, [ this.vertices[a], this.vertices[b], this.vertices[c] ] ) );
+			this.faceVertexUvs[ 0 ].push( [ uvs[ a ], uvs[ b ], uvs[ c ] ]);
+
+			if ((0 < innerRadius) && (innerRadius <= 1)) {
+				this.faces.push( new THREE.Face3( n + b, n + a, n + c, [
+					this.vertices[b].clone ().multiplyScalar (-1),
+					this.vertices[a].clone ().multiplyScalar (-1),
+					this.vertices[c].clone ().multiplyScalar (-1)
+				] ) );
+				this.faceVertexUvs[ 0 ].push( [ uvs[ b ], uvs[ a ], uvs[ c ] ]); // shitty uvs to make 3js exporter happy
+			}
+		}
+
+		// extrude
+		// if (innerRadius < 1) {
+		// 	for (i = 0; i < data.polygons.length; i++) {
+		// 		var polyWithHoles = data.polygons[i];
+		// 		for (var j = 0; j < polyWithHoles.length; j++) {
+		// 			var polygonOrHole = polyWithHoles[j];
+		// 			for (var k = 0; k < polygonOrHole.length; k++) {
+		// 				var a = polygonOrHole[k], b = polygonOrHole[(k + 1) % polygonOrHole.length];
+		// 				var va1 = this.vertices[a], vb1 = this.vertices[b];
+		// 				var va2 = this.vertices[n + a], vb2 = this.vertices[n + b];
+		// 				var normal;
+		// 				if (j < 1) {
+		// 					// polygon
+		// 					normal = vb1.clone ().sub (va1).cross ( va2.clone ().sub (va1) ).normalize ();
+		// 					this.faces.push ( new THREE.Face3( a, b, n + a, [ normal, normal, normal ] ) );
+		// 					this.faceVertexUvs[ 0 ].push( [ uvs[ a ], uvs[ b ], uvs[ a ] ]); // shitty uvs to make 3js exporter happy
+		// 					if (innerRadius > 0) {
+		// 						this.faces.push ( new THREE.Face3( b, n + b, n + a, [ normal, normal, normal ] ) );
+		// 						this.faceVertexUvs[ 0 ].push( [ uvs[ b ], uvs[ b ], uvs[ a ] ]); // shitty uvs to make 3js exporter happy
+		// 					}
+		// 				} else {
+		// 					// hole
+		// 					normal = va2.clone ().sub (va1).cross ( vb1.clone ().sub (va1) ).normalize ();
+		// 					this.faces.push ( new THREE.Face3( b, a, n + a, [ normal, normal, normal ] ) );
+		// 					this.faceVertexUvs[ 0 ].push( [ uvs[ b ], uvs[ a ], uvs[ a ] ]); // shitty uvs to make 3js exporter happy
+		// 					if (innerRadius > 0) {
+		// 						this.faces.push ( new THREE.Face3( b, n + a, n + b, [ normal, normal, normal ] ) );
+		// 						this.faceVertexUvs[ 0 ].push( [ uvs[ b ], uvs[ a ], uvs[ b ] ]); // shitty uvs to make 3js exporter happy
+		// 					}
+		// 				}
+		// 			}
+		// 		}
+		// 	}
+		// }
+
+		this.computeFaceNormals ();
+
+		this.boundingSphere = new THREE.Sphere (new THREE.Vector3 (), 1);
+	}
+
+	Map3DGeometry.prototype = Object.create (THREE.Geometry.prototype);
+
+
+	</script>
+
+	<script type="x-shader" id="sem-vs">
+	varying vec2 vN;
+
+	void main() {
+		vec4 p = vec4( position, 1. );
+
+		vec3 e = normalize( vec3( modelViewMatrix * p ) );
+		vec3 n = normalize( normalMatrix * normal );
+
+		vec3 r = reflect( e, n );
+		float m = 2. * length( vec3( r.xy, r.z + 1. ) );
+		vN = r.xy / m + .5;
+
+		gl_Position = projectionMatrix * modelViewMatrix * p;
+	}
+	</script>
+
+	<script type="x-shader" id="sem-fs">
+	uniform sampler2D tMatCap;
+
+	varying vec2 vN;
+
+	void main() {
+		vec3 base = texture2D( tMatCap, vN ).rgb;
+		gl_FragColor = vec4( base, 1. );
+	}
+	</script>
+
+	<script>
+
+	function demo(data) {
+
+		var scene = new THREE.Scene();
+
+		var camera = new THREE.PerspectiveCamera();
+		camera.position.set(0, 600, 800);
+		camera.lookAt(scene.position);
+		scene.add(camera);
+
+		var renderer, land, water, radius;
+		try {
+			renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+			land = new THREE.MeshNormalMaterial()
+			water = new THREE.MeshBasicMaterial({color: 0xAAAAFF, wireframe:true})
+			radius = 0.995;
+
+		} catch (noWebGL) {
+			// renderer = new THREE.CanvasRenderer();
+			// land = new THREE.MeshLambertMaterial ({ color : 0xffaa50, shading : THREE.FlatShading });
+			// water = new THREE.MeshLambertMaterial ({ color : 0x50aaff, shading : THREE.FlatShading });
+			// radius = 0.9; // smaller radius makes the sorting less atrocious
+			//
+			// var light = new THREE.DirectionalLight (0xffffff);
+			// light.position.set (0, 0, 1);
+			// scene.add (light); // materials are solid black without the light
+		}
+
+		var container = document.getElementById('demo');
+		container.appendChild(renderer.domElement);
+
+
+		function Balloon( html ) {
+			THREE.Object3D.call( this );
+
+			this.popup = document.createElement( 'div' );
+			this.popup.classList.add( 'balloon' );
+			this.popup.innerHTML = html;
+
+			this.addEventListener( 'added', (function () {
+				container.appendChild( this.popup );
+			}).bind( this ));
+
+			this.addEventListener( 'removed', (function () {
+				container.removeChild( this.popup );
+			}).bind( this ));
+
+		}
+
+		Balloon.prototype = Object.create( THREE.Object3D.prototype );
+		Balloon.prototype.constructor = Balloon;
+
+		Balloon.prototype.updateMatrixWorld = (function () {
+			var screenVector = new THREE.Vector3 ();
+			var raycaster = new THREE.Raycaster ();
+
+			return function( force ) {
+				THREE.Object3D.prototype.updateMatrixWorld.call( this, force );
+
+				screenVector.set( 0, 0, 0 ); this.localToWorld( screenVector );
+
+				raycaster.ray.direction.copy( screenVector );
+
+				raycaster.ray.origin.set( 0, 0, 0 ); camera.localToWorld( raycaster.ray.origin );
+				raycaster.ray.direction.sub( raycaster.ray.origin );
+
+				var distance = raycaster.ray.direction.length();
+				raycaster.ray.direction.normalize();
+
+				var intersections = raycaster.intersectObject( scene, true );
+				if( intersections.length && ( intersections[0].distance < distance )) {
+
+					// overlay anchor is obscured
+					this.popup.style.display = 'none';
+
+				} else {
+
+					// overlay anchor is visible
+					screenVector.project( camera );
+
+					this.popup.style.display = '';
+					this.popup.style.left = Math.round((screenVector.x + 1) * container.offsetWidth / 2 /*- 50*/) + 'px';
+					this.popup.style.top = Math.round((1 - screenVector.y) * container.offsetHeight / 2 /*- 100*/) + 'px';
+				}
+			};
+		}) ();
+
+
+		var globe = new THREE.Object3D ();
+		globe.scale.set (250, 250, 250);
+		scene.add (globe);
+
+		var label = new Balloon( '' );
+		label.position.set( 1e-3, 1, 1e-3 );
+		globe.add( label );
+
+		var geometry = new THREE.SphereGeometry(radius, 30, 15);
+		globe.add (new THREE.Mesh (geometry, water));
+
+		for (var name in data) {
+			geometry = new Map3DGeometry (data[name], 0);
+			globe.add (data[name].mesh = new THREE.Mesh (geometry, land));
+			data[name].mesh.name = name;
+		}
+
+		var resize = function () {
+			var w = renderer.domElement.parentElement.clientWidth;
+			var h = renderer.domElement.parentElement.clientHeight;
+			// notify the renderer of the size change
+			renderer.setSize(w, h);
+			// update the camera
+			camera.aspect = w / h;
+			camera.updateProjectionMatrix();
+		};
+
+		var render = function () {
+			requestAnimationFrame (render);
+			globe.rotation.y += 0.01;
+			renderer.render (scene, camera);
+		};
+
+		window.addEventListener('resize', resize, false);
+
+		resize();
+		render();
+
+		renderer.domElement.addEventListener('click', function (event) {
+			var raycaster = new THREE.Raycaster ();
+
+			raycaster.ray.origin.set (0, 0, 0);
+			camera.localToWorld (raycaster.ray.origin);
+			raycaster.ray.direction.set (
+				(event.clientX / window.innerWidth) * 2 - 1, 1 - 2 * (event.clientY / window.innerHeight),
+			0.5).unproject (camera).sub (raycaster.ray.origin).normalize ();
+
+			var intersects = raycaster.intersectObject (scene, true);
+			if (intersects && intersects[0]) {
+
+				var mesh = intersects[0].object;
+				if (mesh.name) {
+
+					var point = intersects[0].point;
+					mesh.worldToLocal (point);
+
+					document.querySelector ('#demo .balloon').innerHTML = mesh.name;
+
+					label.position.copy (point).normalize ().multiplyScalar (1.005); mesh.add (label);
+				}
+			}
+		});
+	}
+
+	fetch('countries.json')
+   .then(response => response.json())
+   .then(response => demo(response))
+
+	</script>
+
+	</body>
+
+</html>
