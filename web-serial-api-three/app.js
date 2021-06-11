@@ -257,12 +257,13 @@ let app = {
 
         let material = new THREE.MeshBasicMaterial({
           color: 0xFFFFFF,
-          wireframe: false,
-          opacity: 0.5,
+          wireframe: true,
+          opacity: 0.2,
           transparent: true
         });
 
-        material.map = THREE.ImageUtils.loadTexture('texture.jpg')
+        // Show satellite texture for debugging
+        // material.map = THREE.ImageUtils.loadTexture('texture.jpg')
 
         let geometry = new THREE.SphereGeometry(
           app.data.earth.radius.crust * 0.99,
