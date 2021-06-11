@@ -17,18 +17,7 @@
 			#demo > canvas {
 				z-index: 1;
 			}
-			#demo > div {
-				position: absolute;
-				z-index: 2;
-			}
-			.balloon {
-				padding: 8px;
-				background: black;
-				color: white;
-			}
-			.balloon:empty {
-				display: none;
-			}
+
 		</style>
 	</head>
 
@@ -138,41 +127,11 @@
 	}
 
 	Map3DGeometry.prototype = Object.create (THREE.Geometry.prototype);
-
-
-	</script>
-
-	<script type="x-shader" id="sem-vs">
-	varying vec2 vN;
-
-	void main() {
-		vec4 p = vec4( position, 1. );
-
-		vec3 e = normalize( vec3( modelViewMatrix * p ) );
-		vec3 n = normalize( normalMatrix * normal );
-
-		vec3 r = reflect( e, n );
-		float m = 2. * length( vec3( r.xy, r.z + 1. ) );
-		vN = r.xy / m + .5;
-
-		gl_Position = projectionMatrix * modelViewMatrix * p;
-	}
-	</script>
-
-	<script type="x-shader" id="sem-fs">
-	uniform sampler2D tMatCap;
-
-	varying vec2 vN;
-
-	void main() {
-		vec3 base = texture2D( tMatCap, vN ).rgb;
-		gl_FragColor = vec4( base, 1. );
-	}
 	</script>
 
 	<script>
 
-	function demo(data) {
+	function demo(countries) {
 
 		var scene = new THREE.Scene();
 
@@ -181,99 +140,30 @@
 		camera.lookAt(scene.position);
 		scene.add(camera);
 
-		var renderer, land, water, radius;
-		try {
-			renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-			land = new THREE.MeshNormalMaterial()
-			water = new THREE.MeshBasicMaterial({color: 0xAAAAFF, wireframe:true})
-			radius = 0.995;
+		// var renderer, land, water, radius;
 
-		} catch (noWebGL) {
-			// renderer = new THREE.CanvasRenderer();
-			// land = new THREE.MeshLambertMaterial ({ color : 0xffaa50, shading : THREE.FlatShading });
-			// water = new THREE.MeshLambertMaterial ({ color : 0x50aaff, shading : THREE.FlatShading });
-			// radius = 0.9; // smaller radius makes the sorting less atrocious
-			//
-			// var light = new THREE.DirectionalLight (0xffffff);
-			// light.position.set (0, 0, 1);
-			// scene.add (light); // materials are solid black without the light
-		}
+			let renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+
+			let material = new THREE.MeshNormalMaterial()
+			material.side = THREE.DoubleSide;
+			// let water = new THREE.MeshBasicMaterial({color: 0xAAAAFF, wireframe:true})
+			let radius = 0.995;
 
 		var container = document.getElementById('demo');
 		container.appendChild(renderer.domElement);
 
 
-		function Balloon( html ) {
-			THREE.Object3D.call( this );
+		var land = new THREE.Object3D ();
+		land.scale.set (250, 250, 250);
+		scene.add (land);
 
-			this.popup = document.createElement( 'div' );
-			this.popup.classList.add( 'balloon' );
-			this.popup.innerHTML = html;
+		// var geometry = new THREE.SphereGeometry(radius, 30, 15);
+		// globe.add (new THREE.Mesh (geometry, water));
 
-			this.addEventListener( 'added', (function () {
-				container.appendChild( this.popup );
-			}).bind( this ));
-
-			this.addEventListener( 'removed', (function () {
-				container.removeChild( this.popup );
-			}).bind( this ));
-
-		}
-
-		Balloon.prototype = Object.create( THREE.Object3D.prototype );
-		Balloon.prototype.constructor = Balloon;
-
-		Balloon.prototype.updateMatrixWorld = (function () {
-			var screenVector = new THREE.Vector3 ();
-			var raycaster = new THREE.Raycaster ();
-
-			return function( force ) {
-				THREE.Object3D.prototype.updateMatrixWorld.call( this, force );
-
-				screenVector.set( 0, 0, 0 ); this.localToWorld( screenVector );
-
-				raycaster.ray.direction.copy( screenVector );
-
-				raycaster.ray.origin.set( 0, 0, 0 ); camera.localToWorld( raycaster.ray.origin );
-				raycaster.ray.direction.sub( raycaster.ray.origin );
-
-				var distance = raycaster.ray.direction.length();
-				raycaster.ray.direction.normalize();
-
-				var intersections = raycaster.intersectObject( scene, true );
-				if( intersections.length && ( intersections[0].distance < distance )) {
-
-					// overlay anchor is obscured
-					this.popup.style.display = 'none';
-
-				} else {
-
-					// overlay anchor is visible
-					screenVector.project( camera );
-
-					this.popup.style.display = '';
-					this.popup.style.left = Math.round((screenVector.x + 1) * container.offsetWidth / 2 /*- 50*/) + 'px';
-					this.popup.style.top = Math.round((1 - screenVector.y) * container.offsetHeight / 2 /*- 100*/) + 'px';
-				}
-			};
-		}) ();
-
-
-		var globe = new THREE.Object3D ();
-		globe.scale.set (250, 250, 250);
-		scene.add (globe);
-
-		var label = new Balloon( '' );
-		label.position.set( 1e-3, 1, 1e-3 );
-		globe.add( label );
-
-		var geometry = new THREE.SphereGeometry(radius, 30, 15);
-		globe.add (new THREE.Mesh (geometry, water));
-
-		for (var name in data) {
-			geometry = new Map3DGeometry (data[name], 0);
-			globe.add (data[name].mesh = new THREE.Mesh (geometry, land));
-			data[name].mesh.name = name;
+		for (var name in countries) {
+			geometry = new Map3DGeometry (countries[name], 0);
+			land.add (countries[name].mesh = new THREE.Mesh (geometry, material));
+			countries[name].mesh.name = name;
 		}
 
 		var resize = function () {
@@ -288,7 +178,7 @@
 
 		var render = function () {
 			requestAnimationFrame (render);
-			globe.rotation.y += 0.01;
+			land.rotation.y += 0.01;
 			renderer.render (scene, camera);
 		};
 
@@ -297,35 +187,13 @@
 		resize();
 		render();
 
-		renderer.domElement.addEventListener('click', function (event) {
-			var raycaster = new THREE.Raycaster ();
-
-			raycaster.ray.origin.set (0, 0, 0);
-			camera.localToWorld (raycaster.ray.origin);
-			raycaster.ray.direction.set (
-				(event.clientX / window.innerWidth) * 2 - 1, 1 - 2 * (event.clientY / window.innerHeight),
-			0.5).unproject (camera).sub (raycaster.ray.origin).normalize ();
-
-			var intersects = raycaster.intersectObject (scene, true);
-			if (intersects && intersects[0]) {
-
-				var mesh = intersects[0].object;
-				if (mesh.name) {
-
-					var point = intersects[0].point;
-					mesh.worldToLocal (point);
-
-					document.querySelector ('#demo .balloon').innerHTML = mesh.name;
-
-					label.position.copy (point).normalize ().multiplyScalar (1.005); mesh.add (label);
-				}
-			}
-		});
 	}
 
+
+	// Gets countries geometries
 	fetch('countries.json')
    .then(response => response.json())
-   .then(response => demo(response))
+   .then(countries => demo(countries))
 
 	</script>
 
