@@ -337,7 +337,7 @@ let app = {
       );
 
       // Makes camera move automatically and with inertia
-      app.three.controls.autoRotate = true;
+      // app.three.controls.autoRotate = true;
       app.three.controls.enableDamping = true;
       app.three.controls.enableZoom = false;
 
