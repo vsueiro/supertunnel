@@ -337,7 +337,7 @@ let app = {
       );
 
       // Makes camera move automatically and with inertia
-      // app.three.controls.autoRotate = true;
+      app.three.controls.autoRotate = true;
       app.three.controls.enableDamping = true;
       app.three.controls.enableZoom = false;
 
@@ -364,11 +364,15 @@ let app = {
 
   geolocation : {
 
-    found : function() {
+    found : function( position ) {
 
+      app.data.user.latitude = position.coords.latitude;
+      app.data.user.longitude = position.coords.longitude;
 
-      app.data.user.latitude && app.data.user.longitude
-      alert( position.coords.latitude, position.coords.longitude );
+      alert( 'Found you :)' );
+
+      console.log( position.coords.latitude, position.coords.longitude );
+
     },
 
     error : function() {
