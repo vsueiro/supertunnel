@@ -58,20 +58,22 @@ let app = {
 
   three : {
 
-    renderer : undefined,
-    camera   : undefined,
-    light    : undefined,
-    scene    : undefined,
-    controls : undefined,
+    renderer  : undefined,
+    camera    : undefined,
+    light     : undefined,
+    scene     : undefined,
+    controls  : undefined,
+    raycaster : undefined,
+    mouse     : undefined,
 
-    earth    : undefined, // group
-    land     : undefined, // group
+    earth     : undefined, // group
+    land      : undefined, // group
 
-    crust    : undefined,
-    tunnel   : undefined,
-    core     : {
-      inner  : undefined,
-      outer  : undefined
+    crust     : undefined,
+    tunnel    : undefined,
+    core      : {
+      inner   : undefined,
+      outer   : undefined
     },
 
     resize : function() {
@@ -115,12 +117,6 @@ let app = {
       app.three.tunnel.rotation.x = THREE.Math.degToRad( 90 + northsouth );
       app.three.tunnel.rotation.z = THREE.Math.degToRad( eastwest );
 
-
-      app.three.renderer.render(
-        app.three.scene,
-        app.three.camera
-      );
-
       // Rotates crust so default location is at latitude and longitude 0
       app.three.crust.rotation.y = THREE.Math.degToRad( -90 )
 
@@ -146,8 +142,14 @@ let app = {
       // Rotates Earth (group) to counter-act previous rotation so OrbitControls work better
       app.three.earth.rotation.x = THREE.Math.degToRad( - app.data.user.latitude )
 
+
       // Makes camera orbit
       app.three.controls.update();
+
+      app.three.renderer.render(
+        app.three.scene,
+        app.three.camera
+      );
 
       // Recursion: this function calls itself to draw frames of 3D animation
       requestAnimationFrame( app.three.render );
@@ -158,6 +160,13 @@ let app = {
 
       // Placeholder for handling data coming from inclination sensor
       console.log( app.data.incoming.json )
+
+    },
+
+    normalizeMouse : function( event ) {
+
+      app.three.mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+	    app.three.mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
 
     },
 
@@ -248,6 +257,11 @@ let app = {
     },
 
     initialize : function() {
+
+
+      app.three.raycaster = new THREE.Raycaster();
+      app.three.mouse     = new THREE.Vector2();
+
 
       { // Countries
 
@@ -503,14 +517,43 @@ let app = {
       // Find user’s location when button is clicked
       app.elements.findButton.addEventListener( 'click', app.geolocation.find );
 
+      // Calculate mouse position in normalized device coordinates (-1 to +1)
+      window.addEventListener( 'mousemove', app.three.normalizeMouse, false );
+
+      // Calculate clicked country
+      window.addEventListener( 'click', function(e) {
+
+        // update the picking ray with the camera and mouse position
+        app.three.raycaster.setFromCamera( app.three.mouse, app.three.camera );
+
+        if ( app.three.land ) {
+
+          // calculate objects intersecting the picking ray
+          for ( let country of app.three.land.children ) {
+
+            let intersects = app.three.raycaster.intersectObject( country );
+
+            for ( let i = 0; i < intersects.length; i ++ ) {
+              // [ i ].object.material.color.set( 0xff0000 );
+              console.log( intersects[ i ].object.name );
+            //
+            }
+
+          }
+
+        }
+
+      } );
+
     }
 
   },
 
   initialize : function() {
 
-    app.events.initialize()
     app.three.initialize()
+    app.events.initialize()
+
 
   }
 
