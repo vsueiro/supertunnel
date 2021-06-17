@@ -110,8 +110,6 @@ let app = {
       // Values to be updated based on the inclination sensor
       // let northsouth = 0; // +90 to -90
       // let eastwest   = 0; // +90 to -90
-
-
       // temp
       let northsouth = app.three.mouse.y * 90; // +90 to -90
       let eastwest   = app.three.mouse.x * 90; // +90 to -90
@@ -128,10 +126,6 @@ let app = {
 
       app.three.tunnel.rotation.z = THREE.Math.degToRad( eastwest );
       app.three.chord.rotation.z = THREE.Math.degToRad( eastwest );
-
-
-
-
 
 
       // Rotates crust so default location is at latitude and longitude 0
@@ -158,6 +152,36 @@ let app = {
 
       // Rotates Earth (group) to counter-act previous rotation so OrbitControls work better
       app.three.earth.rotation.x = THREE.Math.degToRad( - app.data.user.latitude )
+
+
+      // Checks collision of chord (tunnel center) with every country
+      // update the picking ray with the camera and mouse position
+      app.three.raycaster.setFromCamera( app.three.mouse, app.three.camera );
+
+      if ( app.three.land ) {
+
+        // calculate objects intersecting the picking ray
+        for ( let country of app.three.land.children ) {
+
+          let intersects = app.three.raycaster.intersectObject( country );
+
+          for ( let i = 0; i < intersects.length; i ++ ) {
+            // [ i ].object.material.color.set( 0xff0000 );
+            // console.log( intersects[ i ].object.name );
+          //
+          }
+
+        }
+
+      }
+
+
+
+
+
+
+
+
 
 
       // Makes camera orbit
@@ -560,6 +584,7 @@ let app = {
       // Calculate clicked country
       window.addEventListener( 'click', function(e) {
 
+        /*
         // update the picking ray with the camera and mouse position
         app.three.raycaster.setFromCamera( app.three.mouse, app.three.camera );
 
@@ -579,6 +604,7 @@ let app = {
           }
 
         }
+        */
 
       } );
 
@@ -598,3 +624,27 @@ let app = {
 
 // Start everything
 app.initialize()
+
+
+/*
+let position = app.three.chord.geometry.getAttribute( 'position' );
+
+let vertexOrigin = new THREE.Vector3();
+vertexOrigin.fromBufferAttribute( position, 0 );
+
+let vertexDestination = new THREE.Vector3();
+vertexDestination.fromBufferAttribute( position, 1 );
+
+console.log( 'Origin (local):', vertexOrigin );
+console.log( 'Destination (local):', vertexDestination );
+
+let worldOrigin = app.three.chord.localToWorld( vertexOrigin );
+let worldDestination = app.three.chord.localToWorld( vertexDestination );
+
+console.log( 'Origin (world):', worldOrigin );
+console.log( 'Destination (world):', worldDestination );
+
+let direction = worldDestination.sub(worldOrigin).normalize();
+
+console.log( direction );
+*/
