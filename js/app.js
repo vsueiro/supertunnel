@@ -59,24 +59,27 @@ let app = {
 
   three : {
 
-    renderer   : undefined,
-    renderer2D : undefined,
-    camera     : undefined,
-    light      : undefined,
-    scene      : undefined,
-    controls   : undefined,
-    raycaster  : undefined,
-    mouse      : undefined,
+    renderer    : undefined,
+    camera      : undefined,
+    light       : undefined,
+    scene       : undefined,
+    controls    : undefined,
+    raycaster   : undefined,
+    mouse       : undefined,
 
-    earth      : undefined, // group
-    land       : undefined, // group
+    renderer2D  : undefined,
+    label       : undefined,
+    labelObject : undefined,
 
-    crust      : undefined,
-    tunnel     : undefined,
-    chord      : undefined,
-    core       : {
-      inner    : undefined,
-      outer    : undefined
+    earth       : undefined, // group
+    land        : undefined, // group
+
+    crust       : undefined,
+    tunnel      : undefined,
+    chord       : undefined,
+    core        : {
+      inner     : undefined,
+      outer     : undefined
     },
 
     resize : function() {
@@ -445,36 +448,20 @@ let app = {
       app.three.controls.enableDamping = true;
       app.three.controls.enableZoom = false;
 
-
-
-
-
-
-
-
       // Includes label
-      let countryDiv = document.createElement( 'div' );
-			countryDiv.className = 'label';
-			countryDiv.textContent = 'Earth';
+      app.three.label = document.createElement( 'div' );
+			app.three.label.className = 'label';
+			app.three.label.textContent = 'Earth';
 
-			let countryLabel = new THREE.CSS2DObject( countryDiv );
-			countryLabel.position.set( 0, app.data.earth.radius.crust, 0 );
-			app.three.crust.add( countryLabel );
+			app.three.labelObject = new THREE.CSS2DObject( app.three.label );
+			app.three.labelObject.position.set( 0, app.data.earth.radius.crust, 0 );
+			app.three.crust.add( app.three.labelObject );
 
-      // TODO: make this responsive
+      // Creates 2D renderer (to position HTML elements on top of 3D scene)
       app.three.renderer2D = new THREE.CSS2DRenderer();
 			app.three.renderer2D.setSize( window.innerWidth, window.innerHeight );
 
 			app.elements.background.appendChild( app.three.renderer2D.domElement );
-
-
-
-
-
-
-
-
-
 
       // Creates scene
       app.three.scene = new THREE.Scene();
