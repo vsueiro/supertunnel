@@ -67,27 +67,28 @@ let app = {
 
   three : {
 
-    renderer    : undefined,
-    camera      : undefined,
-    light       : undefined,
-    scene       : undefined,
-    controls    : undefined,
-    raycaster   : undefined,
-    mouse       : undefined,
+    renderer       : undefined,
+    camera         : undefined,
+    light          : undefined,
+    scene          : undefined,
+    controls       : undefined,
+    raycaster      : undefined,
+    mouse          : undefined,
 
-    renderer2D  : undefined,
-    label       : undefined,
-    labelObject : undefined,
+    renderer2D     : undefined,
+    label          : undefined,
+    labelObject    : undefined,
 
-    earth       : undefined, // group
-    land        : undefined, // group
+    earth          : undefined, // group
+    land           : undefined, // group
 
-    crust       : undefined,
-    tunnel      : undefined,
-    chord       : undefined,
-    core        : {
-      inner     : undefined,
-      outer     : undefined
+    crust          : undefined,
+    tunnel         : undefined,
+    tunnelGeometry : undefined,
+    chord          : undefined,
+    core           : {
+      inner        : undefined,
+      outer        : undefined
     },
 
     resize : function() {
@@ -192,7 +193,6 @@ let app = {
       app.three.raycaster.set( worldOrigin, chordDirection );
 
 
-
       // Checks collision of chord (tunnel center) with every country
       if ( app.three.land ) {
 
@@ -201,7 +201,7 @@ let app = {
         // calculate objects intersecting the picking ray
         for ( let country of app.three.land.children ) {
 
-          let intersections = app.three.raycaster.intersectObject( country,  );
+          let intersections = app.three.raycaster.intersectObject( country );
 
           // Get farthest intersections (ignore intersection at user location)
           if ( intersections.length > 0 ) {
@@ -219,15 +219,44 @@ let app = {
               app.three.label.textContent = country;
               found = true;
 
+              // Shorten tunnel length to match distance until country
+              let reduction = distance / ( app.data.earth.radius.crust * 2 );
+              app.three.tunnel.scale.set( 1, reduction, 1 );
+
             }
 
           }
 
         }
 
+
         if ( !found ) {
 
+          // Clear country label
           app.three.label.textContent = '';
+
+          // Shorten tunnel length to match distance until other side of Earth
+          let intersections = app.three.raycaster.intersectObject( app.three.crust );
+
+          // Get farthest intersections (ignore intersection at user location)
+          if ( intersections.length > 0 ) {
+
+            let intersection = intersections[ intersections.length - 1 ];
+            let distance = intersection.distance;
+
+            if ( distance > 1000 ) { // Tunnels need to be at least 1000 km long
+
+              let reduction = distance / ( app.data.earth.radius.crust * 2 );
+              app.three.tunnel.scale.set( 1, reduction, 1 );
+
+            }
+
+          } else {
+
+            // Tunnel is not inside Earth
+            app.three.tunnel.scale.set( 0, 0, 0 );
+
+          }
 
         }
 
@@ -374,6 +403,7 @@ let app = {
           opacity: 0.2,
           transparent: true
         });
+        material.side = THREE.DoubleSide;
 
         // Show satellite texture for debugging
         // material.map = THREE.ImageUtils.loadTexture('../assets/texture.jpg')
@@ -396,7 +426,8 @@ let app = {
           opacity: .8,
           transparent: true
         });
-        let geometry = new THREE.CylinderGeometry(
+
+        app.three.tunnelGeometry = new THREE.CylinderGeometry(
           app.data.earth.radius.crust / 20,
           app.data.earth.radius.crust / 200,
           app.data.earth.radius.crust * 2,
@@ -406,9 +437,9 @@ let app = {
         );
 
         // Rotates around end, not center
-        geometry.translate( 0, -app.data.earth.radius.crust, 0);
+        app.three.tunnelGeometry.translate( 0, -app.data.earth.radius.crust, 0);
 
-        app.three.tunnel = new THREE.Mesh( geometry, material );
+        app.three.tunnel = new THREE.Mesh( app.three.tunnelGeometry, material );
         app.three.tunnel.position.z = app.data.earth.radius.crust;
 
       }
