@@ -37,3 +37,15 @@ body {
   height: 100%;
   display: block;
 }
+
+.background > div {
+  position: absolute;
+  top: 0;
+  pointer-events: none;
+}
+
+.label {
+  margin-top: -1em;
+  font-size: 72px;
+  color: #fff;
+}

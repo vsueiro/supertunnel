@@ -2,7 +2,8 @@ let app = {
 
   elements : {
 
-    canvas        : document.querySelector( '.canvas'  ),
+    background    : document.querySelector( '.background' ),
+    canvas        : document.querySelector( '.canvas' ),
     connectButton : document.querySelector( '.connect' ),
     findButton    : document.querySelector( '.find'    ),
 
@@ -28,6 +29,8 @@ let app = {
 
   data : {
 
+
+
     earth : {
 
       tilt : 23.4365, // In decimal degrees
@@ -47,9 +50,15 @@ let app = {
       json : undefined,
     },
 
+    outgoing : {
+      country : undefined,  // name
+      type : undefined,     // (land|water|air)
+      distance : undefined, // in km
+    },
+
     user : { // In decimal degrees
-      latitude : -23.5505, // south is negative
-      longitude : -46.63330, // west is negative
+      latitude : 0, // south is negative
+      longitude : 0, // west is negative
     },
 
     seconds : 0
@@ -58,23 +67,27 @@ let app = {
 
   three : {
 
-    renderer  : undefined,
-    camera    : undefined,
-    light     : undefined,
-    scene     : undefined,
-    controls  : undefined,
-    raycaster : undefined,
-    mouse     : undefined,
+    renderer    : undefined,
+    camera      : undefined,
+    light       : undefined,
+    scene       : undefined,
+    controls    : undefined,
+    raycaster   : undefined,
+    mouse       : undefined,
 
-    earth     : undefined, // group
-    land      : undefined, // group
+    renderer2D  : undefined,
+    label       : undefined,
+    labelObject : undefined,
 
-    crust     : undefined,
-    tunnel    : undefined,
-    chord     : undefined,
-    core      : {
-      inner   : undefined,
-      outer   : undefined
+    earth       : undefined, // group
+    land        : undefined, // group
+
+    crust       : undefined,
+    tunnel      : undefined,
+    chord       : undefined,
+    core        : {
+      inner     : undefined,
+      outer     : undefined
     },
 
     resize : function() {
@@ -86,6 +99,12 @@ let app = {
 
         // Resize
         app.three.renderer.setSize(
+          c.clientWidth,
+          c.clientHeight,
+          false
+        );
+
+        app.three.renderer2D.setSize(
           c.clientWidth,
           c.clientHeight,
           false
@@ -172,8 +191,12 @@ let app = {
       // Makes raycaster match the position and angle of the tunnel
       app.three.raycaster.set( worldOrigin, chordDirection );
 
+
+
       // Checks collision of chord (tunnel center) with every country
       if ( app.three.land ) {
+
+        let found = false;
 
         // calculate objects intersecting the picking ray
         for ( let country of app.three.land.children ) {
@@ -193,27 +216,31 @@ let app = {
 
               console.log( 'A tunnel in this direction would be ' + parseInt( distance ) + 'km long and lead you to ' + country );
 
+              app.three.label.textContent = country;
+              found = true;
+
             }
 
           }
 
         }
 
+        if ( !found ) {
+
+          app.three.label.textContent = '';
+
+        }
+
       }
-
-
-
-
-
-
-
-
-
 
       // Makes camera orbit
       app.three.controls.update();
 
       app.three.renderer.render(
+        app.three.scene,
+        app.three.camera
+      );
+      app.three.renderer2D.render(
         app.three.scene,
         app.three.camera
       );
@@ -388,7 +415,6 @@ let app = {
 
       { // Chord
 
-        //create a blue LineBasicMaterial
         let material = new THREE.LineBasicMaterial( { color: 0x0000ff } );
 
         let points = [
@@ -443,27 +469,20 @@ let app = {
       app.three.controls.enableDamping = true;
       app.three.controls.enableZoom = false;
 
-
-
       // Includes label
-      // let countryDiv = document.createElement( 'div' );
-			// countryDiv.className = 'label';
-			// countryDiv.textContent = 'Earth';
-			// countryDiv.style.marginTop = '-1em';
-      //
-			// let countryLabel = new THREE.CSS2DObject( countryDiv );
-			// countryLabel.position.set( 0, EARTH_RADIUS, 0 );
-			// app.three.crust.add( countryLabel );
+      app.three.label = document.createElement( 'div' );
+			app.three.label.className = 'label';
+			app.three.label.textContent = '';
 
+			app.three.labelObject = new THREE.CSS2DObject( app.three.label );
+			app.three.labelObject.position.set( 0, app.data.earth.radius.crust * -2, 0 );
+			app.three.tunnel.add( app.three.labelObject );
 
+      // Creates 2D renderer (to position HTML elements on top of 3D scene)
+      app.three.renderer2D = new THREE.CSS2DRenderer();
+			app.three.renderer2D.setSize( window.innerWidth, window.innerHeight );
 
-
-
-
-
-
-
-
+			app.elements.background.appendChild( app.three.renderer2D.domElement );
 
       // Creates scene
       app.three.scene = new THREE.Scene();
