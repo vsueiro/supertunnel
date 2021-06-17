@@ -29,6 +29,8 @@ let app = {
 
   data : {
 
+
+
     earth : {
 
       tilt : 23.4365, // In decimal degrees
@@ -46,6 +48,12 @@ let app = {
     incoming : {
       stream : '',
       json : undefined,
+    },
+
+    outgoing : {
+      country : undefined,  // name
+      type : undefined,     // (land|water|air)
+      distance : undefined, // in km
     },
 
     user : { // In decimal degrees
@@ -183,8 +191,12 @@ let app = {
       // Makes raycaster match the position and angle of the tunnel
       app.three.raycaster.set( worldOrigin, chordDirection );
 
+
+
       // Checks collision of chord (tunnel center) with every country
       if ( app.three.land ) {
+
+        let found = false;
 
         // calculate objects intersecting the picking ray
         for ( let country of app.three.land.children ) {
@@ -205,10 +217,17 @@ let app = {
               console.log( 'A tunnel in this direction would be ' + parseInt( distance ) + 'km long and lead you to ' + country );
 
               app.three.label.textContent = country;
+              found = true;
 
             }
 
           }
+
+        }
+
+        if ( !found ) {
+
+          app.three.label.textContent = '';
 
         }
 
