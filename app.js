@@ -71,6 +71,7 @@ let app = {
 
     crust     : undefined,
     tunnel    : undefined,
+    chord     : undefined,
     core      : {
       inner   : undefined,
       outer   : undefined
@@ -107,15 +108,31 @@ let app = {
       app.data.seconds = time * .001;
 
       // Values to be updated based on the inclination sensor
-      let northsouth = 0; // +90 to -90
-      let eastwest   = 0; // +90 to -90
+      // let northsouth = 0; // +90 to -90
+      // let eastwest   = 0; // +90 to -90
+
+
+      // temp
+      let northsouth = app.three.mouse.y * 90; // +90 to -90
+      let eastwest   = app.three.mouse.x * 90; // +90 to -90
+
+
       if ( app.data.incoming.json ) {
         northsouth = app.data.incoming.json.x;
         eastwest   = - app.data.incoming.json.z;
       }
 
+      // Move tunnel according to shovel inclination
       app.three.tunnel.rotation.x = THREE.Math.degToRad( 90 + northsouth );
+      app.three.chord.rotation.x = THREE.Math.degToRad( 90 + northsouth );
+
       app.three.tunnel.rotation.z = THREE.Math.degToRad( eastwest );
+      app.three.chord.rotation.z = THREE.Math.degToRad( eastwest );
+
+
+
+
+
 
       // Rotates crust so default location is at latitude and longitude 0
       app.three.crust.rotation.y = THREE.Math.degToRad( -90 )
@@ -319,12 +336,31 @@ let app = {
 
       }
 
+      { // Chord
+
+        //create a blue LineBasicMaterial
+        let material = new THREE.LineBasicMaterial( { color: 0x0000ff } );
+
+        let points = [
+          new THREE.Vector3( 0,  app.data.earth.radius.crust, 0 ),
+          new THREE.Vector3( 0, -app.data.earth.radius.crust, 0 )
+        ];
+
+        let geometry = new THREE.BufferGeometry().setFromPoints( points );
+        geometry.translate( 0, -app.data.earth.radius.crust, 0);
+
+        app.three.chord = new THREE.Line( geometry, material );
+        app.three.chord.position.z = app.data.earth.radius.crust;
+
+      }
+
       { // Earth (group)
 
         app.three.earth = new THREE.Group();
         app.three.earth.add(
           app.three.crust,
-          app.three.tunnel
+          app.three.tunnel,
+          app.three.chord
         );
 
       }
@@ -362,6 +398,7 @@ let app = {
       // app.three.scene.add( app.three.crust );
       // app.three.scene.add( app.three.tunnel );
       app.three.scene.add( app.three.earth );
+      // app.three.scene.add( app.three.chord );
 
       // Plot axis for debugging
       // X = red
