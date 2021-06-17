@@ -38,8 +38,9 @@ body {
   display: block;
 }
 
-/* Prevents unintentional clicks on 2D renderer */
 .background > div {
+  position: absolute;
+  top: 0;
   pointer-events: none;
 }
 

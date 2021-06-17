@@ -464,8 +464,6 @@ let app = {
       // TODO: make this responsive
       app.three.renderer2D = new THREE.CSS2DRenderer();
 			app.three.renderer2D.setSize( window.innerWidth, window.innerHeight );
-			app.three.renderer2D.domElement.style.position = 'absolute';
-			app.three.renderer2D.domElement.style.top = '0px';
 
 			app.elements.background.appendChild( app.three.renderer2D.domElement );
 
