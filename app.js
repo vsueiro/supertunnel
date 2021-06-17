@@ -48,8 +48,8 @@ let app = {
     },
 
     user : { // In decimal degrees
-      latitude : 0, // south is negative
-      longitude : 0, // west is negative
+      latitude : -23.5505, // south is negative
+      longitude : -46.63330, // west is negative
     },
 
     seconds : 0
@@ -154,21 +154,47 @@ let app = {
       app.three.earth.rotation.x = THREE.Math.degToRad( - app.data.user.latitude )
 
 
-      // Checks collision of chord (tunnel center) with every country
-      // update the picking ray with the camera and mouse position
-      app.three.raycaster.setFromCamera( app.three.mouse, app.three.camera );
 
+      // Gets position & direction of chord (center of tunnel)
+
+      let chordPosition = app.three.chord.geometry.getAttribute( 'position' );
+
+      let vertexOrigin = new THREE.Vector3();
+      vertexOrigin.fromBufferAttribute( chordPosition, 0 );
+
+      let vertexDestination = new THREE.Vector3();
+      vertexDestination.fromBufferAttribute( chordPosition, 1 );
+
+      let worldOrigin = app.three.chord.localToWorld( vertexOrigin );
+      let worldDestination = app.three.chord.localToWorld( vertexDestination );
+      let chordDirection = worldDestination.sub(worldOrigin).normalize();
+
+      // Makes raycaster match the position and angle of the tunnel
+      app.three.raycaster.set( worldOrigin, chordDirection );
+
+      // Checks collision of chord (tunnel center) with every country
       if ( app.three.land ) {
 
         // calculate objects intersecting the picking ray
         for ( let country of app.three.land.children ) {
 
-          let intersects = app.three.raycaster.intersectObject( country );
+          let intersections = app.three.raycaster.intersectObject( country,  );
 
-          for ( let i = 0; i < intersects.length; i ++ ) {
-            // [ i ].object.material.color.set( 0xff0000 );
-            // console.log( intersects[ i ].object.name );
-          //
+          // Get farthest intersections (ignore intersection at user location)
+          if ( intersections.length > 0 ) {
+
+            let intersection = intersections[ intersections.length - 1 ];
+
+            let country = intersection.object.name;
+            let distance = intersection.distance;
+            let exit = intersection.point;
+
+            if ( distance > 1000 ) { // Tunnels need to be at least 1000 km long
+
+              console.log( 'A tunnel in this direction would be ' + parseInt( distance ) + 'km long and lead you to ' + country );
+
+            }
+
           }
 
         }
@@ -624,27 +650,3 @@ let app = {
 
 // Start everything
 app.initialize()
-
-
-/*
-let position = app.three.chord.geometry.getAttribute( 'position' );
-
-let vertexOrigin = new THREE.Vector3();
-vertexOrigin.fromBufferAttribute( position, 0 );
-
-let vertexDestination = new THREE.Vector3();
-vertexDestination.fromBufferAttribute( position, 1 );
-
-console.log( 'Origin (local):', vertexOrigin );
-console.log( 'Destination (local):', vertexDestination );
-
-let worldOrigin = app.three.chord.localToWorld( vertexOrigin );
-let worldDestination = app.three.chord.localToWorld( vertexDestination );
-
-console.log( 'Origin (world):', worldOrigin );
-console.log( 'Destination (world):', worldDestination );
-
-let direction = worldDestination.sub(worldOrigin).normalize();
-
-console.log( direction );
-*/
