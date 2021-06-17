@@ -38,6 +38,10 @@ body {
   display: block;
 }
 
+/* Prevents unintentional clicks on 2D renderer */
+.background > div {
+  pointer-events: none;
+}
 
 .label {
   margin-top: -1em;
