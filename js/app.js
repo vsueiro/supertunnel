@@ -97,6 +97,12 @@ let app = {
           false
         );
 
+        app.two.renderer.setSize(
+          c.clientWidth,
+          c.clientHeight,
+          false
+        );
+
         // Updates camera accordingly
         app.three.camera.aspect = c.clientWidth / c.clientHeight;
         app.three.camera.updateProjectionMatrix();
@@ -474,8 +480,7 @@ let app = {
 			countryLabel.position.set( 0, app.data.earth.radius.crust, 0 );
 			app.three.crust.add( countryLabel );
 
-
-
+      // TODO: make this responsive
       app.two.renderer = new THREE.CSS2DRenderer();
 			app.two.renderer.setSize( window.innerWidth, window.innerHeight );
 			app.two.renderer.domElement.style.position = 'absolute';
