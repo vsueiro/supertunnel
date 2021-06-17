@@ -333,7 +333,7 @@ let app = {
       { // Countries
 
         // Gets countries geometries
-        fetch( 'countries.json' )
+        fetch( '../assets/countries.json' )
          .then( response => response.json() )
          .then( json => app.three.create.countries( json ) )
 
@@ -349,7 +349,7 @@ let app = {
         });
 
         // Show satellite texture for debugging
-        // material.map = THREE.ImageUtils.loadTexture('texture.jpg')
+        // material.map = THREE.ImageUtils.loadTexture('../assets/texture.jpg')
 
         let geometry = new THREE.SphereGeometry(
           app.data.earth.radius.crust * 0.99,
@@ -442,6 +442,27 @@ let app = {
       app.three.controls.autoRotateSpeed = .25; // 1 orbit in 240 seconds
       app.three.controls.enableDamping = true;
       app.three.controls.enableZoom = false;
+
+
+
+      // Includes label
+      // let countryDiv = document.createElement( 'div' );
+			// countryDiv.className = 'label';
+			// countryDiv.textContent = 'Earth';
+			// countryDiv.style.marginTop = '-1em';
+      //
+			// let countryLabel = new THREE.CSS2DObject( countryDiv );
+			// countryLabel.position.set( 0, EARTH_RADIUS, 0 );
+			// app.three.crust.add( countryLabel );
+
+
+
+
+
+
+
+
+
 
 
       // Creates scene
