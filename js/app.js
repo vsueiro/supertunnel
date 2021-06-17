@@ -2,7 +2,8 @@ let app = {
 
   elements : {
 
-    canvas        : document.querySelector( '.canvas'  ),
+    background    : document.querySelector( '.background' ),
+    canvas        : document.querySelector( '.canvas' ),
     connectButton : document.querySelector( '.connect' ),
     findButton    : document.querySelector( '.find'    ),
 
@@ -56,31 +57,26 @@ let app = {
 
   },
 
-  two : {
-
-    renderer  : undefined,
-
-  },
-
   three : {
 
-    renderer  : undefined,
-    camera    : undefined,
-    light     : undefined,
-    scene     : undefined,
-    controls  : undefined,
-    raycaster : undefined,
-    mouse     : undefined,
+    renderer   : undefined,
+    renderer2D : undefined,
+    camera     : undefined,
+    light      : undefined,
+    scene      : undefined,
+    controls   : undefined,
+    raycaster  : undefined,
+    mouse      : undefined,
 
-    earth     : undefined, // group
-    land      : undefined, // group
+    earth      : undefined, // group
+    land       : undefined, // group
 
-    crust     : undefined,
-    tunnel    : undefined,
-    chord     : undefined,
-    core      : {
-      inner   : undefined,
-      outer   : undefined
+    crust      : undefined,
+    tunnel     : undefined,
+    chord      : undefined,
+    core       : {
+      inner    : undefined,
+      outer    : undefined
     },
 
     resize : function() {
@@ -97,7 +93,7 @@ let app = {
           false
         );
 
-        app.two.renderer.setSize(
+        app.three.renderer2D.setSize(
           c.clientWidth,
           c.clientHeight,
           false
@@ -213,15 +209,6 @@ let app = {
 
       }
 
-
-
-
-
-
-
-
-
-
       // Makes camera orbit
       app.three.controls.update();
 
@@ -229,7 +216,7 @@ let app = {
         app.three.scene,
         app.three.camera
       );
-      app.two.renderer.render(
+      app.three.renderer2D.render(
         app.three.scene,
         app.three.camera
       );
@@ -404,7 +391,6 @@ let app = {
 
       { // Chord
 
-        //create a blue LineBasicMaterial
         let material = new THREE.LineBasicMaterial( { color: 0x0000ff } );
 
         let points = [
@@ -470,22 +456,18 @@ let app = {
       let countryDiv = document.createElement( 'div' );
 			countryDiv.className = 'label';
 			countryDiv.textContent = 'Earth';
-			countryDiv.style.marginTop = '-1em';
-      countryDiv.style.fontSize = '72px';
-      countryDiv.style.color = '#fff';
-
-
 
 			let countryLabel = new THREE.CSS2DObject( countryDiv );
 			countryLabel.position.set( 0, app.data.earth.radius.crust, 0 );
 			app.three.crust.add( countryLabel );
 
       // TODO: make this responsive
-      app.two.renderer = new THREE.CSS2DRenderer();
-			app.two.renderer.setSize( window.innerWidth, window.innerHeight );
-			app.two.renderer.domElement.style.position = 'absolute';
-			app.two.renderer.domElement.style.top = '0px';
-			document.body.appendChild( app.two.renderer.domElement );
+      app.three.renderer2D = new THREE.CSS2DRenderer();
+			app.three.renderer2D.setSize( window.innerWidth, window.innerHeight );
+			app.three.renderer2D.domElement.style.position = 'absolute';
+			app.three.renderer2D.domElement.style.top = '0px';
+
+			app.elements.background.appendChild( app.three.renderer2D.domElement );
 
 
 

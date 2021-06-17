@@ -37,3 +37,10 @@ body {
   height: 100%;
   display: block;
 }
+
+
+.label {
+  margin-top: -1em;
+  font-size: 72px;
+  color: #fff;
+}
