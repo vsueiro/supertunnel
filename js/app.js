@@ -56,6 +56,12 @@ let app = {
 
   },
 
+  two : {
+
+    renderer  : undefined,
+
+  },
+
   three : {
 
     renderer  : undefined,
@@ -214,6 +220,10 @@ let app = {
       app.three.controls.update();
 
       app.three.renderer.render(
+        app.three.scene,
+        app.three.camera
+      );
+      app.two.renderer.render(
         app.three.scene,
         app.three.camera
       );
@@ -445,16 +455,32 @@ let app = {
 
 
 
-      // Includes label
-      // let countryDiv = document.createElement( 'div' );
-			// countryDiv.className = 'label';
-			// countryDiv.textContent = 'Earth';
-			// countryDiv.style.marginTop = '-1em';
-      //
-			// let countryLabel = new THREE.CSS2DObject( countryDiv );
-			// countryLabel.position.set( 0, EARTH_RADIUS, 0 );
-			// app.three.crust.add( countryLabel );
 
+
+
+
+
+      // Includes label
+      let countryDiv = document.createElement( 'div' );
+			countryDiv.className = 'label';
+			countryDiv.textContent = 'Earth';
+			countryDiv.style.marginTop = '-1em';
+      countryDiv.style.fontSize = '72px';
+      countryDiv.style.color = '#fff';
+
+
+
+			let countryLabel = new THREE.CSS2DObject( countryDiv );
+			countryLabel.position.set( 0, app.data.earth.radius.crust, 0 );
+			app.three.crust.add( countryLabel );
+
+
+
+      app.two.renderer = new THREE.CSS2DRenderer();
+			app.two.renderer.setSize( window.innerWidth, window.innerHeight );
+			app.two.renderer.domElement.style.position = 'absolute';
+			app.two.renderer.domElement.style.top = '0px';
+			document.body.appendChild( app.two.renderer.domElement );
 
 
 
