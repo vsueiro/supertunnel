@@ -49,8 +49,8 @@ let app = {
     },
 
     user : { // In decimal degrees
-      latitude : -23.5505, // south is negative
-      longitude : -46.63330, // west is negative
+      latitude : 0, // south is negative
+      longitude : 0, // west is negative
     },
 
     seconds : 0
@@ -203,6 +203,8 @@ let app = {
             if ( distance > 1000 ) { // Tunnels need to be at least 1000 km long
 
               console.log( 'A tunnel in this direction would be ' + parseInt( distance ) + 'km long and lead you to ' + country );
+
+              app.three.label.textContent = country;
 
             }
 
@@ -451,11 +453,11 @@ let app = {
       // Includes label
       app.three.label = document.createElement( 'div' );
 			app.three.label.className = 'label';
-			app.three.label.textContent = 'Earth';
+			app.three.label.textContent = '';
 
 			app.three.labelObject = new THREE.CSS2DObject( app.three.label );
-			app.three.labelObject.position.set( 0, app.data.earth.radius.crust, 0 );
-			app.three.crust.add( app.three.labelObject );
+			app.three.labelObject.position.set( 0, app.data.earth.radius.crust * -2, 0 );
+			app.three.tunnel.add( app.three.labelObject );
 
       // Creates 2D renderer (to position HTML elements on top of 3D scene)
       app.three.renderer2D = new THREE.CSS2DRenderer();
