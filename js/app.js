@@ -201,12 +201,18 @@ let app = {
         // calculate objects intersecting the picking ray
         for ( let country of app.three.land.children ) {
 
+          // Reset country highlight
+          country.material.color.setHex(0x808080); // there is also setHSV and setRGB
+
           let intersections = app.three.raycaster.intersectObject( country );
 
           // Get farthest intersections (ignore intersection at user location)
           if ( intersections.length > 0 ) {
 
             let intersection = intersections[ intersections.length - 1 ];
+
+            // Highlight country
+            intersection.object.material.color.setHex(0xff8080); // there is also setHSV and setRGB
 
             let country = intersection.object.name;
             let distance = intersection.distance;
@@ -355,9 +361,6 @@ let app = {
 
         app.three.create.map3DGeometry.prototype = Object.create( THREE.Geometry.prototype );
 
-        let material = new THREE.MeshNormalMaterial()
-        material.side = THREE.DoubleSide;
-
         app.three.land = new THREE.Group();
         app.three.land.scale.set(
           app.data.earth.radius.crust,
@@ -368,7 +371,18 @@ let app = {
         let countries = app.data.countries
 
         for ( let name in countries ) {
-          geometry = new app.three.create.map3DGeometry( countries[ name ] );
+
+          let geometry = new app.three.create.map3DGeometry( countries[ name ] );
+
+          // let material = new THREE.MeshNormalMaterial()
+
+          let material = new THREE.MeshBasicMaterial({
+            color: 0x404040,    // red (can also use a CSS color string here)
+            flatShading: false,
+          });
+
+          material.side = THREE.DoubleSide;
+
           app.three.land.add( countries[ name ].mesh = new THREE.Mesh( geometry, material ) );
           countries[name].mesh.name = name;
         }
