@@ -48,8 +48,8 @@ let app = {
     },
 
     user : { // In decimal degrees
-      latitude : 0, // south is negative
-      longitude : 0, // west is negative
+      latitude : -23.5505, // south is negative
+      longitude : -46.63330, // west is negative
     },
 
     seconds : 0
@@ -58,20 +58,23 @@ let app = {
 
   three : {
 
-    renderer : undefined,
-    camera   : undefined,
-    light    : undefined,
-    scene    : undefined,
-    controls : undefined,
+    renderer  : undefined,
+    camera    : undefined,
+    light     : undefined,
+    scene     : undefined,
+    controls  : undefined,
+    raycaster : undefined,
+    mouse     : undefined,
 
-    earth    : undefined, // group
-    land     : undefined, // group
+    earth     : undefined, // group
+    land      : undefined, // group
 
-    crust    : undefined,
-    tunnel   : undefined,
-    core     : {
-      inner  : undefined,
-      outer  : undefined
+    crust     : undefined,
+    tunnel    : undefined,
+    chord     : undefined,
+    core      : {
+      inner   : undefined,
+      outer   : undefined
     },
 
     resize : function() {
@@ -105,21 +108,25 @@ let app = {
       app.data.seconds = time * .001;
 
       // Values to be updated based on the inclination sensor
-      let northsouth = 0; // +90 to -90
-      let eastwest   = 0; // +90 to -90
+      // let northsouth = 0; // +90 to -90
+      // let eastwest   = 0; // +90 to -90
+      // temp
+      let northsouth = app.three.mouse.y * 90; // +90 to -90
+      let eastwest   = app.three.mouse.x * 90; // +90 to -90
+
+
       if ( app.data.incoming.json ) {
         northsouth = app.data.incoming.json.x;
         eastwest   = - app.data.incoming.json.z;
       }
 
+      // Move tunnel according to shovel inclination
       app.three.tunnel.rotation.x = THREE.Math.degToRad( 90 + northsouth );
+      app.three.chord.rotation.x = THREE.Math.degToRad( 90 + northsouth );
+
       app.three.tunnel.rotation.z = THREE.Math.degToRad( eastwest );
+      app.three.chord.rotation.z = THREE.Math.degToRad( eastwest );
 
-
-      app.three.renderer.render(
-        app.three.scene,
-        app.three.camera
-      );
 
       // Rotates crust so default location is at latitude and longitude 0
       app.three.crust.rotation.y = THREE.Math.degToRad( -90 )
@@ -146,8 +153,70 @@ let app = {
       // Rotates Earth (group) to counter-act previous rotation so OrbitControls work better
       app.three.earth.rotation.x = THREE.Math.degToRad( - app.data.user.latitude )
 
+
+
+      // Gets position & direction of chord (center of tunnel)
+
+      let chordPosition = app.three.chord.geometry.getAttribute( 'position' );
+
+      let vertexOrigin = new THREE.Vector3();
+      vertexOrigin.fromBufferAttribute( chordPosition, 0 );
+
+      let vertexDestination = new THREE.Vector3();
+      vertexDestination.fromBufferAttribute( chordPosition, 1 );
+
+      let worldOrigin = app.three.chord.localToWorld( vertexOrigin );
+      let worldDestination = app.three.chord.localToWorld( vertexDestination );
+      let chordDirection = worldDestination.sub(worldOrigin).normalize();
+
+      // Makes raycaster match the position and angle of the tunnel
+      app.three.raycaster.set( worldOrigin, chordDirection );
+
+      // Checks collision of chord (tunnel center) with every country
+      if ( app.three.land ) {
+
+        // calculate objects intersecting the picking ray
+        for ( let country of app.three.land.children ) {
+
+          let intersections = app.three.raycaster.intersectObject( country,  );
+
+          // Get farthest intersections (ignore intersection at user location)
+          if ( intersections.length > 0 ) {
+
+            let intersection = intersections[ intersections.length - 1 ];
+
+            let country = intersection.object.name;
+            let distance = intersection.distance;
+            let exit = intersection.point;
+
+            if ( distance > 1000 ) { // Tunnels need to be at least 1000 km long
+
+              console.log( 'A tunnel in this direction would be ' + parseInt( distance ) + 'km long and lead you to ' + country );
+
+            }
+
+          }
+
+        }
+
+      }
+
+
+
+
+
+
+
+
+
+
       // Makes camera orbit
       app.three.controls.update();
+
+      app.three.renderer.render(
+        app.three.scene,
+        app.three.camera
+      );
 
       // Recursion: this function calls itself to draw frames of 3D animation
       requestAnimationFrame( app.three.render );
@@ -158,6 +227,13 @@ let app = {
 
       // Placeholder for handling data coming from inclination sensor
       console.log( app.data.incoming.json )
+
+    },
+
+    normalizeMouse : function( event ) {
+
+      app.three.mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+	    app.three.mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
 
     },
 
@@ -249,6 +325,11 @@ let app = {
 
     initialize : function() {
 
+
+      app.three.raycaster = new THREE.Raycaster();
+      app.three.mouse     = new THREE.Vector2();
+
+
       { // Countries
 
         // Gets countries geometries
@@ -305,12 +386,31 @@ let app = {
 
       }
 
+      { // Chord
+
+        //create a blue LineBasicMaterial
+        let material = new THREE.LineBasicMaterial( { color: 0x0000ff } );
+
+        let points = [
+          new THREE.Vector3( 0,  app.data.earth.radius.crust, 0 ),
+          new THREE.Vector3( 0, -app.data.earth.radius.crust, 0 )
+        ];
+
+        let geometry = new THREE.BufferGeometry().setFromPoints( points );
+        geometry.translate( 0, -app.data.earth.radius.crust, 0);
+
+        app.three.chord = new THREE.Line( geometry, material );
+        app.three.chord.position.z = app.data.earth.radius.crust;
+
+      }
+
       { // Earth (group)
 
         app.three.earth = new THREE.Group();
         app.three.earth.add(
           app.three.crust,
-          app.three.tunnel
+          app.three.tunnel,
+          app.three.chord
         );
 
       }
@@ -348,6 +448,7 @@ let app = {
       // app.three.scene.add( app.three.crust );
       // app.three.scene.add( app.three.tunnel );
       app.three.scene.add( app.three.earth );
+      // app.three.scene.add( app.three.chord );
 
       // Plot axis for debugging
       // X = red
@@ -503,14 +604,45 @@ let app = {
       // Find user’s location when button is clicked
       app.elements.findButton.addEventListener( 'click', app.geolocation.find );
 
+      // Calculate mouse position in normalized device coordinates (-1 to +1)
+      window.addEventListener( 'mousemove', app.three.normalizeMouse, false );
+
+      // Calculate clicked country
+      window.addEventListener( 'click', function(e) {
+
+        /*
+        // update the picking ray with the camera and mouse position
+        app.three.raycaster.setFromCamera( app.three.mouse, app.three.camera );
+
+        if ( app.three.land ) {
+
+          // calculate objects intersecting the picking ray
+          for ( let country of app.three.land.children ) {
+
+            let intersects = app.three.raycaster.intersectObject( country );
+
+            for ( let i = 0; i < intersects.length; i ++ ) {
+              // [ i ].object.material.color.set( 0xff0000 );
+              console.log( intersects[ i ].object.name );
+            //
+            }
+
+          }
+
+        }
+        */
+
+      } );
+
     }
 
   },
 
   initialize : function() {
 
-    app.events.initialize()
     app.three.initialize()
+    app.events.initialize()
+
 
   }
 
