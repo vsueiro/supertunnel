@@ -29,8 +29,6 @@ let app = {
 
   data : {
 
-
-
     earth : {
 
       tilt : 23.4365, // In decimal degrees
@@ -52,7 +50,7 @@ let app = {
 
     outgoing : {
       country : undefined,  // name
-      type : undefined,     // (land|water|air)
+      destination : undefined,     // (land|water|air)
       distance : undefined, // in km
     },
 
@@ -220,10 +218,15 @@ let app = {
 
             if ( distance > 1000 ) { // Tunnels need to be at least 1000 km long
 
-              console.log( 'A tunnel in this direction would be ' + parseInt( distance ) + 'km long and lead you to ' + country );
+              // console.log( 'A tunnel in this direction would be ' + parseInt( distance ) + 'km long and lead you to ' + country );
 
               app.three.label.textContent = country;
               found = true;
+
+              // Store data to be sent to device
+              app.data.outgoing.country = country;
+              app.data.outgoing.destination = 'land';
+              app.data.outgoing.distance = parseInt( distance );
 
               // Shorten tunnel length to match distance until country
               let reduction = distance / ( app.data.earth.radius.crust * 2 );
@@ -241,6 +244,9 @@ let app = {
           // Clear country label
           app.three.label.textContent = '';
 
+          // Remove country from data to be sent to device
+          app.data.outgoing.country = '';
+
           // Shorten tunnel length to match distance until other side of Earth
           let intersections = app.three.raycaster.intersectObject( app.three.crust );
 
@@ -257,10 +263,16 @@ let app = {
 
             }
 
+            app.data.outgoing.destination = 'water';
+            app.data.outgoing.distance = -1;
+
           } else {
 
             // Tunnel is not inside Earth
             app.three.tunnel.scale.set( 0, 0, 0 );
+
+            app.data.outgoing.destination = 'air';
+            app.data.outgoing.distance = -1;
 
           }
 
@@ -296,6 +308,8 @@ let app = {
 
       app.three.mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
 	    app.three.mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+
+      console.log( app.data.outgoing );
 
     },
 
@@ -378,7 +392,7 @@ let app = {
 
           let material = new THREE.MeshBasicMaterial({
             color: 0x404040,    // red (can also use a CSS color string here)
-            flatShading: false,
+            flatShading: true,
           });
 
           material.side = THREE.DoubleSide;
