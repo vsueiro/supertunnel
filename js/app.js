@@ -417,7 +417,7 @@ let app = {
       { // Countries
 
         // Gets countries geometries
-        fetch( '../assets/countries.json' )
+        fetch( './assets/countries.json' )
          .then( response => response.json() )
          .then( json => app.three.create.countries( json ) )
 
