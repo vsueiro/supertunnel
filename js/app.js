@@ -60,13 +60,14 @@ let app = {
     },
 
     outgoing : {
-      country : undefined,  // name
-      destination : undefined,     // (land|water|air)
-      distance : undefined, // in km
+      origin          : undefined, // country name
+      destination     : undefined, // country name
+      destinationType : undefined, // (land|water|air)
+      distance        : undefined, // in km
     },
 
-    user : { // In decimal degrees
-      latitude : 0, // south is negative
+    user : {         // In decimal degrees
+      latitude  : 0, // south is negative
       longitude : 0, // west is negative
     },
 
@@ -226,9 +227,10 @@ let app = {
 
           let intersections = app.three.raycaster.intersectObject( country );
 
-          // Get farthest intersections (ignore intersection at user location)
-          if ( intersections.length > 0 ) {
+          // If ray instersects with anything
+          if ( intersections.length >= 1 ) {
 
+            // Get farthest intersections (ignore intersection at user location)
             let intersection = intersections[ intersections.length - 1 ];
 
             let country = intersection.object.name;
@@ -248,8 +250,8 @@ let app = {
               app.three.labels.distance.element.textContent = (parseInt( distance / 100 ) * 100).toLocaleString('en-US') + ' km'
 
               // Stores data to be sent to device
-              app.data.outgoing.country = country;
-              app.data.outgoing.destination = 'land';
+              app.data.outgoing.destination = country;
+              app.data.outgoing.destinationType = 'land';
               app.data.outgoing.distance = parseInt( distance );
 
               // Shortens tunnel length to match distance until country
@@ -259,6 +261,10 @@ let app = {
               // Highlights country
               intersection.object.material[0].color.set( app.color( 'accent-50' ) );
               intersection.object.material[1].color.set( app.color( 'accent-100' ) );
+
+            } else if ( distance < 100 ) {
+
+              app.data.outgoing.origin = country;
 
             }
 
@@ -272,7 +278,7 @@ let app = {
           app.three.labels.country.element.textContent = '';
 
           // Removes country from data to be sent to device
-          app.data.outgoing.country = '';
+          app.data.outgoing.destination = '';
 
           // Shortens tunnel length to match distance until other side of Earth
           let intersections = app.three.raycaster.intersectObject( app.three.crust );
@@ -299,7 +305,7 @@ let app = {
 
             }
 
-            app.data.outgoing.destination = 'water';
+            app.data.outgoing.destinationType = 'water';
             app.data.outgoing.distance = -1;
 
           } else {
@@ -312,7 +318,7 @@ let app = {
             // Clears distance label
             app.three.labels.distance.element.textContent = ''
 
-            app.data.outgoing.destination = 'air';
+            app.data.outgoing.destinationType = 'air';
             app.data.outgoing.distance = -1;
 
           }
