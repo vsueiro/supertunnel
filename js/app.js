@@ -69,7 +69,6 @@ let app = {
 
     renderer       : undefined,
     camera         : undefined,
-    light          : undefined,
     scene          : undefined,
     controls       : undefined,
     raycaster      : undefined,
@@ -551,10 +550,6 @@ let app = {
         logarithmicDepthBuffer: true // prevents z fighting
       });
 
-      // Let there be light
-      app.three.light = new THREE.DirectionalLight( 0xFFFFFF, 1 );
-      app.three.light.position.set( -1, 2, 4 );
-
       // Creates camera
       app.three.camera = new THREE.PerspectiveCamera( 50, 1, .1, app.data.earth.radius.crust * 30 );
       app.three.camera.position.z = app.data.earth.radius.crust * 3;
@@ -618,17 +613,7 @@ let app = {
 
       // Creates scene
       app.three.scene = new THREE.Scene();
-      app.three.scene.add( app.three.light );
-      // app.three.scene.add( app.three.crust );
-      // app.three.scene.add( app.three.tunnel );
       app.three.scene.add( app.three.earth );
-      // app.three.scene.add( app.three.chord );
-
-      // Plot axis for debugging
-      // X = red
-      // Y = green
-      // Z = blue
-      app.three.scene.add( new THREE.AxesHelper( 1000 ) );
 
       // Animate 3D elements
       requestAnimationFrame( app.three.render );
