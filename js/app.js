@@ -74,8 +74,21 @@ let app = {
     mouse          : undefined,
 
     renderer2D     : undefined,
-    label          : undefined,
-    labelObject    : undefined,
+    labels         : {
+      country      : {
+        element    : undefined,
+        object     : undefined
+      },
+      distance     : {
+        element    : undefined,
+        object     : undefined
+      },
+      origin       : {
+        element    : undefined,
+        object     : undefined
+      }
+    },
+
 
     earth          : undefined, // group
     land           : undefined, // group
@@ -220,7 +233,8 @@ let app = {
 
               // console.log( 'A tunnel in this direction would be ' + parseInt( distance ) + 'km long and lead you to ' + country );
 
-              app.three.label.textContent = country;
+              app.three.labels.country.element.textContent = country;
+              app.three.labels.distance.element.textContent = (parseInt( distance / 100 ) * 100).toLocaleString('en-US') + ' km'
               found = true;
 
               // Store data to be sent to device
@@ -242,7 +256,7 @@ let app = {
         if ( !found ) {
 
           // Clear country label
-          app.three.label.textContent = '';
+          app.three.labels.country.element.textContent = '';
 
           // Remove country from data to be sent to device
           app.data.outgoing.country = '';
@@ -528,14 +542,31 @@ let app = {
       app.three.controls.enableDamping = true;
       app.three.controls.enableZoom = false;
 
-      // Includes label
-      app.three.label = document.createElement( 'div' );
-			app.three.label.className = 'label';
-			app.three.label.textContent = '';
+      // Creates labels
 
-			app.three.labelObject = new THREE.CSS2DObject( app.three.label );
-			app.three.labelObject.position.set( 0, app.data.earth.radius.crust * -2, 0 );
-			app.three.tunnel.add( app.three.labelObject );
+      { // Country label
+
+        app.three.labels.country.element = document.createElement( 'div' );
+  			app.three.labels.country.element.className = 'label label-country';
+  			app.three.labels.country.element.textContent = '';
+
+  			app.three.labels.country.object = new THREE.CSS2DObject( app.three.labels.country.element );
+  			app.three.labels.country.object.position.set( 0, app.data.earth.radius.crust * -2, 0 );
+  			app.three.tunnel.add( app.three.labels.country.object );
+
+      }
+
+      { // Distance label
+
+        app.three.labels.distance.element = document.createElement( 'div' );
+  			app.three.labels.distance.element.className = 'label label-distance';
+  			app.three.labels.distance.element.textContent = '12,700 km';
+
+  			app.three.labels.distance.object = new THREE.CSS2DObject( app.three.labels.distance.element );
+  			app.three.labels.distance.object.position.set( 0, app.data.earth.radius.crust * -1, 0 );
+  			app.three.tunnel.add( app.three.labels.distance.object );
+
+      }
 
       // Creates 2D renderer (to position HTML elements on top of 3D scene)
       app.three.renderer2D = new THREE.CSS2DRenderer();
