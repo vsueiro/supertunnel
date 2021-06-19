@@ -523,8 +523,8 @@ let app = {
         });
 
         app.three.tunnelGeometry = new THREE.CylinderGeometry(
-          app.data.earth.radius.crust / 20,
-          app.data.earth.radius.crust / 200,
+          app.data.earth.radius.crust / 40,
+          app.data.earth.radius.crust / 40,
           app.data.earth.radius.crust * 2,
           6,
           32,
