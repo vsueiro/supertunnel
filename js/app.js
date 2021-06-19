@@ -215,7 +215,7 @@ let app = {
         for ( let country of app.three.land.children ) {
 
           // Reset country highlight
-          country.material.color.setHex(0x808080); // there is also setHSV and setRGB
+          // country.material.color.setHex(0x808080); // there is also setHSV and setRGB
 
           let intersections = app.three.raycaster.intersectObject( country );
 
@@ -225,7 +225,7 @@ let app = {
             let intersection = intersections[ intersections.length - 1 ];
 
             // Highlight country
-            intersection.object.material.color.setHex(0xff8080); // there is also setHSV and setRGB
+            // intersection.object.material.color.setHex(0xff8080); // there is also setHSV and setRGB
 
             let country = intersection.object.name;
             let distance = intersection.distance;
@@ -406,14 +406,46 @@ let app = {
 
           // let material = new THREE.MeshNormalMaterial()
 
-          let material = new THREE.MeshBasicMaterial({
-            color: 0x404040,    // red (can also use a CSS color string here)
-            flatShading: true,
-          });
+          // Duplicates every face of the geometry
 
-          material.side = THREE.DoubleSide;
+          let faces = []
 
-          app.three.land.add( countries[ name ].mesh = new THREE.Mesh( geometry, material ) );
+          for ( let face of geometry.faces ) {
+
+            let newFace = face.clone();
+            newFace.materialIndex = 1;
+            faces.push( newFace );
+
+          }
+
+          for ( let face of faces ) {
+
+            geometry.faces.push( face );
+
+          }
+
+          let materials = [
+
+            new THREE.MeshBasicMaterial({
+              color: 0x0000FF,    // red (can also use a CSS color string here)
+              // flatShading: true,
+            }),
+            new THREE.MeshBasicMaterial({
+              color: 0x00FF00,    // red (can also use a CSS color string here)
+              // flatShading: true,
+            }),
+
+          ];
+
+          // let material = new THREE.MeshBasicMaterial({
+          //   color: 0x404040,    // red (can also use a CSS color string here)
+          //   flatShading: true,
+          // });
+
+          materials[0].side = THREE.DoubleSide;
+          materials[1].side = THREE.FrontSide;
+
+          app.three.land.add( countries[ name ].mesh = new THREE.Mesh( geometry, materials ) );
           countries[name].mesh.name = name;
         }
 
