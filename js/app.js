@@ -101,6 +101,7 @@ let app = {
     earth          : undefined, // group
     land           : undefined, // group
 
+    stars          : undefined,
     crust          : undefined,
     tunnel         : undefined,
     tunnelGeometry : undefined,
@@ -108,12 +109,6 @@ let app = {
     core           : {
       inner        : undefined,
       outer        : undefined
-    },
-
-    geometries     : {
-
-
-
     },
 
     resize : function() {
@@ -556,6 +551,83 @@ let app = {
 
       }
 
+      { // Stars (instances)
+
+        let material = new THREE.MeshBasicMaterial({
+          color: app.color( 'neutral-50' )
+        });
+
+        let geometry = new THREE.SphereGeometry(
+          app.data.earth.radius.crust * 0.005
+        );
+
+        let amount = 10000;
+        let innerRadius = app.data.earth.radius.crust * 6;
+        let outerRadius = app.data.earth.radius.crust * 12;
+
+        // Creates instance
+        app.three.stars = new THREE.InstancedMesh( geometry, material, amount );
+
+        let insideCircle = function( coordinates, radius ) {
+
+          let sum = 0;
+
+          sum += Math.pow( coordinates.x, 2 );
+          sum += Math.pow( coordinates.y, 2 );
+          sum += Math.pow( coordinates.z, 2 );
+
+          let boolean = sum < Math.pow( radius, 2 );
+
+          return boolean;
+
+        }
+
+        let randomPosition = function( max ) {
+
+          let value = ( Math.random() * max * 2 ) - max;
+
+          return parseInt( value );
+
+        }
+
+        let getCoordinates = function() {
+
+          let coordinates = {
+            x : randomPosition( outerRadius ),
+            y : randomPosition( outerRadius ),
+            z : randomPosition( outerRadius ),
+          }
+
+          if ( insideCircle( coordinates, outerRadius ) && !insideCircle( coordinates, innerRadius ) ) {
+
+            return coordinates
+
+          } else {
+
+            return getCoordinates()
+
+          }
+
+        }
+
+        for ( let i = 0; i < amount; i++ ) {
+
+          let matrix = new THREE.Matrix4();
+
+          let coordinates = getCoordinates();
+
+          matrix.makeTranslation(
+            coordinates.x,
+            coordinates.y,
+            coordinates.z,
+          )
+
+          app.three.stars.setMatrixAt( i, matrix );
+
+        }
+
+      }
+
       // Begins renderer with transparent background
       app.three.renderer = new THREE.WebGLRenderer({
         canvas : app.elements.canvas,
@@ -626,7 +698,9 @@ let app = {
 
       // Creates scene
       app.three.scene = new THREE.Scene();
+      app.three.scene.add( app.three.stars );
       app.three.scene.add( app.three.earth );
+
 
       // Animate 3D elements
       requestAnimationFrame( app.three.render );
