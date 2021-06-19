@@ -45,5 +45,11 @@ body {
 }
 
 .label {
-  color: #fff;
+  color: white;
+}
+
+.label-origin {
+  width: 48px;
+  height: 48px;
+  border: 2px solid white;
 }

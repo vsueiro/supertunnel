@@ -568,6 +568,18 @@ let app = {
 
       }
 
+      { // Origin label
+
+        app.three.labels.origin.element = document.createElement( 'div' );
+  			app.three.labels.origin.element.className = 'label label-origin';
+  			app.three.labels.origin.element.textContent = '';
+
+  			app.three.labels.origin.object = new THREE.CSS2DObject( app.three.labels.origin.element );
+  			app.three.labels.origin.object.position.set( 0, 0, 0 );
+  			app.three.tunnel.add( app.three.labels.origin.object );
+
+      }
+
       // Creates 2D renderer (to position HTML elements on top of 3D scene)
       app.three.renderer2D = new THREE.CSS2DRenderer();
 			app.three.renderer2D.setSize( window.innerWidth, window.innerHeight );
