@@ -558,22 +558,37 @@ let app = {
         });
 
         let geometry = new THREE.SphereGeometry(
-          app.data.earth.radius.crust * 0.2
+          app.data.earth.radius.crust * 0.005
         );
 
-        app.three.stars = new THREE.InstancedMesh( geometry, material, 10 );
+        let amount = 10000;
+
+        // Creates instance
+        app.three.stars = new THREE.InstancedMesh( geometry, material, amount );
 
         let randomPosition = function() {
 
           let seed = Math.random();
-          let max  =  app.data.earth.radius.crust * 6;
-          let value = ( seed * max ) - ( max / 2 );
+          let max  =  app.data.earth.radius.crust;
+          let value = ( seed * max * 2 ) - ( max );
 
-          return value;
+          if ( false /* is located within mininum range */ ) {
+
+            return randomPosition();
+
+          } else {
+
+            if ( value > 3000 || value < -3000 ) {
+              console.log( value )
+            }
+
+            return value;
+
+          }
 
         }
 
-        for ( let i = 0; i < 10; i++ ) {
+        for ( let i = 0; i < amount; i++ ) {
 
           let matrix = new THREE.Matrix4();
 
