@@ -256,7 +256,7 @@ let app = {
               app.three.tunnel.scale.set( 1, reduction, 1 );
 
               // Highlights country
-              intersection.object.material[0].color.set( app.color( 'accent-75' ) );
+              intersection.object.material[0].color.set( app.color( 'accent-50' ) );
               intersection.object.material[1].color.set( app.color( 'accent-100' ) );
 
             }
