@@ -1,5 +1,7 @@
 let app = {
 
+  element : document.querySelector( '.app' ),
+
   elements : {
 
     background    : document.querySelector( '.background' ),
@@ -614,13 +616,15 @@ let app = {
       app.data.user.latitude = position.coords.latitude;
       app.data.user.longitude = position.coords.longitude;
 
-      alert( 'Found you :)' );
+      app.element.dataset.statusGeolocation = 'located';
 
       console.log( position.coords.latitude, position.coords.longitude );
 
     },
 
     error : function() {
+
+      app.element.dataset.statusGeolocation = 'unlocated';
 
       let prompt = window.prompt(
 
@@ -638,6 +642,8 @@ let app = {
     },
 
     find : function() {
+
+      app.element.dataset.statusGeolocation = 'locating';
 
       if ( navigator.geolocation ) {
 
