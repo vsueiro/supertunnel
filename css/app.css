@@ -1,12 +1,3 @@
-:root {
-
-  --dark:      #000000;
-  --light:     #FFFFFF;
-  --accent:    #FF0000;
-  --success:   #0000FF;
-
-}
-
 * {
   margin: 0;
   padding: 0;
@@ -15,7 +6,9 @@
 html,
 body {
   height: 100%;
-  background: var(--dark);
+  background: black;
+  font-family: sans-serif;
+  color: white;
   overflow: hidden;
 }
 
@@ -53,12 +46,8 @@ body {
   pointer-events: none;
 }
 
-.label {
-  color: white;
-}
-
 .label-origin {
   width: 48px;
   height: 48px;
-  border: 2px solid var(--white);
+  border: 1px solid;
 }

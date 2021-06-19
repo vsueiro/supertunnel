@@ -225,8 +225,8 @@ let app = {
         for ( let country of app.three.land.children ) {
 
           // Reset country highlight
-          country.material[0].color.set( '#404040' );
-          country.material[1].color.set( '#808080' ); // there is also setHSV and setRGB
+          country.material[0].color.set( app.color( 'neutral-50' ) );
+          country.material[1].color.set( app.color( 'neutral-25' ) ); // there is also setHSV and setRGB
 
           let intersections = app.three.raycaster.intersectObject( country );
 
@@ -256,8 +256,8 @@ let app = {
               app.three.tunnel.scale.set( 1, reduction, 1 );
 
               // Highlights country
-              intersection.object.material[0].color.set( '#ff8080' );
-              intersection.object.material[1].color.set( '#ff8080' );
+              intersection.object.material[0].color.set( app.color( 'accent-75' ) );
+              intersection.object.material[1].color.set( app.color( 'accent-100' ) );
 
             }
 
@@ -438,10 +438,10 @@ let app = {
           let materials = [
 
             // Internal-facing color
-            new THREE.MeshBasicMaterial( { color: '#404040' } ),
+            new THREE.MeshBasicMaterial( { color: app.color( 'neutral-50' ) } ),
 
             // External-facing color
-            new THREE.MeshBasicMaterial( { color: '#808080' } ),
+            new THREE.MeshBasicMaterial( { color: app.color( 'neutral-25' ) } ),
 
           ];
 
@@ -481,9 +481,9 @@ let app = {
       { // Crust
 
         let material = new THREE.MeshBasicMaterial({
-          color: 0xFFFFFF,
+          color: app.color( 'neutral-25' ),
           wireframe: true,
-          opacity: 0.2,
+          opacity: 0.25,
           transparent: true
         });
         material.side = THREE.DoubleSide;
@@ -504,9 +504,9 @@ let app = {
       { // Tunnel
 
         let material = new THREE.MeshBasicMaterial({
-          color: app.color( 'accent' ),
+          color: app.color( 'accent-100' ),
           wireframe: true,
-          opacity: .8,
+          opacity: 1,
           transparent: true
         });
 

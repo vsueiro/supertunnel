@@ -2,13 +2,25 @@
 
 :root {
 
-  --dark:      #3D283A;
-  --light:     #FADFD4;
-  --accent:    #E2363F;
-  --success:   #36E2DE;
+  --neutral-100: #FADFD4;
+  --neutral-75:  #6C5660;
+  --neutral-50:  #9A8387;
+  --neutral-25:  #CAB1AD;
+  --neutral-0:   #3D283A;
+
+  --accent-100:  #E2363F;
+  --accent-75:   #B9323E;
+  --accent-50:   #8F2F3C;
+  --accent-25:   #662B3B;
+
+  --success-100: #36E2DE;
+  --success-75:  #38B3B5;
+  --success-50:  #39858C;
+  --success-25:  #3B5663;
 
 }
 
 body {
-  background: var(--dark);
+  background: var(--neutral-0);
+  color: var(--neutral-100);
 }
