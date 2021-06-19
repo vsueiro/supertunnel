@@ -566,23 +566,46 @@ let app = {
         // Creates instance
         app.three.stars = new THREE.InstancedMesh( geometry, material, amount );
 
+        let insideCircle = function( coordinates, radius ) {
+
+          let sum = 0;
+
+          sum += Math.pow( coordinates.x, 2 );
+          sum += Math.pow( coordinates.y, 2 );
+          sum += Math.pow( coordinates.z, 2 );
+
+          let boolean = sum < Math.pow( radius, 2 );
+
+          console.log( boolean );
+          return boolean;
+
+        }
+
         let randomPosition = function() {
 
           let seed = Math.random();
           let max  =  app.data.earth.radius.crust;
           let value = ( seed * max * 2 ) - ( max );
 
-          if ( false /* is located within mininum range */ ) {
+          return parseInt( value );
 
-            return randomPosition();
+        }
+
+        let getCoordinates = function() {
+
+          let coordinates = {
+            x : randomPosition(),
+            y : randomPosition(),
+            z : randomPosition(),
+          }
+
+          if ( insideCircle( coordinates, app.data.earth.radius.crust ) ) {
+
+            return coordinates
 
           } else {
 
-            if ( value > 3000 || value < -3000 ) {
-              console.log( value )
-            }
-
-            return value;
+            return getCoordinates()
 
           }
 
@@ -592,11 +615,12 @@ let app = {
 
           let matrix = new THREE.Matrix4();
 
+          let coordinates = getCoordinates();
 
           matrix.makeTranslation(
-            randomPosition(),
-            randomPosition(),
-            randomPosition(),
+            coordinates.x,
+            coordinates.y,
+            coordinates.z,
           )
 
           app.three.stars.setMatrixAt( i, matrix );
