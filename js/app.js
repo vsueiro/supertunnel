@@ -563,14 +563,25 @@ let app = {
 
         app.three.stars = new THREE.InstancedMesh( geometry, material, 10 );
 
+        let randomPosition = function() {
+
+          let seed = Math.random();
+          let max  =  app.data.earth.radius.crust * 6;
+          let value = ( seed * max ) - ( max / 2 );
+
+          return value;
+
+        }
+
         for ( let i = 0; i < 10; i++ ) {
 
           let matrix = new THREE.Matrix4();
 
+
           matrix.makeTranslation(
-            Math.random() * 4000 - 2000,
-            Math.random() * 4000 - 2000,
-            Math.random() * 4000 - 2000,
+            randomPosition(),
+            randomPosition(),
+            randomPosition(),
           )
 
           app.three.stars.setMatrixAt( i, matrix );
