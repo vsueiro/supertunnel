@@ -215,7 +215,8 @@ let app = {
         for ( let country of app.three.land.children ) {
 
           // Reset country highlight
-          // country.material.color.setHex(0x808080); // there is also setHSV and setRGB
+          country.material[0].color.setHex(0x0000ff); // there is also setHSV and setRGB
+          country.material[1].color.setHex(0x00ff00); // there is also setHSV and setRGB
 
           let intersections = app.three.raycaster.intersectObject( country );
 
@@ -225,7 +226,8 @@ let app = {
             let intersection = intersections[ intersections.length - 1 ];
 
             // Highlight country
-            // intersection.object.material.color.setHex(0xff8080); // there is also setHSV and setRGB
+            intersection.object.material[0].color.setHex(0xff8080); // there is also setHSV and setRGB
+            intersection.object.material[1].color.setHex(0xff8080); // there is also setHSV and setRGB
 
             let country = intersection.object.name;
             let distance = intersection.distance;
