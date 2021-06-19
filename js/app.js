@@ -324,8 +324,6 @@ let app = {
       app.three.mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
 	    app.three.mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
 
-      console.log( app.data.outgoing );
-
     },
 
     create : {
@@ -630,8 +628,6 @@ let app = {
       app.data.user.longitude = position.coords.longitude;
 
       app.element.dataset.statusGeolocation = 'located';
-
-      console.log( position.coords.latitude, position.coords.longitude );
 
     },
 
