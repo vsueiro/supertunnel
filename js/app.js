@@ -91,7 +91,6 @@ let app = {
       }
     },
 
-
     earth          : undefined, // group
     land           : undefined, // group
 
@@ -111,7 +110,7 @@ let app = {
       // If canvas dimensions are different from window dimensios
       if ( c.width !== c.clientWidth || c.height !== c.clientHeight ) {
 
-        // Resize
+        // Resizes
         app.three.renderer.setSize(
           c.clientWidth,
           c.clientHeight,
@@ -143,23 +142,25 @@ let app = {
       // Values to be updated based on the inclination sensor
       // let northsouth = 0; // +90 to -90
       // let eastwest   = 0; // +90 to -90
-      // temp
+
+      // Enables mouse control over tunnel direction
       let northsouth = app.three.mouse.y * 90; // +90 to -90
       let eastwest   = app.three.mouse.x * 90; // +90 to -90
 
-
+      // If there is data coming from the Arduino sensor
       if ( app.data.incoming.json ) {
+
+        // Updates variables
         northsouth = app.data.incoming.json.x;
         eastwest   = - app.data.incoming.json.z;
       }
 
-      // Move tunnel according to shovel inclination
+      // Moves tunnel according to shovel inclination
       app.three.tunnel.rotation.x = THREE.Math.degToRad( 90 + northsouth );
       app.three.chord.rotation.x = THREE.Math.degToRad( 90 + northsouth );
 
       app.three.tunnel.rotation.z = THREE.Math.degToRad( eastwest );
       app.three.chord.rotation.z = THREE.Math.degToRad( eastwest );
-
 
       // Rotates crust so default location is at latitude and longitude 0
       app.three.crust.rotation.y = THREE.Math.degToRad( -90 )
@@ -186,8 +187,6 @@ let app = {
       // Rotates Earth (group) to counter-act previous rotation so OrbitControls work better
       app.three.earth.rotation.x = THREE.Math.degToRad( - app.data.user.latitude )
 
-
-
       // Gets position & direction of chord (center of tunnel)
 
       let chordPosition = app.three.chord.geometry.getAttribute( 'position' );
@@ -204,7 +203,6 @@ let app = {
 
       // Makes raycaster match the position and angle of the tunnel
       app.three.raycaster.set( worldOrigin, chordDirection );
-
 
       // Checks collision of chord (tunnel center) with every country
       if ( app.three.land ) {
@@ -255,7 +253,6 @@ let app = {
           }
 
         }
-
 
         if ( !found ) {
 
@@ -406,10 +403,7 @@ let app = {
 
           let geometry = new app.three.create.map3DGeometry( countries[ name ] );
 
-          // let material = new THREE.MeshNormalMaterial()
-
           // Duplicates every face of the geometry
-
           let faces = []
 
           for ( let face of geometry.faces ) {
@@ -420,34 +414,31 @@ let app = {
 
           }
 
+          // Adds the newly cloned face to array of original faces
           for ( let face of faces ) {
 
             geometry.faces.push( face );
 
           }
 
+          // Creates list of two materials
           let materials = [
 
-            new THREE.MeshBasicMaterial({
-              color: 0x0000FF,    // red (can also use a CSS color string here)
-              // flatShading: true,
-            }),
-            new THREE.MeshBasicMaterial({
-              color: 0x00FF00,    // red (can also use a CSS color string here)
-              // flatShading: true,
-            }),
+            // Internal-facing color
+            new THREE.MeshBasicMaterial( { color: 0x0000FF } ),
+
+            // External-facing color
+            new THREE.MeshBasicMaterial( { color: 0x00FF00 } ),
 
           ];
-
-          // let material = new THREE.MeshBasicMaterial({
-          //   color: 0x404040,    // red (can also use a CSS color string here)
-          //   flatShading: true,
-          // });
 
           materials[0].side = THREE.DoubleSide;
           materials[1].side = THREE.FrontSide;
 
+          // Group all countries within the `land` group
           app.three.land.add( countries[ name ].mesh = new THREE.Mesh( geometry, materials ) );
+
+          // Assigns country name to mesh (to be retrieved by raycaster collision)
           countries[name].mesh.name = name;
         }
 
@@ -459,8 +450,10 @@ let app = {
 
     initialize : function() {
 
-
+      // Initializes raycaster (a line used to test collisions)
       app.three.raycaster = new THREE.Raycaster();
+
+      // Initializes variable to house mouse position
       app.three.mouse     = new THREE.Vector2();
 
 
