@@ -1,3 +1,5 @@
+@import url( 'https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;1,700&display=swap' );
+
 /* palette */
 
 :root {
@@ -21,6 +23,7 @@
 }
 
 body {
+  font-family: 'Poppins';
   background: var(--neutral-0);
   color: var(--neutral-100);
 }
