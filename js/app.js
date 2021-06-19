@@ -102,6 +102,12 @@ let app = {
       outer        : undefined
     },
 
+    geometries     : {
+
+
+
+    },
+
     resize : function() {
 
       let c = app.elements.canvas;
@@ -211,8 +217,8 @@ let app = {
         for ( let country of app.three.land.children ) {
 
           // Reset country highlight
-          country.material[0].color.setHex(0x0000ff);
-          country.material[1].color.setHex(0x00ff00); // there is also setHSV and setRGB
+          country.material[0].color.set( '#404040' );
+          country.material[1].color.set( '#808080' ); // there is also setHSV and setRGB
 
           let intersections = app.three.raycaster.intersectObject( country );
 
@@ -220,10 +226,6 @@ let app = {
           if ( intersections.length > 0 ) {
 
             let intersection = intersections[ intersections.length - 1 ];
-
-            // Highlights country
-            intersection.object.material[0].color.setHex(0xff8080);
-            intersection.object.material[1].color.setHex(0xff8080);
 
             let country = intersection.object.name;
             let distance = intersection.distance;
@@ -244,6 +246,10 @@ let app = {
               // Shortens tunnel length to match distance until country
               let reduction = distance / ( app.data.earth.radius.crust * 2 );
               app.three.tunnel.scale.set( 1, reduction, 1 );
+
+              // Highlights country
+              intersection.object.material[0].color.set( '#ff8080' );
+              intersection.object.material[1].color.set( '#ff8080' );
 
             }
 
@@ -424,14 +430,14 @@ let app = {
           let materials = [
 
             // Internal-facing color
-            new THREE.MeshBasicMaterial( { color: 0x0000FF } ),
+            new THREE.MeshBasicMaterial( { color: '#404040' } ),
 
             // External-facing color
-            new THREE.MeshBasicMaterial( { color: 0x00FF00 } ),
+            new THREE.MeshBasicMaterial( { color: '#808080' } ),
 
           ];
 
-          materials[0].side = THREE.DoubleSide;
+          materials[0].side = THREE.BackSide;
           materials[1].side = THREE.FrontSide;
 
           // Groups all countries within the `land` group
