@@ -91,7 +91,6 @@ let app = {
       }
     },
 
-
     earth          : undefined, // group
     land           : undefined, // group
 
@@ -111,7 +110,7 @@ let app = {
       // If canvas dimensions are different from window dimensios
       if ( c.width !== c.clientWidth || c.height !== c.clientHeight ) {
 
-        // Resize
+        // Resizes
         app.three.renderer.setSize(
           c.clientWidth,
           c.clientHeight,
@@ -143,23 +142,25 @@ let app = {
       // Values to be updated based on the inclination sensor
       // let northsouth = 0; // +90 to -90
       // let eastwest   = 0; // +90 to -90
-      // temp
+
+      // Enables mouse control over tunnel direction
       let northsouth = app.three.mouse.y * 90; // +90 to -90
       let eastwest   = app.three.mouse.x * 90; // +90 to -90
 
-
+      // If there is data coming from the Arduino sensor
       if ( app.data.incoming.json ) {
+
+        // Updates variables
         northsouth = app.data.incoming.json.x;
         eastwest   = - app.data.incoming.json.z;
       }
 
-      // Move tunnel according to shovel inclination
+      // Moves tunnel according to shovel inclination
       app.three.tunnel.rotation.x = THREE.Math.degToRad( 90 + northsouth );
       app.three.chord.rotation.x = THREE.Math.degToRad( 90 + northsouth );
 
       app.three.tunnel.rotation.z = THREE.Math.degToRad( eastwest );
       app.three.chord.rotation.z = THREE.Math.degToRad( eastwest );
-
 
       // Rotates crust so default location is at latitude and longitude 0
       app.three.crust.rotation.y = THREE.Math.degToRad( -90 )
@@ -186,10 +187,7 @@ let app = {
       // Rotates Earth (group) to counter-act previous rotation so OrbitControls work better
       app.three.earth.rotation.x = THREE.Math.degToRad( - app.data.user.latitude )
 
-
-
       // Gets position & direction of chord (center of tunnel)
-
       let chordPosition = app.three.chord.geometry.getAttribute( 'position' );
 
       let vertexOrigin = new THREE.Vector3();
@@ -205,17 +203,17 @@ let app = {
       // Makes raycaster match the position and angle of the tunnel
       app.three.raycaster.set( worldOrigin, chordDirection );
 
-
       // Checks collision of chord (tunnel center) with every country
       if ( app.three.land ) {
 
         let found = false;
 
-        // calculate objects intersecting the picking ray
+        // Calculates objects intersecting the picking ray
         for ( let country of app.three.land.children ) {
 
           // Reset country highlight
-          country.material.color.setHex(0x808080); // there is also setHSV and setRGB
+          country.material[0].color.setHex(0x0000ff);
+          country.material[1].color.setHex(0x00ff00); // there is also setHSV and setRGB
 
           let intersections = app.three.raycaster.intersectObject( country );
 
@@ -224,27 +222,27 @@ let app = {
 
             let intersection = intersections[ intersections.length - 1 ];
 
-            // Highlight country
-            intersection.object.material.color.setHex(0xff8080); // there is also setHSV and setRGB
+            // Highlights country
+            intersection.object.material[0].color.setHex(0xff8080);
+            intersection.object.material[1].color.setHex(0xff8080);
 
             let country = intersection.object.name;
             let distance = intersection.distance;
             let exit = intersection.point;
 
-            if ( distance > 1000 ) { // Tunnels need to be at least 1000 km long
-
-              // console.log( 'A tunnel in this direction would be ' + parseInt( distance ) + 'km long and lead you to ' + country );
+            // Requires tunnel to be at least 1000 km long
+            if ( distance > 1000 ) {
 
               app.three.labels.country.element.textContent = country;
               app.three.labels.distance.element.textContent = (parseInt( distance / 100 ) * 100).toLocaleString('en-US') + ' km'
               found = true;
 
-              // Store data to be sent to device
+              // Stores data to be sent to device
               app.data.outgoing.country = country;
               app.data.outgoing.destination = 'land';
               app.data.outgoing.distance = parseInt( distance );
 
-              // Shorten tunnel length to match distance until country
+              // Shortens tunnel length to match distance until country
               let reduction = distance / ( app.data.earth.radius.crust * 2 );
               app.three.tunnel.scale.set( 1, reduction, 1 );
 
@@ -254,25 +252,25 @@ let app = {
 
         }
 
-
         if ( !found ) {
 
-          // Clear country label
+          // Clears country label
           app.three.labels.country.element.textContent = '';
 
-          // Remove country from data to be sent to device
+          // Removes country from data to be sent to device
           app.data.outgoing.country = '';
 
-          // Shorten tunnel length to match distance until other side of Earth
+          // Shortens tunnel length to match distance until other side of Earth
           let intersections = app.three.raycaster.intersectObject( app.three.crust );
 
-          // Get farthest intersections (ignore intersection at user location)
+          // Gets farthest intersections (ignore intersection at user location)
           if ( intersections.length > 0 ) {
 
             let intersection = intersections[ intersections.length - 1 ];
             let distance = intersection.distance;
 
-            if ( distance > 1000 ) { // Tunnels need to be at least 1000 km long
+            // Requires tunnel to be at least 1000 km long
+            if ( distance > 1000 ) {
 
               let reduction = distance / ( app.data.earth.radius.crust * 2 );
               app.three.tunnel.scale.set( 1, reduction, 1 );
@@ -284,7 +282,9 @@ let app = {
 
           } else {
 
-            // Tunnel is not inside Earth
+            // Means tunnel is not inside Earth
+
+            // Shrinks tunnel completely (so it disappears)
             app.three.tunnel.scale.set( 0, 0, 0 );
 
             app.data.outgoing.destination = 'air';
@@ -308,14 +308,14 @@ let app = {
         app.three.camera
       );
 
-      // Recursion: this function calls itself to draw frames of 3D animation
+      // Enables recursion (this function calls itself to draw frames of 3D animation)
       requestAnimationFrame( app.three.render );
 
     },
 
     update : function() {
 
-      // Placeholder for handling data coming from inclination sensor
+      // Handles data coming from inclination sensor
       console.log( app.data.incoming.json )
 
     },
@@ -338,23 +338,24 @@ let app = {
         // data.vertices = [lat, lon, ...]
         // data.polygons = [[poly indices, hole i-s, ...], ...]
         // data.triangles = [tri i-s, ...]
+
         let i, uvs = [];
         for (i = 0; i < data.vertices.length; i += 2) {
           let lon = data.vertices[i];
           let lat = data.vertices[i + 1];
 
-          // colatitude
+          // Colatitude
           let phi = +(90 - lat) * 0.01745329252;
 
-          // azimuthal angle
+          // Azimuthal angle
           let the = +(180 - lon) * 0.01745329252;
 
-          // translate into XYZ coordinates
+          // Translates into XYZ coordinates
           let wx = Math.sin (the) * Math.sin (phi) * -1;
           let wz = Math.cos (the) * Math.sin (phi);
           let wy = Math.cos (phi);
 
-          // equirectangular projection
+          // Equirectangular projection
           let wu = 0.25 + lon / 360.0;
           let wv = 0.5 + lat / 180.0;
 
@@ -404,16 +405,42 @@ let app = {
 
           let geometry = new app.three.create.map3DGeometry( countries[ name ] );
 
-          // let material = new THREE.MeshNormalMaterial()
+          // Duplicates every face of the geometry
+          let faces = []
 
-          let material = new THREE.MeshBasicMaterial({
-            color: 0x404040,    // red (can also use a CSS color string here)
-            flatShading: true,
-          });
+          for ( let face of geometry.faces ) {
 
-          material.side = THREE.DoubleSide;
+            let newFace = face.clone();
+            newFace.materialIndex = 1;
+            faces.push( newFace );
 
-          app.three.land.add( countries[ name ].mesh = new THREE.Mesh( geometry, material ) );
+          }
+
+          // Adds the newly cloned face to array of original faces
+          for ( let face of faces ) {
+
+            geometry.faces.push( face );
+
+          }
+
+          // Creates list of two materials
+          let materials = [
+
+            // Internal-facing color
+            new THREE.MeshBasicMaterial( { color: 0x0000FF } ),
+
+            // External-facing color
+            new THREE.MeshBasicMaterial( { color: 0x00FF00 } ),
+
+          ];
+
+          materials[0].side = THREE.DoubleSide;
+          materials[1].side = THREE.FrontSide;
+
+          // Groups all countries within the `land` group
+          app.three.land.add( countries[ name ].mesh = new THREE.Mesh( geometry, materials ) );
+
+          // Assigns country name to mesh (to be retrieved by raycaster collision)
           countries[name].mesh.name = name;
         }
 
@@ -425,10 +452,11 @@ let app = {
 
     initialize : function() {
 
-
+      // Initializes raycaster (a line used to test collisions)
       app.three.raycaster = new THREE.Raycaster();
-      app.three.mouse     = new THREE.Vector2();
 
+      // Initializes variable to house mouse position
+      app.three.mouse     = new THREE.Vector2();
 
       { // Countries
 
@@ -666,7 +694,7 @@ let app = {
 
     split : function() {
 
-      // Split concatenated string by newline character
+      // Splits concatenated string by newline character
       let parts = app.data.incoming.stream.split( "\n" );
 
       // If there is at least one newline character
@@ -681,7 +709,7 @@ let app = {
           // Parses and store most recent JSON received
           app.data.incoming.json = JSON.parse( string );
 
-          // Call function to handle the newly received data
+          // Calls function to handle the newly received data
           app.three.update();
 
         }
@@ -689,7 +717,7 @@ let app = {
         // Resets incoming stream (concatenated strings) for next JSON package
         app.data.incoming.stream = parts[ 1 ];
 
-        // Recursion to account for multiple newline characters in string
+        // Enabels recursion to account for multiple newline characters in string
         app.serial.split();
 
       }
@@ -703,7 +731,7 @@ let app = {
         // Begins asynchronous call
         (async() => {
 
-          // Request serial ports using Web Serial API
+          // Requests serial ports using Web Serial API
           const port = await navigator.serial.requestPort();
 
           // Sets rate to 9600 bits per second (must match Arduino’s)
@@ -716,20 +744,20 @@ let app = {
           const readableStreamClosed = port.readable.pipeTo( textDecoder.writable );
           const reader = textDecoder.readable.getReader();
 
-          // Listen to data coming from the serial device
+          // Listens to data coming from the serial device
           while ( true ) {
 
             const { value, done } = await reader.read();
 
             if ( done ) {
 
-              // Allow the serial port to be closed later
+              // Allows the serial port to be closed later
               reader.releaseLock();
               break;
 
             }
 
-            // Put incoming strings together until it finds a new line
+            // Puts incoming strings together until it finds a new line
             app.data.incoming.stream += value;
             app.serial.split();
 
@@ -748,25 +776,25 @@ let app = {
 
     initialize : function() {
 
-      // Connect to serial port when button is clicked
+      // Connects to serial port when button is clicked
       app.elements.connectButton.addEventListener( 'click', app.serial.connect );
 
-      // Find user’s location when button is clicked
+      // Finds user’s location when button is clicked
       app.elements.findButton.addEventListener( 'click', app.geolocation.find );
 
-      // Calculate mouse position in normalized device coordinates (-1 to +1)
+      // Calculates mouse position in normalized device coordinates (-1 to +1)
       window.addEventListener( 'mousemove', app.three.normalizeMouse, false );
 
-      // Calculate clicked country
+      // Calculates clicked country
       window.addEventListener( 'click', function(e) {
 
         /*
-        // update the picking ray with the camera and mouse position
+        // Updates ray with the camera and mouse position
         app.three.raycaster.setFromCamera( app.three.mouse, app.three.camera );
 
         if ( app.three.land ) {
 
-          // calculate objects intersecting the picking ray
+          // Calculates objects intersecting the picking ray
           for ( let country of app.three.land.children ) {
 
             let intersects = app.three.raycaster.intersectObject( country );
@@ -793,10 +821,9 @@ let app = {
     app.three.initialize()
     app.events.initialize()
 
-
   }
 
 }
 
-// Start everything
+// Starts everything
 app.initialize()
