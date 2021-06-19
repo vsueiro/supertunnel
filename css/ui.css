@@ -20,6 +20,8 @@
   --success-50:  #39858C;
   --success-25:  #3B5663;
 
+  --basis:          10px;
+
 }
 
 body {
@@ -27,4 +29,8 @@ body {
   font-weight: 700;
   background: var(--neutral-0);
   color: var(--neutral-100);
+}
+
+.label-origin {
+  border: calc( var(--basis) / 5 ) solid;
 }
