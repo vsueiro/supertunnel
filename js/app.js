@@ -238,9 +238,14 @@ let app = {
             // Requires tunnel to be at least 1000 km long
             if ( distance > 1000 ) {
 
-              app.three.labels.country.element.textContent = country;
-              app.three.labels.distance.element.textContent = (parseInt( distance / 100 ) * 100).toLocaleString('en-US') + ' km'
+              // Sets flag to true
               found = true;
+
+              // Sets country label
+              app.three.labels.country.element.textContent = country;
+
+              // Sets distance label
+              app.three.labels.distance.element.textContent = (parseInt( distance / 100 ) * 100).toLocaleString('en-US') + ' km'
 
               // Stores data to be sent to device
               app.data.outgoing.country = country;
@@ -284,6 +289,14 @@ let app = {
               let reduction = distance / ( app.data.earth.radius.crust * 2 );
               app.three.tunnel.scale.set( 1, reduction, 1 );
 
+              // Sets distance label
+              app.three.labels.distance.element.textContent = (parseInt( distance / 100 ) * 100).toLocaleString('en-US') + ' km'
+
+            } else {
+
+              // Clears distance label
+              app.three.labels.distance.element.textContent = ''
+
             }
 
             app.data.outgoing.destination = 'water';
@@ -295,6 +308,9 @@ let app = {
 
             // Shrinks tunnel completely (so it disappears)
             app.three.tunnel.scale.set( 0, 0, 0 );
+
+            // Clears distance label
+            app.three.labels.distance.element.textContent = ''
 
             app.data.outgoing.destination = 'air';
             app.data.outgoing.distance = -1;
