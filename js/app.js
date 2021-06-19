@@ -13,6 +13,7 @@ let app = {
 
   color : function( name ) {
 
+    // Gets color from CSS variable
     let style = getComputedStyle( document.documentElement );
     let value = style.getPropertyValue( '--' + name ).trim();
     return value
