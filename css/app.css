@@ -1,3 +1,12 @@
+:root {
+
+  --dark:      #000000;
+  --light:     #FFFFFF;
+  --accent:    #FF0000;
+  --success:   #0000FF;
+
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -6,7 +15,7 @@
 html,
 body {
   height: 100%;
-  background: black;
+  background: var(--dark);
   overflow: hidden;
 }
 
@@ -51,5 +60,5 @@ body {
 .label-origin {
   width: 48px;
   height: 48px;
-  border: 2px solid white;
+  border: 2px solid var(--white);
 }

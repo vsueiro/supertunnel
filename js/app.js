@@ -11,6 +11,14 @@ let app = {
 
   },
 
+  color : function( name ) {
+
+    let style = getComputedStyle( document.documentElement );
+    let value = style.getPropertyValue( '--' + name ).trim();
+    return value
+
+  },
+
   validates : {
 
     json : function ( string ) {
@@ -496,7 +504,7 @@ let app = {
       { // Tunnel
 
         let material = new THREE.MeshBasicMaterial({
-          color: 0xFF0000,
+          color: app.color( 'accent' ),
           wireframe: true,
           opacity: .8,
           transparent: true
@@ -533,6 +541,7 @@ let app = {
 
         app.three.chord = new THREE.Line( geometry, material );
         app.three.chord.position.z = app.data.earth.radius.crust;
+        app.three.chord.visible = false;
 
       }
 

@@ -1,0 +1,14 @@
+/* palette */
+
+:root {
+
+  --dark:      #3D283A;
+  --light:     #FADFD4;
+  --accent:    #E2363F;
+  --success:   #36E2DE;
+
+}
+
+body {
+  background: var(--dark);
+}
