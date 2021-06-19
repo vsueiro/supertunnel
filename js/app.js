@@ -554,7 +554,7 @@ let app = {
       { // Stars (instances)
 
         let material = new THREE.MeshBasicMaterial({
-          color: app.color( 'neutral-100' )
+          color: app.color( 'neutral-50' )
         });
 
         let geometry = new THREE.SphereGeometry(
@@ -562,6 +562,8 @@ let app = {
         );
 
         let amount = 10000;
+        let innerRadius = app.data.earth.radius.crust * 6;
+        let outerRadius = app.data.earth.radius.crust * 12;
 
         // Creates instance
         app.three.stars = new THREE.InstancedMesh( geometry, material, amount );
@@ -576,16 +578,13 @@ let app = {
 
           let boolean = sum < Math.pow( radius, 2 );
 
-          console.log( boolean );
           return boolean;
 
         }
 
-        let randomPosition = function() {
+        let randomPosition = function( max ) {
 
-          let seed = Math.random();
-          let max  =  app.data.earth.radius.crust;
-          let value = ( seed * max * 2 ) - ( max );
+          let value = ( Math.random() * max * 2 ) - max;
 
           return parseInt( value );
 
@@ -594,12 +593,12 @@ let app = {
         let getCoordinates = function() {
 
           let coordinates = {
-            x : randomPosition(),
-            y : randomPosition(),
-            z : randomPosition(),
+            x : randomPosition( outerRadius ),
+            y : randomPosition( outerRadius ),
+            z : randomPosition( outerRadius ),
           }
 
-          if ( insideCircle( coordinates, app.data.earth.radius.crust ) ) {
+          if ( insideCircle( coordinates, outerRadius ) && !insideCircle( coordinates, innerRadius ) ) {
 
             return coordinates
 
@@ -626,7 +625,6 @@ let app = {
           app.three.stars.setMatrixAt( i, matrix );
 
         }
-
 
       }
 
