@@ -101,6 +101,7 @@ let app = {
     earth          : undefined, // group
     land           : undefined, // group
 
+    stars          : undefined,
     crust          : undefined,
     tunnel         : undefined,
     tunnelGeometry : undefined,
@@ -108,12 +109,6 @@ let app = {
     core           : {
       inner        : undefined,
       outer        : undefined
-    },
-
-    geometries     : {
-
-
-
     },
 
     resize : function() {
@@ -556,6 +551,35 @@ let app = {
 
       }
 
+      { // Stars (instances)
+
+        let material = new THREE.MeshBasicMaterial({
+          color: app.color( 'neutral-100' )
+        });
+
+        let geometry = new THREE.SphereGeometry(
+          app.data.earth.radius.crust * 0.2
+        );
+
+        app.three.stars = new THREE.InstancedMesh( geometry, material, 10 );
+
+        for ( let i = 0; i < 10; i++ ) {
+
+          let matrix = new THREE.Matrix4();
+
+          matrix.makeTranslation(
+            Math.random() * 4000 - 2000,
+            Math.random() * 4000 - 2000,
+            Math.random() * 4000 - 2000,
+          )
+
+          app.three.stars.setMatrixAt( i, matrix );
+
+        }
+
+
+      }
+
       // Begins renderer with transparent background
       app.three.renderer = new THREE.WebGLRenderer({
         canvas : app.elements.canvas,
@@ -626,7 +650,9 @@ let app = {
 
       // Creates scene
       app.three.scene = new THREE.Scene();
+      app.three.scene.add( app.three.stars );
       app.three.scene.add( app.three.earth );
+
 
       // Animate 3D elements
       requestAnimationFrame( app.three.render );
