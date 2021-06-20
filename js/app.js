@@ -66,9 +66,9 @@ let app = {
       distance        : undefined, // in km
     },
 
-    user : {         // In decimal degrees
-      latitude  : -33.4489 , // south is negative
-      longitude : -70.6693 // west is negative
+    user : {                // In decimal degrees
+      latitude  : -33.4489, // south is negative
+      longitude : -70.6693  // west is negative
     },
 
     seconds : 0
