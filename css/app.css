@@ -45,9 +45,3 @@ body {
   top: 0;
   pointer-events: none;
 }
-
-.label-origin {
-  width: 48px;
-  height: 48px;
-  border: 1px solid;
-}

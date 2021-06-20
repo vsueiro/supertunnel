@@ -99,6 +99,12 @@ let app = {
         object     : undefined
       }
     },
+    markers        : {
+      origin       : {
+        element    : undefined,
+        object     : undefined
+      }
+    },
 
     earth          : undefined, // group
     land           : undefined, // group
@@ -213,22 +219,25 @@ let app = {
       // Makes raycaster match the position and angle of the tunnel
       app.three.raycaster.set( worldOrigin, chordDirection );
 
+
       // Checks collision of chord (tunnel center) with every country
       if ( app.three.land ) {
 
+        // Creates flag variable
         let found = false;
+        let foundOrigin = false;
 
         // Calculates objects intersecting the picking ray
         for ( let country of app.three.land.children ) {
 
           // Reset country highlight
           country.material[0].color.set( app.color( 'neutral-50' ) );
-          country.material[1].color.set( app.color( 'neutral-25' ) ); // there is also setHSV and setRGB
+          country.material[1].color.set( app.color( 'neutral-25' ) );
 
           let intersections = app.three.raycaster.intersectObject( country );
 
           // If ray instersects with anything
-          if ( intersections.length >= 1 ) {
+          if ( intersections.length > 0 ) {
 
             // Get farthest intersections (ignore intersection at user location)
             let intersection = intersections[ intersections.length - 1 ];
@@ -236,6 +245,16 @@ let app = {
             let country = intersection.object.name;
             let distance = intersection.distance;
             let exit = intersection.point;
+
+            // Checks intersection close to user location
+            if ( distance < 10 ) {
+
+              foundOrigin = true;
+
+              app.data.outgoing.origin = country;
+              app.three.labels.origin.element.textContent = app.data.outgoing.origin;
+
+            }
 
             // Requires tunnel to be at least 1000 km long
             if ( distance > 1000 ) {
@@ -261,10 +280,6 @@ let app = {
               // Highlights country
               intersection.object.material[0].color.set( app.color( 'accent-50' ) );
               intersection.object.material[1].color.set( app.color( 'accent-100' ) );
-
-            } else if ( distance < 100 ) {
-
-              app.data.outgoing.origin = country;
 
             }
 
@@ -322,6 +337,13 @@ let app = {
             app.data.outgoing.distance = -1;
 
           }
+
+        }
+
+        if ( !foundOrigin ) {
+
+          app.data.outgoing.origin = '';
+          app.three.labels.origin.element.textContent = app.data.outgoing.origin;
 
         }
 
@@ -703,13 +725,16 @@ let app = {
 
       { // Origin label
 
-        app.three.labels.origin.element = document.createElement( 'div' );
-  			app.three.labels.origin.element.className = 'label label-origin';
-  			app.three.labels.origin.element.textContent = '';
+        app.three.labels.origin.element = document.querySelector( '.label.label-origin' );
 
-  			app.three.labels.origin.object = new THREE.CSS2DObject( app.three.labels.origin.element );
-  			app.three.labels.origin.object.position.set( 0, 0, 0 );
-  			app.three.tunnel.add( app.three.labels.origin.object );
+        // Marker
+        app.three.markers.origin.element = document.createElement( 'div' );
+        app.three.markers.origin.element.className = 'marker marker-origin';
+        app.three.markers.origin.element.textContent = '';
+
+        app.three.markers.origin.object = new THREE.CSS2DObject( app.three.markers.origin.element );
+        app.three.markers.origin.object.position.set( 0, 0, 0 );
+        app.three.tunnel.add( app.three.markers.origin.object );
 
       }
 
@@ -911,12 +936,12 @@ let app = {
 
   initialize : function() {
 
-    app.three.initialize()
-    app.events.initialize()
+    app.three.initialize();
+    app.events.initialize();
 
   }
 
 }
 
 // Starts everything
-app.initialize()
+app.initialize();

@@ -31,6 +31,8 @@ body {
   color: var(--neutral-100);
 }
 
-.label-origin {
+.marker-origin {
+  width: 48px;
+  height: 48px;
   border: calc( var(--basis) / 5 ) solid;
 }
