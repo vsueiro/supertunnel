@@ -4,23 +4,28 @@
 
 :root {
 
-  --neutral-100: #FADFD4;
-  --neutral-75:  #CAB1AD;
-  --neutral-50:  #9A8387;
-  --neutral-25:  #6C5660;
-  --neutral-0:   #3D283A;
+  --neutral-100:         #FADFD4;
+  --neutral-75:          #CAB1AD;
+  --neutral-50:          #9A8387;
+  --neutral-25:          #6C5660;
+  --neutral-0:           #3D283A;
 
-  --accent-100:  #E2363F;
-  --accent-75:   #B9323E;
-  --accent-50:   #8F2F3C;
-  --accent-25:   #662B3B;
+  --accent-100:          #E2363F;
+  --accent-75:           #B9323E;
+  --accent-50:           #8F2F3C;
+  --accent-25:           #662B3B;
 
-  --success-100: #36E2DE;
-  --success-75:  #38B3B5;
-  --success-50:  #39858C;
-  --success-25:  #3B5663;
+  --success-100:         #36E2DE;
+  --success-75:          #38B3B5;
+  --success-50:          #39858C;
+  --success-25:          #3B5663;
 
-  --basis:          10px;
+  --neutral-100-rgb: 250,223,212;
+  --neutral-0-rgb:    61, 40, 58;
+  --accent-100-rgb:  226, 54, 64;
+  --success-100-rgb:  54,226,222;
+
+  --basis:                  10px;
 
 }
 
@@ -50,7 +55,7 @@ input[type=number] {
 button,
 input[type=number],
 input[type="submit"] {
-  font-family: 'Poppins';
+  font-family: 'Poppins', sans-serif;
   font-weight: 700;
   line-height: 150%;
   font-size: calc( var(--basis) * 1.6 );
@@ -58,6 +63,8 @@ input[type="submit"] {
   background: transparent;
   border: none;
   outline: none;
+  height: calc( var(--basis) * 4.8 );
+  white-space: nowrap;
 }
 
 a {
@@ -103,26 +110,6 @@ main p {
 
 footer p {
   font-size: calc( var(--basis) * 1.2 );
-}
-
-/* Form elements */
-
-form p,
-label span {
-  font-size: calc( var(--basis) * 1.2 );
-  letter-spacing: calc( var(--basis) * .3 );
-  text-transform: uppercase;
-  font-weight: 700;
-}
-
-button,
-input[type="number"] {
-  font-size: calc( var(--basis) * 1.6 );
-  letter-spacing: calc( var(--basis) * .4 );
-  text-transform: uppercase;
-  font-weight: 700;
-  cursor: pointer;
-  color: var(--accent-100);
 }
 
 /* Header, main & footer */
@@ -179,11 +166,84 @@ main {
 }
 
 /* Boxes */
+
 main section {
   position: relative;
+  background: rgba( var(--neutral-0-rgb), .75 );
+  /* background: black; */
   border: calc( var(--basis) * .2 ) solid var(--neutral-100);
-  width: calc( var(--basis) * 26.4 );
-  height: calc( var(--basis) * 26.4 );
+  width: calc( ( var(--basis) * 26.4 ) + ( var(--basis) * .4 ) ); /* To account for .2 border */
+  height: calc( ( var(--basis) * 26.4 ) + ( var(--basis) * .4 ) ); /* To account for .2 border */
+  padding: calc( var(--basis) * .4 );
+}
+
+main section header {
+  position: absolute;
+  top: calc( var(--basis) * -4.8 );
+  right: 0;
+  left: 0;
+}
+
+main section .tip {
+  position: absolute;
+  top: calc( var(--basis) * 26.4 );
+  right: 0;
+  left: 0;
+  margin-top: calc( var(--basis) * 2.4 );
+}
+
+/* Form elements */
+
+form {
+  display: flex;
+  flex-direction: column;
+  height: calc( 100% - calc( var(--basis) * 4.8 ) );
+}
+
+form p,
+form label {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  padding: calc( var(--basis) * 1.2 );
+  height: calc( var(--basis) * 4.8 );
+  margin-bottom: calc( var(--basis) * .4 );
+  background: rgba( var(--neutral-100-rgb), .0333 );
+}
+
+form label span,
+form label input {
+  width: 50%;
+}
+
+form p,
+form label span {
+  font-size: calc( var(--basis) * 1.2 );
+  letter-spacing: calc( var(--basis) * .3 );
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+button,
+input[type="number"] {
+  font-size: calc( var(--basis) * 1.6 );
+  letter-spacing: calc( var(--basis) * .4 );
+  text-transform: uppercase;
+  font-weight: 700;
+  cursor: pointer;
+  color: var(--accent-100);
+}
+
+button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  background: rgba( var(--accent-100-rgb), .2 );
+}
+
+form p:last-child {
+  justify-content: center;
 }
 
 /* Markers & labels */
