@@ -156,6 +156,10 @@ main {
   display: flex;
 }
 
+.logo img {
+  margin-right: calc( var(--basis) * 1.2 );
+}
+
 .logo h1 {
   display: flex;
 }
