@@ -169,7 +169,7 @@ let app = {
       let eastwest   = app.three.mouse.x * 90; // +90 to -90
 
       // Animates shovel drawings to rotate accordingly
-      app.elements.deviceFront.style.transform = 'rotate(' + eastwest + 'deg)';
+      app.elements.deviceFront.style.transform = 'rotate(' + eastwest * -1 + 'deg)';
       app.elements.deviceSide.style.transform  = 'rotate(' + northsouth + 'deg)';
 
 
