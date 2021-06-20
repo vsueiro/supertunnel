@@ -602,11 +602,11 @@ let app = {
       { // Stars (instances)
 
         let material = new THREE.MeshBasicMaterial({
-          color: app.color( 'neutral-50' )
+          color: app.color( 'neutral-25' )
         });
 
         let geometry = new THREE.SphereGeometry(
-          app.data.earth.radius.crust * 0.005
+          app.data.earth.radius.crust * 0.01
         );
 
         let amount = 10000;
