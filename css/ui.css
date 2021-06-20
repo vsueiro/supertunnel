@@ -324,6 +324,46 @@ form p:last-child {
   color: var(--accent-100);
 }
 
+.app[data-status-geolocation="located"] button.find,
+.app[data-status-bluetooth="paired"] button.connect {
+  pointer-events: none;
+  background: rgba( var(--success-100-rgb), .25 );
+  color: var(--success-100);
+}
+
+.app[data-status-geolocation="located"] form input {
+  color: var(--success-100);
+}
+
+.app[data-status-geolocation="located"] form p:last-child {
+  pointer-events: none;
+  color: transparent;
+}
+
+.app[data-status-bluetooth="paired"] main section:last-child {
+  border-color: var(--success-100);
+}
+
+.app[data-status-bluetooth="paired"] main section:last-child header {
+  color: var(--success-100);
+}
+
+.app[data-status-bluetooth="paired"] .backlight {
+  background: rgba( var(--success-100-rgb), .0666 );
+}
+
+.app[data-status-bluetooth="paired"] .device-front {
+  background: url('../assets/shovel/front-paired.svg');
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.app[data-status-bluetooth="paired"] .device-side {
+  background: url('../assets/shovel/side-paired.svg');
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
 /* Markers & labels */
 
 .marker-origin {
