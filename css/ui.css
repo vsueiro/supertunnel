@@ -57,6 +57,11 @@ input[type="submit"] {
   outline: none;
 }
 
+a {
+  color: var(--neutral-100);
+  text-decoration: none;
+}
+
 body {
   font-family: 'Poppins';
   font-weight: 700;
