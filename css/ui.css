@@ -315,6 +315,15 @@ form p:last-child {
   justify-content: center;
 }
 
+/* Handles status */
+
+.app[data-status-geolocation="locating"] button.find,
+.app[data-status-bluetooth="pairing"] button.connect {
+  pointer-events: none;
+  background: rgba( var(--accent-100-rgb), .2 );
+  color: var(--accent-100);
+}
+
 /* Markers & labels */
 
 .marker-origin {

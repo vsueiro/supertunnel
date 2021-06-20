@@ -68,14 +68,14 @@ main > * {
   display: none
 }
 
-.app[data-status-bluetooh="unpaired"] .connect  span:nth-child(1) {
+.app[data-status-bluetooth="unpaired"] .connect  span:nth-child(1) {
   display: flex;
 }
 
-.app[data-status-bluetooh="pairing"] .connect  span:nth-child(2) {
+.app[data-status-bluetooth="pairing"] .connect  span:nth-child(2) {
   display: flex;
 }
 
-.app[data-status-bluetooh="paired"] .connect  span:nth-child(3) {
+.app[data-status-bluetooth="paired"] .connect  span:nth-child(3) {
   display: flex;
 }
