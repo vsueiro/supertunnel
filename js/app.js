@@ -67,8 +67,8 @@ let app = {
     },
 
     user : {         // In decimal degrees
-      latitude  : 0, // south is negative
-      longitude : 0, // west is negative
+      latitude  : -33.4489 , // south is negative
+      longitude : -70.6693 // west is negative
     },
 
     seconds : 0
@@ -86,11 +86,11 @@ let app = {
 
     renderer2D     : undefined,
     labels         : {
-      country      : {
+      distance     : {
         element    : undefined,
         object     : undefined
       },
-      distance     : {
+      destination  : {
         element    : undefined,
         object     : undefined
       },
@@ -156,12 +156,12 @@ let app = {
       app.data.seconds = time * .001;
 
       // Values to be updated based on the inclination sensor
-      // let northsouth = 0; // +90 to -90
-      // let eastwest   = 0; // +90 to -90
+      let northsouth = 0; // +90 to -90
+      let eastwest   = 0; // +90 to -90
 
       // Enables mouse control over tunnel direction
-      let northsouth = app.three.mouse.y * 90; // +90 to -90
-      let eastwest   = app.three.mouse.x * 90; // +90 to -90
+      // let northsouth = app.three.mouse.y * 90; // +90 to -90
+      // let eastwest   = app.three.mouse.x * 90; // +90 to -90
 
       // If there is data coming from the Arduino sensor
       if ( app.data.incoming.json ) {
@@ -263,7 +263,7 @@ let app = {
               found = true;
 
               // Sets country label
-              app.three.labels.country.element.textContent = country;
+              app.three.labels.destination.element.textContent = country;
 
               // Sets distance label
               app.three.labels.distance.element.textContent = (parseInt( distance / 100 ) * 100).toLocaleString('en-US') + ' km'
@@ -290,7 +290,7 @@ let app = {
         if ( !found ) {
 
           // Clears country label
-          app.three.labels.country.element.textContent = '';
+          app.three.labels.destination.element.textContent = '';
 
           // Removes country from data to be sent to device
           app.data.outgoing.destination = '';
@@ -699,27 +699,25 @@ let app = {
 
       // Creates labels
 
-      { // Country label
-
-        app.three.labels.country.element = document.createElement( 'div' );
-  			app.three.labels.country.element.className = 'label label-country';
-  			app.three.labels.country.element.textContent = '';
-
-  			app.three.labels.country.object = new THREE.CSS2DObject( app.three.labels.country.element );
-  			app.three.labels.country.object.position.set( 0, app.data.earth.radius.crust * -2, 0 );
-  			app.three.tunnel.add( app.three.labels.country.object );
-
-      }
-
       { // Distance label
 
         app.three.labels.distance.element = document.createElement( 'div' );
-  			app.three.labels.distance.element.className = 'label label-distance';
-  			app.three.labels.distance.element.textContent = '12,700 km';
+        app.three.labels.distance.element.classList.add( 'label', 'label-distance' );
 
-  			app.three.labels.distance.object = new THREE.CSS2DObject( app.three.labels.distance.element );
-  			app.three.labels.distance.object.position.set( 0, app.data.earth.radius.crust * -1, 0 );
-  			app.three.tunnel.add( app.three.labels.distance.object );
+        app.three.labels.distance.object = new THREE.CSS2DObject( app.three.labels.distance.element );
+        app.three.labels.distance.object.position.set( 0, app.data.earth.radius.crust * -1, 0 );
+        app.three.tunnel.add( app.three.labels.distance.object );
+
+      }
+
+      { // Destination label
+
+        app.three.labels.destination.element = document.createElement( 'div' );
+  			app.three.labels.destination.element.classList.add( 'label', 'label-destination' );
+
+  			app.three.labels.destination.object = new THREE.CSS2DObject( app.three.labels.destination.element );
+  			app.three.labels.destination.object.position.set( 0, app.data.earth.radius.crust * -2, 0 );
+  			app.three.tunnel.add( app.three.labels.destination.object );
 
       }
 
@@ -729,8 +727,7 @@ let app = {
 
         // Marker
         app.three.markers.origin.element = document.createElement( 'div' );
-        app.three.markers.origin.element.className = 'marker marker-origin';
-        app.three.markers.origin.element.textContent = '';
+        app.three.markers.origin.element.classList.add( 'marker', 'marker-origin' );
 
         app.three.markers.origin.object = new THREE.CSS2DObject( app.three.markers.origin.element );
         app.three.markers.origin.object.position.set( 0, 0, 0 );
