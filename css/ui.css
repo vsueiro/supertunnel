@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=block');
 
 /* palette */
 
@@ -42,18 +42,28 @@ input::-webkit-inner-spin-button {
 
 input[type=number] {
   -moz-appearance: textfield;
-  font-variant-numeric: tabular-nums;
+}
+
+button,
+input[type=number],
+input[type="submit"] {
   font-family: 'Poppins';
   font-weight: 700;
+  line-height: 150%;
+  font-size: calc( var(--basis) * 1.6 );
+  color: var(--neutral-100);
+  background: transparent;
+  border: none;
+  outline: none;
 }
 
 body {
   font-family: 'Poppins';
   font-weight: 700;
-  font-size: calc( var(--basis) * 1.6 );
   line-height: 150%;
-  background: var(--neutral-0);
+  font-size: calc( var(--basis) * 1.6 );
   color: var(--neutral-100);
+  background: var(--neutral-0);
   text-rendering: auto;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
