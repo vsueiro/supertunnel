@@ -24,15 +24,57 @@
 
 }
 
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
 body {
   font-family: 'Poppins';
   font-weight: 700;
+  font-size: calc( var(--basis) * 1.6 );
+  line-height: 150%;
   background: var(--neutral-0);
   color: var(--neutral-100);
+  text-rendering: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .marker-origin {
   width: 48px;
   height: 48px;
-  border: calc( var(--basis) / 5 ) solid;
+  border: calc( var(--basis) * .2 ) solid;
+}
+
+.label-destination {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  height: calc( var(--basis) * 5.4 );
+  margin-top: calc( var(--basis) * -2.7 );
+  font-size: calc( var(--basis) * 3.6 );
+}
+
+.label-destination::after {
+  content: '';
+  display: flex;
+  transform: translateY( calc( var(--basis) * .4 ) );
+  width: calc( var(--basis) * .8 );
+  height: calc( var(--basis) * .8 );
+  border-radius: 50%;
+  background: var(--neutral-100);
+}
+
+.label-distance {
+  font-size: calc( var(--basis) * 1.2 );
+  letter-spacing: calc( var(--basis) * .3 );
+  text-transform: uppercase;
 }
