@@ -216,7 +216,7 @@ main section:last-child header {
   display: flex;
   width: 100%;
   height: calc( var(--basis) * 4.8 );
-  background: rgba( var(--accent-100-rgb), .05 );
+  background: rgba( var(--accent-100-rgb), .0666 );
   margin-bottom: calc( var(--basis) * .4 );
 }
 
@@ -304,6 +304,11 @@ button {
   align-items: center;
   width: 100%;
   background: rgba( var(--accent-100-rgb), .2 );
+}
+
+button:hover {
+  background: var(--accent-100);
+  color: var(--neutral-0);
 }
 
 form p:last-child {
