@@ -10,7 +10,9 @@ let app = {
     findButton    : document.querySelector( '.find'                   ),
     form          : document.querySelector( 'form'                    ),
     latitude      : document.querySelector( 'input[name="latitude"]'  ),
-    longitude     : document.querySelector( 'input[name="longitude"]' )
+    longitude     : document.querySelector( 'input[name="longitude"]' ),
+    deviceFront   : document.querySelector( '.device-front'           ),
+    deviceSide    : document.querySelector( '.device-side'            )
 
   },
 
@@ -159,12 +161,17 @@ let app = {
       app.data.seconds = time * .001;
 
       // Values to be updated based on the inclination sensor
-      let northsouth = 0; // +90 to -90
-      let eastwest   = 0; // +90 to -90
+      // let northsouth = 0; // +90 to -90
+      // let eastwest   = 0; // +90 to -90
 
       // Enables mouse control over tunnel direction
-      // let northsouth = app.three.mouse.y * 90; // +90 to -90
-      // let eastwest   = app.three.mouse.x * 90; // +90 to -90
+      let northsouth = app.three.mouse.y * 90; // +90 to -90
+      let eastwest   = app.three.mouse.x * 90; // +90 to -90
+
+      // Animates shovel drawings to rotate accordingly
+      app.elements.deviceFront.style.transform = 'rotate(' + eastwest + 'deg)';
+      app.elements.deviceSide.style.transform  = 'rotate(' + northsouth + 'deg)';
+
 
       // If there is data coming from the Arduino sensor
       if ( app.data.incoming.json ) {
