@@ -28,11 +28,15 @@ body {
 }
 
 .foreground,
-main {
+.foreground header,
+.foreground main,
+.foreground footer {
   pointer-events: none;
 }
 
-main > * {
+.foreground header > *,
+.foreground main > *,
+.foreground footer > * {
   pointer-events: all;
 }
 
