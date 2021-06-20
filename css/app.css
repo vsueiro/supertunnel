@@ -27,11 +27,12 @@ body {
   left: 0;
 }
 
-.foreground {
+.foreground,
+main {
   pointer-events: none;
 }
 
-.foreground > * {
+main > * {
   pointer-events: all;
 }
 
