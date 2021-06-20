@@ -523,7 +523,7 @@ let app = {
         let material = new THREE.MeshBasicMaterial({
           color: app.color( 'neutral-25' ),
           wireframe: true,
-          opacity: 0.25,
+          opacity: 0.1,
           transparent: true
         });
         material.side = THREE.DoubleSide;
