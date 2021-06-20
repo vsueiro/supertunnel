@@ -195,6 +195,63 @@ main section .tip {
   margin-top: calc( var(--basis) * 2.4 );
 }
 
+main section:last-child {
+  border-color: var(--accent-100);
+}
+
+.device {
+  position: relative;
+  display: flex;
+}
+
+.backlights {
+  width: 100%;
+}
+
+.backlight {
+  display: flex;
+  width: 100%;
+  height: calc( var(--basis) * 4.8 );
+  background: rgba( var(--accent-100-rgb), .05 );
+  margin-bottom: calc( var(--basis) * .4 );
+}
+
+.device .drawings {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: calc( var(--basis) * .4 );
+  left: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.device .drawings::before,
+.device .drawings::after {
+  content: '';
+  display: flex;
+  width: 0;
+  height: 0;
+}
+
+.device-front {
+  background: url('../assets/shovel/front.svg');
+}
+
+.device-side {
+  background: url('../assets/shovel/side.svg');
+}
+
+.device-front,
+.device-side {
+  display: flex;
+  width: calc( var(--basis) * 3.2 );
+  height: calc( var(--basis) * 16 );
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
 /* Form elements */
 
 form {
