@@ -45,3 +45,35 @@ body {
   top: 0;
   pointer-events: none;
 }
+
+.app .find > span {
+  display: none
+}
+
+.app[data-status-geolocation="unlocated"] .find  span:nth-child(1) {
+  display: flex;
+}
+
+.app[data-status-geolocation="locating"] .find  span:nth-child(2) {
+  display: flex;
+}
+
+.app[data-status-geolocation="located"] .find  span:nth-child(3) {
+  display: flex;
+}
+
+.app .connect > span {
+  display: none
+}
+
+.app[data-status-bluetooh="unpaired"] .connect  span:nth-child(1) {
+  display: flex;
+}
+
+.app[data-status-bluetooh="pairing"] .connect  span:nth-child(2) {
+  display: flex;
+}
+
+.app[data-status-bluetooh="paired"] .connect  span:nth-child(3) {
+  display: flex;
+}

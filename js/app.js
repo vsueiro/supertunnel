@@ -4,10 +4,13 @@ let app = {
 
   elements : {
 
-    background    : document.querySelector( '.background' ),
-    canvas        : document.querySelector( '.canvas' ),
-    connectButton : document.querySelector( '.connect' ),
-    findButton    : document.querySelector( '.find'    ),
+    background    : document.querySelector( '.background'             ),
+    canvas        : document.querySelector( '.canvas'                 ),
+    connectButton : document.querySelector( '.connect'                ),
+    findButton    : document.querySelector( '.find'                   ),
+    form          : document.querySelector( 'form'                    ),
+    latitude      : document.querySelector( 'input[name="latitude"]'  ),
+    longitude     : document.querySelector( 'input[name="longitude"]' )
 
   },
 
@@ -801,6 +804,17 @@ let app = {
 
       }
 
+    },
+
+    submit : () => {
+
+      // Uses coordinates that were manually entered by the user
+
+      app.data.user.latitude  = app.elements.latitude.value;
+      app.data.user.longitude = app.elements.longitude.value;
+
+      app.element.dataset.statusGeolocation = 'unlocated';
+
     }
 
   },
@@ -896,6 +910,21 @@ let app = {
 
       // Finds user’s location when button is clicked
       app.elements.findButton.addEventListener( 'click', app.geolocation.find );
+
+      // Handles location form
+      app.elements.form.addEventListener( 'submit', function() {
+
+        event.preventDefault();
+        app.geolocation.submit();
+
+      }, false );
+
+      // Updates coordinates every time input is changed
+      app.elements.latitude.addEventListener(  'change', app.geolocation.submit );
+      app.elements.latitude.addEventListener(  'input',  app.geolocation.submit );
+
+      app.elements.longitude.addEventListener( 'change', app.geolocation.submit );
+      app.elements.longitude.addEventListener( 'input',  app.geolocation.submit );
 
       // Calculates mouse position in normalized device coordinates (-1 to +1)
       window.addEventListener( 'mousemove', app.three.normalizeMouse, false );

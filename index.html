@@ -17,9 +17,7 @@
 
       <div class="foreground">
 
-
         <header>
-
           <div class="logo">
             <img src="assets/logo.svg" alt="Symbol consisting of simplified globe that is cut by a tunnel from east to west, revealing Earth’s core">
             <h1>
@@ -27,36 +25,81 @@
               <span>Simulator</span>
             </h1>
           </div>
-
           <nav>
             <a href="#" target="_blank">About</a>
           </nav>
-
         </header>
-
-
 
         <main>
 
+          <section>
+
+            <header>
+              <h2>Origin: <span class="label label-origin"></span></h2>
+            </header>
+
+            <form>
+
+              <p>Insert coordinates</p>
+
+              <label for="latitude">
+                <span>Latitude:<span>
+                <input type="number" name="latitude" min="-90" max="90" step="0.0001" value="-33.4489">
+              </label>
+
+              <label for="longitude">
+                <span>Longitude:<span>
+                <input type="number" name="longitude" min="-180" max="180" step="0.0001" value="-70.6693">
+              </label>
+
+              <input type="submit" value="Submit coordinates" style="display: none">
+
+              <p>Or</p>
+
+            </form>
+
+            <button class="find">
+              <span>Get my location</span>
+              <span>Locating...</span>
+              <span>Found you</span>
+            </button>
+
+            <p class="tip">Simulate a tunnel through Earth, starting from where you are</p>
+
+          </section>
+
+          <section>
+
+            <header>
+              <h2>Bluetooth device</h2>
+            </header>
+
+            <div class="device">
+              <div class="device-front"></div>
+              <div class="device-side"></div>
+            </div>
+
+            <button class="connect">
+              <span>Pair with shovel</span>
+              <span>Pairing...</span>
+              <span>Paired</span>
+            </button>
+
+            <p class="tip">Point shovel at the ground to dig a virtual tunnel in that direction</p>
+
+          </section>
+
         </main>
-
-
 
         <footer>
 
+          <p>Created by Vinicius Sueiro</p>
+          <p>Thesis project for the Interaction Design master’s at Malmö University</p>
 
         </footer>
 
 
         <!--
-
-        <button class="connect">Connect to Arduino</button>
-        <button class="find">Find my location</button>
-
-        <div class="label label-origin"></div>
-
-        <img src="assets/logo.svg">
-
         <img src="assets/shovel/front.svg">
         <img src="assets/shovel/side.svg">
 
