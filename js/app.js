@@ -235,7 +235,7 @@ let app = {
 
           // Reset country highlight
           country.material[0].color.set( app.color( 'neutral-50' ) );
-          country.material[1].color.set( app.color( 'neutral-25' ) );
+          country.material[1].color.set( app.color( 'neutral-75' ) );
 
           let intersections = app.three.raycaster.intersectObject( country );
 
@@ -481,10 +481,10 @@ let app = {
           let materials = [
 
             // Internal-facing color
-            new THREE.MeshBasicMaterial( { color: app.color( 'neutral-50' ) } ),
+            new THREE.MeshBasicMaterial( { color: app.color( 'accent-50' ) } ),
 
             // External-facing color
-            new THREE.MeshBasicMaterial( { color: app.color( 'neutral-25' ) } ),
+            new THREE.MeshBasicMaterial( { color: app.color( 'neutral-75' ) } ),
 
           ];
 
