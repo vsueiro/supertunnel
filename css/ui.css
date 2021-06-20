@@ -1,6 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=block');
 
-/* palette */
+/* Color palette & size variable */
 
 :root {
 
@@ -24,11 +24,14 @@
 
 }
 
+/* Specific resets */
+
 *,
 *::before,
 *::after {
   margin: 0;
   padding: 0;
+  box-sizing: border-box;
   list-style-type: none;
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
@@ -62,6 +65,8 @@ a {
   text-decoration: none;
 }
 
+/* General UI formatting */
+
 body {
   font-family: 'Poppins';
   font-weight: 700;
@@ -73,6 +78,8 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+/* Markers & labels */
 
 .marker-origin {
   width: 48px;
@@ -109,4 +116,51 @@ body {
   font-size: calc( var(--basis) * 1.2 );
   letter-spacing: calc( var(--basis) * .3 );
   text-transform: uppercase;
+}
+
+
+/* Headings */
+
+h1 {
+  font-size: calc( var(--basis) * 2.4 );
+}
+
+h2 {
+  font-size: calc( var(--basis) * 1.2 );
+  letter-spacing: calc( var(--basis) * .3 );
+  text-transform: uppercase;
+}
+
+/* Paragraphs */
+
+p {
+  font-weight: 400;
+}
+
+main p {
+  font-size: calc( var(--basis) * 1.6 );
+}
+
+footer p {
+  font-size: calc( var(--basis) * 1.2 );
+}
+
+/* Form elements */
+
+form p,
+label span {
+  font-size: calc( var(--basis) * 1.2 );
+  letter-spacing: calc( var(--basis) * .3 );
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+button,
+input[type="number"] {
+  font-size: calc( var(--basis) * 1.6 );
+  letter-spacing: calc( var(--basis) * .4 );
+  text-transform: uppercase;
+  font-weight: 700;
+  cursor: pointer;
+  color: var(--accent-100);
 }
