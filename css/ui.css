@@ -144,6 +144,9 @@ main {
 }
 
 .logo img {
+  display: flex;
+  width: calc( var(--basis) * 2.4 );
+  height: calc( var(--basis) * 2.4 );
   margin-right: calc( var(--basis) * 1.2 );
 }
 
@@ -249,8 +252,8 @@ form p:last-child {
 /* Markers & labels */
 
 .marker-origin {
-  width: 48px;
-  height: 48px;
+  width: calc( var(--basis) * 4.8 );
+  height: calc( var(--basis) * 4.8 );
   border: calc( var(--basis) * .2 ) solid;
 }
 
