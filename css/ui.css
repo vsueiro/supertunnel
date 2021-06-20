@@ -82,7 +82,3 @@ body {
   letter-spacing: calc( var(--basis) * .3 );
   text-transform: uppercase;
 }
-
-.foreground {
-  display: none;
-}
