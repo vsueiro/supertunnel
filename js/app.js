@@ -1009,8 +1009,8 @@ let app = {
           // Checks if any country was actually clicked
           if ( closest ) {
 
-            // Closest it the country clicked
-            console.log( closest );
+            // Handles clicked country
+            // console.log( closest );
 
           }
 
