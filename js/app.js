@@ -28,6 +28,7 @@ let app = {
   options : {
 
     mouseControl : false,
+    rotateDrawings : false,
 
   },
 
@@ -176,9 +177,15 @@ let app = {
         northsouth = app.three.mouse.y * 90;
         eastwest   = app.three.mouse.x * 90;
 
-      // Animates shovel drawings to rotate accordingly
-      app.elements.deviceFront.style.transform = 'rotate(' + eastwest * -1 + 'deg)';
-      app.elements.deviceSide.style.transform  = 'rotate(' + northsouth + 'deg)';
+      }
+
+      if ( app.options.rotateDrawings ) {
+
+        // Animates shovel drawings to rotate accordingly
+        app.elements.deviceFront.style.transform = 'rotate(' + eastwest * -1 + 'deg)';
+        app.elements.deviceSide.style.transform  = 'rotate(' + northsouth + 'deg)';
+
+      }
 
       // If there is data coming from the Arduino sensor
       if ( app.data.incoming.json ) {
