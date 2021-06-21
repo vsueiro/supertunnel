@@ -88,6 +88,16 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+::-moz-selection {
+  color: var(--neutral-0);
+  background: var(--success-100);
+}
+
+::selection {
+  color: var(--neutral-0);
+  background: var(--success-100);
+}
+
 /* Headings */
 
 h1 {
