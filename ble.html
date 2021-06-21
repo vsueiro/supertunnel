@@ -2,90 +2,57 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>TunnelSimulator</title>
-    <link rel="stylesheet" href="css/app.css">
-    <link rel="stylesheet" href="css/ui.css">
   </head>
   <body>
+    <form>
+      <button>Connect with BLE device</button>
 
-    <!-- p5.js -->
+      <script>
 
-    <!-- https://unpkg.com/browse/p5@0.7.2/lib/p5.min.js -->
-    <script src="js/p5.min.js"></script>
+        function isWebBLEAvailable() {
 
-    <!-- https://unpkg.com/browse/p5@0.7.2/lib/addons/p5.dom.min.js -->
-    <script src="js/p5.dom.min.js"></script>
+          if ( navigator.bluetooth )
+            return true;
 
-    <!-- https://unpkg.com/browse/p5ble@0.0.4/dist/p5.ble.min.js -->
-    <script src="js/p5.ble.min.js"></script>
+          console.log( 'Web Bluetooth is not available' )
+          return false;
 
-    <!-- Custom -->
+        }
 
-    <script>
+        function getDeviceInfo() {
 
-    // The serviceUuid must match the serviceUuid of the device you would like to connect
-    const serviceUuid = "19b10010-e8f2-537e-4f6c-d104768a1214";
-    let myBLE;
-    let isConnected = false;
+          let options = {
+            acceptAllDevices : true
+          }
 
-    function setup() {
-      // Create a p5ble class
-      myBLE = new p5ble();
+          console.log( 'Requesting BLE info…' );
 
-      createCanvas(200, 200);
-      textSize(20);
-      textAlign(CENTER, CENTER);
+          navigator.bluetooth.requestDevice( options ).then( device => {
 
-      // Create a 'Connect' button
-      const connectButton = createButton('Connect')
-      connectButton.mousePressed(connectToBle);
+            console.log( device )
 
-      // Create a 'Disconnect' button
-      const disconnectButton = createButton('Disconnect')
-      disconnectButton.mousePressed(disconnectToBle);
-    }
+          } ).catch( error => {
 
-    function connectToBle() {
-      // Connect to a device by passing the service UUID
-      myBLE.connect(serviceUuid, gotCharacteristics);
-    }
+            console.log( error )
 
-    function disconnectToBle() {
-      // Disonnect to the device
-      myBLE.disconnect();
-      // Check if myBLE is connected
-      isConnected = myBLE.isConnected();
-    }
+          } )
 
-    function onDisconnected() {
-      console.log('Device got disconnected.');
-      isConnected = false;
-    }
+        }
 
-    // A function that will be called once got characteristics
-    function gotCharacteristics(error, characteristics) {
-      if (error) console.log('error: ', error);
-      console.log('characteristics: ', characteristics);
+        document.querySelector( 'form' ).addEventListener( 'submit', function( event ) {
+          event.stopPropagation();
+          event.preventDefault();
 
-      // Check if myBLE is connected
-      isConnected = myBLE.isConnected();
+          if ( isWebBLEAvailable() ) {
 
-      // Add a event handler when the device is disconnected
-      myBLE.onDisconnected(onDisconnected)
-    }
+            getDeviceInfo();
 
-    function draw() {
-      if (isConnected) {
-        background(0, 255, 0);
-        text('Connected!', 100, 100);
-      } else {
-        background(255, 0, 0);
-        text('Disconnected :/', 100, 100);
-      }
-    }
+          }
 
-    </script>
+        } )
 
+      </script>
+
+    </form>
   </body>
 </html>
