@@ -956,29 +956,50 @@ let app = {
       window.addEventListener( 'mousemove', app.three.normalizeMouse, false );
 
       // Calculates clicked country
-      window.addEventListener( 'click', function(e) {
+      window.addEventListener( 'click', function() {
 
-        /*
-        // Updates ray with the camera and mouse position
         app.three.raycaster.setFromCamera( app.three.mouse, app.three.camera );
+
+        let matches = [];
+        let closest;
 
         if ( app.three.land ) {
 
-          // Calculates objects intersecting the picking ray
+          // Calculates countries intersecting the mouse click
           for ( let country of app.three.land.children ) {
 
             let intersects = app.three.raycaster.intersectObject( country );
 
-            for ( let i = 0; i < intersects.length; i ++ ) {
-              // [ i ].object.material.color.set( 0xff0000 );
-              console.log( intersects[ i ].object.name );
-            //
+            for ( let i = 0; i < intersects.length; i ++ )
+              matches.push( intersects[i] );
+
+          }
+
+          // Gets country with shortest distance to camera
+          for ( let match of matches ) {
+
+            if ( closest ) {
+
+              if ( match.distance < closest.distance )
+                closest = match;
+
+            } else {
+
+              closest = match;
+
             }
 
           }
 
+          // Checks if any country was actually clicked
+          if ( closest ) {
+
+            // Closest it the country clicked
+            console.log( closest );
+
+          }
+
         }
-        */
 
       } );
 
