@@ -1,5 +1,7 @@
 let app = {
 
+  title : 'TunnelSimulator',
+
   element : document.querySelector( '.app' ),
 
   elements : {
@@ -32,6 +34,45 @@ let app = {
 
   },
 
+  parameters : {
+
+    update : function() {
+
+      window.history.replaceState(
+        {},
+        app.title,
+        '/?latitude=' + app.data.user.latitude +
+        '&longitude=' + app.data.user.longitude
+      );
+
+    },
+
+    initialize : function() {
+
+      let parameters = new URLSearchParams( window.location.search );
+
+      if ( parameters.has( 'latitude' ) ) {
+
+        let lat = app.validates.coordinates( parameters.get( 'latitude' ), 90 )
+
+        app.elements.latitude.value = lat;
+        app.data.user.latitude  = lat;
+
+      }
+
+      if ( parameters.has( 'longitude' ) ) {
+
+        let lng = app.validates.coordinates( parameters.get( 'longitude' ), 180 )
+
+        app.elements.longitude.value = lng;
+        app.data.user.longitude = lng;
+
+      }
+
+    }
+
+  },
+
   validates : {
 
     json : function ( string ) {
@@ -45,6 +86,31 @@ let app = {
       // TODO: Check if it contains all desired properties before returning true
 
       return true;
+
+    },
+
+    coordinates : function ( string, max ) {
+
+      // Removes all characters except numbers, minus sign and dot
+      let coordinate = string.replace( /[^0-9.\-]/g, '');
+
+      if ( max !== undefined ) {
+
+        coordinate = parseFloat( coordinate );
+
+        // Constrain within -90 to 90 (latitude) or -180 to 180 (longitude)
+        if ( coordinate > max )
+          coordinate = max;
+
+        if ( coordinate < -max )
+          coordinate = -max;
+
+        if ( isNaN( coordinate ) )
+          coordinate = 0;
+
+      }
+
+      return coordinate;
 
     }
 
@@ -789,6 +855,8 @@ let app = {
       app.elements.latitude.value = app.data.user.latitude;
       app.elements.longitude.value = app.data.user.longitude;
 
+      app.parameters.update();
+
       app.element.dataset.statusGeolocation = 'located';
 
     },
@@ -828,25 +896,12 @@ let app = {
 
     submit : () => {
 
-      // Validades coordinates
-
       let lat = app.elements.latitude.value;
       let lng = app.elements.longitude.value;
 
-      lat = lat.replace( /[^0-9.\-]/g, '');
-      lng = lng.replace( /[^0-9.\-]/g, '');
-
-      if ( parseFloat( lat ) > 90 )
-        lat = 90
-
-      if ( parseFloat( lat ) < -90 )
-        lat = -90
-
-      if ( parseFloat( lng ) > 180 )
-        lng = 180
-
-      if ( parseFloat( lng ) < -180 )
-        lng = -180
+      // Validades coordinates
+      lat = app.validates.coordinates( lat, 90 );
+      lng = app.validates.coordinates( lng, 180 );
 
       app.elements.latitude.value = lat;
       app.elements.longitude.value = lng;
@@ -854,7 +909,23 @@ let app = {
       app.data.user.latitude  = lat;
       app.data.user.longitude = lng;
 
+      app.parameters.update();
+
       app.element.dataset.statusGeolocation = 'unlocated';
+
+    },
+
+    validate : () => {
+
+      let lat = app.elements.latitude.value;
+      let lng = app.elements.longitude.value;
+
+      // Validades coordinates
+      lat = app.validates.coordinates( lat );
+      lng = app.validates.coordinates( lng );
+
+      app.elements.latitude.value = lat;
+      app.elements.longitude.value = lng;
 
     }
 
@@ -962,10 +1033,12 @@ let app = {
 
       // Updates coordinates every time input is changed
       app.elements.latitude.addEventListener(  'change', app.geolocation.submit );
-      app.elements.latitude.addEventListener(  'input',  app.geolocation.submit );
+      app.elements.latitude.addEventListener(  'blur',   app.geolocation.submit );
+      app.elements.latitude.addEventListener(  'input',  app.geolocation.validate );
 
       app.elements.longitude.addEventListener( 'change', app.geolocation.submit );
-      app.elements.longitude.addEventListener( 'input',  app.geolocation.submit );
+      app.elements.longitude.addEventListener( 'blur',   app.geolocation.submit );
+      app.elements.longitude.addEventListener( 'input',  app.geolocation.validate );
 
       // Calculates mouse position in normalized device coordinates (-1 to +1)
       window.addEventListener( 'mousemove', app.three.normalizeMouse, false );
@@ -1026,6 +1099,7 @@ let app = {
 
     app.three.initialize();
     app.events.initialize();
+    app.parameters.initialize();
 
   }
 
