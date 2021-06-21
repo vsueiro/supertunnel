@@ -48,11 +48,13 @@ input::-webkit-inner-spin-button {
   margin: 0;
 }
 
-input[type=number] {
+input[type=number],
+input[type=text] {
   -moz-appearance: textfield;
 }
 
 button,
+input[type=text],
 input[type=number],
 input[type="submit"] {
   font-family: 'Poppins', sans-serif;
@@ -289,7 +291,8 @@ form label span {
 }
 
 button,
-input[type="number"] {
+input[type="number"],
+input[type=text] {
   font-size: calc( var(--basis) * 1.6 );
   letter-spacing: calc( var(--basis) * .4 );
   text-transform: uppercase;

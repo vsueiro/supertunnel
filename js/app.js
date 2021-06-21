@@ -172,7 +172,6 @@ let app = {
       app.elements.deviceFront.style.transform = 'rotate(' + eastwest * -1 + 'deg)';
       app.elements.deviceSide.style.transform  = 'rotate(' + northsouth + 'deg)';
 
-
       // If there is data coming from the Arduino sensor
       if ( app.data.incoming.json ) {
 
@@ -771,6 +770,10 @@ let app = {
       app.data.user.latitude = position.coords.latitude;
       app.data.user.longitude = position.coords.longitude;
 
+      // Updates manual input values to match the retrieved coordinates
+      app.elements.latitude.value = app.data.user.latitude;
+      app.elements.longitude.value = app.data.user.longitude;
+
       app.element.dataset.statusGeolocation = 'located';
 
     },
@@ -779,18 +782,13 @@ let app = {
 
       app.element.dataset.statusGeolocation = 'unlocated';
 
-      let prompt = window.prompt(
+      window.alert(
 
         'Sorry, there was an error. ' +
         'Please type in your latitude and longitude as decimal degrees ' +
-        '(West and South are negative):',
+        '(West and South are negative).'
 
-        '-23.5505,-46.6333');
-
-      let coordinates = prompt.split(',')
-
-      app.data.user.latitude  = parseFloat( coordinates[ 0 ] );
-      app.data.user.longitude = parseFloat( coordinates[ 1 ] );
+      );
 
     },
 
@@ -815,10 +813,31 @@ let app = {
 
     submit : () => {
 
-      // Uses coordinates that were manually entered by the user
+      // Validades coordinates
 
-      app.data.user.latitude  = app.elements.latitude.value;
-      app.data.user.longitude = app.elements.longitude.value;
+      let lat = app.elements.latitude.value;
+      let lng = app.elements.longitude.value;
+
+      lat = lat.replace( /[^0-9.\-]/g, '');
+      lng = lng.replace( /[^0-9.\-]/g, '');
+
+      if ( parseFloat( lat ) > 90 )
+        lat = 90
+
+      if ( parseFloat( lat ) < -90 )
+        lat = -90
+
+      if ( parseFloat( lng ) > 180 )
+        lng = 180
+
+      if ( parseFloat( lng ) < -180 )
+        lng = -180
+
+      app.elements.latitude.value = lat;
+      app.elements.longitude.value = lng;
+
+      app.data.user.latitude  = lat;
+      app.data.user.longitude = lng;
 
       app.element.dataset.statusGeolocation = 'unlocated';
 
