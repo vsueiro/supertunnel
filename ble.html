@@ -5,7 +5,7 @@
   </head>
   <body>
     <form>
-      <button>Connect with BLE device</button>
+      <button>Connect with specific BLE device</button>
     </form>
 
     <script>
@@ -24,11 +24,11 @@
 
         let options = {
           acceptAllDevices : true
-          // filters : [
-          //   {
-          //     services : [ '00001101-0000-1000-8000-00805f9b34fb' ]
-          //   }
-          // ]
+          filters : [
+            {
+              services : [ '19B10000-E8F2-537E-4F6C-D104768A1214' ]
+            }
+          ]
         }
 
         console.log( 'Requesting BLE info…' );
