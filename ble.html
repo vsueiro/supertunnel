@@ -6,58 +6,58 @@
   <body>
     <form>
       <button>Connect with BLE device</button>
+    </form>
 
-      <script>
+    <script>
 
-        function isWebBLEAvailable() {
+      function isWebBLEAvailable() {
 
-          if ( navigator.bluetooth )
-            return true;
+        if ( navigator.bluetooth )
+          return true;
 
-          console.log( 'Web Bluetooth is not available' )
-          return false;
+        console.log( 'Web Bluetooth is not available' )
+        return false;
 
+      }
+
+      function getDeviceInfo() {
+
+        let options = {
+          acceptAllDevices : true
+          // filters : [
+          //   {
+          //     services : [ '00001101-0000-1000-8000-00805f9b34fb' ]
+          //   }
+          // ]
         }
 
-        function getDeviceInfo() {
+        console.log( 'Requesting BLE info…' );
 
-          let options = {
-            // acceptAllDevices : true
-            filters : [
-              {
-                services : [ '00001101-0000-1000-8000-00805f9b34fb' ]
-              }
-            ]
-          }
+        navigator.bluetooth.requestDevice( options ).then( device => {
 
-          console.log( 'Requesting BLE info…' );
+          console.log( device )
 
-          navigator.bluetooth.requestDevice( options ).then( device => {
+        } ).catch( error => {
 
-            console.log( device )
-
-          } ).catch( error => {
-
-            console.log( error )
-
-          } )
-
-        }
-
-        document.querySelector( 'form' ).addEventListener( 'submit', function( event ) {
-          event.stopPropagation();
-          event.preventDefault();
-
-          if ( isWebBLEAvailable() ) {
-
-            getDeviceInfo();
-
-          }
+          console.log( error )
 
         } )
 
-      </script>
+      }
 
-    </form>
+      document.querySelector( 'form' ).addEventListener( 'submit', function( event ) {
+        event.stopPropagation();
+        event.preventDefault();
+
+        if ( isWebBLEAvailable() ) {
+
+          getDeviceInfo();
+
+        }
+
+      } )
+
+    </script>
+
   </body>
 </html>
