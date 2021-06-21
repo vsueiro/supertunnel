@@ -25,6 +25,12 @@ let app = {
 
   },
 
+  options : {
+
+    mouseControl : false,
+
+  },
+
   validates : {
 
     json : function ( string ) {
@@ -157,16 +163,18 @@ let app = {
       // Makes canvas responsive
       app.three.resize();
 
-      // Just a counter since the animation started
+      // Creates a simple time counter (since the animation started)
       app.data.seconds = time * .001;
 
-      // Values to be updated based on the inclination sensor
-      // let northsouth = 0; // +90 to -90
-      // let eastwest   = 0; // +90 to -90
+      // Initializes values to be updated according to inclination sensor
+      let northsouth = 0; // +90 to -90
+      let eastwest   = 0; // +90 to -90
 
-      // Enables mouse control over tunnel direction
-      let northsouth = app.three.mouse.y * 90; // +90 to -90
-      let eastwest   = app.three.mouse.x * 90; // +90 to -90
+      if ( app.options.mouseControl ) {
+
+        // Enables mouse control over tunnel direction
+        northsouth = app.three.mouse.y * 90;
+        eastwest   = app.three.mouse.x * 90;
 
       // Animates shovel drawings to rotate accordingly
       app.elements.deviceFront.style.transform = 'rotate(' + eastwest * -1 + 'deg)';
