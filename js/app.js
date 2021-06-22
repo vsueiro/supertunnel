@@ -257,8 +257,11 @@ let app = {
       if ( app.data.incoming.json ) {
 
         // Updates variables
+        // northsouth = app.data.incoming.json.x;
+        // eastwest   = - app.data.incoming.json.z;
+
         northsouth = app.data.incoming.json.x;
-        eastwest   = - app.data.incoming.json.z;
+        eastwest   = app.data.incoming.json.z - 180;
       }
 
       // Moves tunnel according to shovel inclination
