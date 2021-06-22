@@ -864,8 +864,8 @@ let app = {
 
     found : function( position ) {
 
-      app.data.user.latitude = position.coords.latitude;
-      app.data.user.longitude = position.coords.longitude;
+      app.data.user.latitude = position.coords.latitude.toFixed( 4 );
+      app.data.user.longitude = position.coords.longitude.toFixed( 4 );
 
       // Updates manual input values to match the retrieved coordinates
       app.elements.latitude.value = app.data.user.latitude;
