@@ -145,8 +145,8 @@ let app = {
     },
 
     user : {                // In decimal degrees
-      latitude  : -33.4489, // south is negative
-      longitude : -70.6693  // west is negative
+      latitude  : 0, //-33.4489, // south is negative
+      longitude : 0, //-70.6693  // west is negative
     },
 
     seconds : 0
@@ -237,39 +237,56 @@ let app = {
       let northsouth = 0; // +90 to -90
       let eastwest   = 0; // +90 to -90
 
+      // Makes tunnel face straight down, into the core
+      app.three.tunnel.rotation.x = THREE.Math.degToRad( 90 + 0 );
+      app.three.chord.rotation.x = THREE.Math.degToRad( 90 + 0 );
+
       if ( app.options.mouseControl ) {
 
         // Enables mouse control over tunnel direction
         northsouth = app.three.mouse.y * 90;
         eastwest   = app.three.mouse.x * 90;
 
+        // Moves tunnel according to mouse-simulated inclination
+        app.three.tunnel.rotation.x = THREE.Math.degToRad( 90 + northsouth );
+        app.three.chord.rotation.x = THREE.Math.degToRad( 90 + northsouth );
+
+        app.three.tunnel.rotation.z = THREE.Math.degToRad( eastwest );
+        app.three.chord.rotation.z = THREE.Math.degToRad( eastwest );
+
+
+        if ( app.options.rotateDrawings ) {
+
+          // Animates shovel drawings to rotate accordingly
+          app.elements.deviceFront.style.transform = 'rotate(' + eastwest * -1 + 'deg)';
+          app.elements.deviceSide.style.transform  = 'rotate(' + northsouth + 'deg)';
+
+        }
+
+      } else if ( app.data.incoming.json ) {
+
+        // If there is data coming from the Arduino sensor
+
+        console.log( app.data.incoming.json )
+
+        // Creates different variables (ditches northsouth and eastwest)
+
+        // Starting position is 180
+        let heading = app.data.incoming.json[ 0 ];
+
+        // Moving towards north makes vlue
+        let pitch   = app.data.incoming.json[ 1 ];
+
+        // Moves tunnel according to shovel inclination
+
+        // Makes tunnel roll (affects direction if paired with z rotation)
+        app.three.tunnel.rotation.y = THREE.Math.degToRad( 90 + heading );
+        app.three.chord.rotation.y = THREE.Math.degToRad( 90 + heading);
+
+        app.three.tunnel.rotation.z = THREE.Math.degToRad( pitch );
+        app.three.chord.rotation.z = THREE.Math.degToRad( pitch );
       }
 
-      if ( app.options.rotateDrawings ) {
-
-        // Animates shovel drawings to rotate accordingly
-        app.elements.deviceFront.style.transform = 'rotate(' + eastwest * -1 + 'deg)';
-        app.elements.deviceSide.style.transform  = 'rotate(' + northsouth + 'deg)';
-
-      }
-
-      // If there is data coming from the Arduino sensor
-      if ( app.data.incoming.json ) {
-
-        // Updates variables
-        // northsouth = app.data.incoming.json.x;
-        // eastwest   = - app.data.incoming.json.z;
-
-        northsouth = app.data.incoming.json.x;
-        eastwest   = app.data.incoming.json.z - 180;
-      }
-
-      // Moves tunnel according to shovel inclination
-      app.three.tunnel.rotation.x = THREE.Math.degToRad( 90 + northsouth );
-      app.three.chord.rotation.x = THREE.Math.degToRad( 90 + northsouth );
-
-      app.three.tunnel.rotation.z = THREE.Math.degToRad( eastwest );
-      app.three.chord.rotation.z = THREE.Math.degToRad( eastwest );
 
       // Rotates crust so default location is at latitude and longitude 0
       app.three.crust.rotation.y = THREE.Math.degToRad( -90 )
@@ -421,7 +438,7 @@ let app = {
             // Means tunnel is not inside Earth
 
             // Shrinks tunnel completely (so it disappears)
-            app.three.tunnel.scale.set( 0, 0, 0 );
+            // app.three.tunnel.scale.set( 0, 0, 0 );
 
             // Clears distance label
             app.three.labels.distance.element.textContent = ''
@@ -456,13 +473,6 @@ let app = {
 
       // Enables recursion (this function calls itself to draw frames of 3D animation)
       requestAnimationFrame( app.three.render );
-
-    },
-
-    update : function() {
-
-      // Handles data coming from inclination sensor
-      console.log( app.data.incoming.json )
 
     },
 
@@ -784,7 +794,7 @@ let app = {
       );
 
       // Makes camera move automatically and with inertia
-      app.three.controls.autoRotate = true;
+      app.three.controls.autoRotate = false;
       app.three.controls.autoRotateSpeed =   2; // 1 orbit in 30 seconds
       app.three.controls.autoRotateSpeed = .25; // 1 orbit in 240 seconds
       app.three.controls.enableDamping = true;
@@ -839,6 +849,9 @@ let app = {
       app.three.scene.add( app.three.stars );
       app.three.scene.add( app.three.earth );
 
+      // Debugs axes
+      let axesHelper = new THREE.AxesHelper( 1000 );
+      app.three.scene.add( axesHelper );
 
       // Animate 3D elements
       requestAnimationFrame( app.three.render );
@@ -952,9 +965,6 @@ let app = {
 
           // Parses and store most recent JSON received
           app.data.incoming.json = JSON.parse( string );
-
-          // Calls function to handle the newly received data
-          app.three.update();
 
         }
 
