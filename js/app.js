@@ -108,6 +108,8 @@ let app = {
         if ( isNaN( coordinate ) )
           coordinate = 0;
 
+          coordinate = coordinate.toFixed( 4 );
+
       }
 
       return coordinate;
