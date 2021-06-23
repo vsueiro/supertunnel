@@ -10,6 +10,7 @@ let app = {
     canvas        : document.querySelector( '.canvas'                 ),
     connectButton : document.querySelector( '.connect'                ),
     findButton    : document.querySelector( '.find'                   ),
+    trackButton   : document.querySelector( '.track'                  ),
     form          : document.querySelector( 'form'                    ),
     latitude      : document.querySelector( 'input[name="latitude"]'  ),
     longitude     : document.querySelector( 'input[name="longitude"]' ),
@@ -862,6 +863,32 @@ let app = {
 
   },
 
+  orientation : {
+
+    request : function() {
+
+      // Request permission for iOS 13+ devices
+      if ( DeviceMotionEvent && typeof DeviceMotionEvent.requestPermission === 'function' ) {
+
+        DeviceMotionEvent.requestPermission();
+
+      }
+
+    },
+
+    initialize : function() {
+
+      // Checks if device supports retrieving device orientation values
+      if ( DeviceMotionEvent && typeof DeviceMotionEvent.requestPermission === 'function' ) {
+
+        app.element.dataset.statusOrientation = 'supported';
+
+      }
+
+    }
+
+  },
+
   geolocation : {
 
     found : function( position ) {
@@ -1032,6 +1059,9 @@ let app = {
 
     initialize : function() {
 
+      // Tracks phone’s orientation when clicked
+      app.elements.trackButton.addEventListener( 'click', app.orientation.request );
+
       // Connects to serial port when button is clicked
       app.elements.connectButton.addEventListener( 'click', app.serial.connect );
 
@@ -1115,6 +1145,7 @@ let app = {
     app.three.initialize();
     app.events.initialize();
     app.parameters.initialize();
+    app.orientation.initialize();
 
   }
 

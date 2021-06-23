@@ -66,6 +66,7 @@ input[type="submit"] {
   border: none;
   outline: none;
   height: calc( var(--basis) * 4.8 );
+  padding: calc( var(--basis) * .8 );
   white-space: nowrap;
 }
 
@@ -375,6 +376,16 @@ form p:last-child {
   background: url('../assets/shovel/side-paired.svg');
   background-repeat: no-repeat;
   background-size: cover;
+}
+
+.app[data-status-orientation="unsupported"] {
+
+}
+
+.app[data-status-orientation="supported"] main section:first-child,
+.app[data-status-orientation="supported"] main section:last-child,
+.app[data-status-orientation="supported"] footer {
+  display: none;
 }
 
 /* Markers & labels */

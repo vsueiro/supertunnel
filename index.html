@@ -9,7 +9,7 @@
   </head>
   <body>
 
-    <div class="app" data-status-geolocation="unlocated" data-status-bluetooth="unpaired">
+    <div class="app" data-status-geolocation="unlocated" data-status-bluetooth="unpaired" data-status-orientation="unsupported">
 
       <div class="background">
         <canvas class="canvas"></canvas>
@@ -26,10 +26,11 @@
             </h1>
           </div>
           <nav>
-            <a href="#" target="_blank">About</a>
+            <button class="track">Track device orientation</button>
+            <!-- <a href="#" target="_blank">About</a> -->
           </nav>
-        </header>
 
+        </header>
         <main>
 
           <section>
@@ -44,12 +45,12 @@
 
               <label for="latitude">
                 <span>Latitude:</span>
-                <input type="text" name="latitude" value="-33.4489">
+                <input type="text" name="latitude" value="0">
               </label>
 
               <label for="longitude">
                 <span>Longitude:</span>
-                <input type="text" name="longitude" value="-70.6693">
+                <input type="text" name="longitude" value="0">
               </label>
 
               <input type="submit" value="Submit coordinates" style="display: none">
