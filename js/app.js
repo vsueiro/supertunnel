@@ -868,7 +868,7 @@ let app = {
     handle : function( event ) {
 
       // Prints values
-      document.querySelector( 'pre' ).textContent = event.alpha + '\n' +  event.beta + '\n' event.gamma;
+      document.querySelector( 'pre' ).textContent = event.alpha + '\n' + event.beta + '\n' + event.gamma;
 
     },
 
