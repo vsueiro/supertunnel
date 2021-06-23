@@ -865,12 +865,21 @@ let app = {
 
   orientation : {
 
+    handle : function( event ) {
+
+      // Prints values
+      document.querySelector( 'pre' ).textContent = event.alpha + '\n' +  event.beta + '\n' event.gamma;
+
+    },
+
     request : function() {
 
       // Request permission for iOS 13+ devices
       if ( DeviceMotionEvent && typeof DeviceMotionEvent.requestPermission === 'function' ) {
 
         DeviceMotionEvent.requestPermission();
+
+        window.addEventListener( 'deviceorientation', app.orientation.handle );
 
       }
 
