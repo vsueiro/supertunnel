@@ -378,8 +378,8 @@ form p:last-child {
   background-size: cover;
 }
 
-.app[data-status-orientation="unsupported"] {
-
+.app[data-status-orientation="unsupported"] main ol {
+  display: none;
 }
 
 .app[data-status-orientation="supported"] main section:first-child,
@@ -387,6 +387,15 @@ form p:last-child {
 .app[data-status-orientation="supported"] footer {
   display: none;
 }
+
+/* List of steps for mobile */
+
+ol {
+  display: flex;
+  flex-direction: column;
+  align-self: flex-end;
+}
+
 
 /* Markers & labels */
 
