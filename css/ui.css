@@ -242,6 +242,10 @@ nav {
 
 /* Boxes */
 
+main ol {
+  display: none;
+}
+
 main section {
   position: relative;
   background: rgba( var(--neutral-0-rgb), .75 );
@@ -437,10 +441,6 @@ form p:last-child {
   background-size: cover;
 }
 
-.app[data-status-orientation="unsupported"] main ol {
-  display: none;
-}
-
 .app[data-status-orientation="supported"] main section:first-child,
 .app[data-status-orientation="supported"] main section:last-child,
 .app[data-status-orientation="supported"] footer {
@@ -493,4 +493,34 @@ ol {
   font-size: calc( var(--basis) * 1.2 );
   letter-spacing: calc( var(--basis) * .3 );
   text-transform: uppercase;
+}
+
+/* Media queries */
+
+@media ( max-width: 1024px ) {
+
+  .foreground {
+    padding: calc( var(--basis) * 1.2 );
+  }
+
+  header,
+  footer {
+    border: none;
+  }
+
+
+  main ol {
+    display: none;
+  }
+
+  main section:first-child,
+  main section:last-child,
+  footer {
+    display: none;
+  }
+
+  main > ol {
+    display: flex;
+  }
+
 }
