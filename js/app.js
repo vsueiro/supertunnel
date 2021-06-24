@@ -15,7 +15,8 @@ let app = {
     latitude      : document.querySelector(    'input[name="latitude"]'  ),
     longitude     : document.querySelector(    'input[name="longitude"]' ),
     deviceFront   : document.querySelector(    '.device-front'           ),
-    deviceSide    : document.querySelector(    '.device-side'            )
+    deviceSide    : document.querySelector(    '.device-side'            ),
+    compassNeedle : document.querySelector(    '.needle'                 ),
 
   },
 
@@ -292,6 +293,9 @@ let app = {
 
 
         }
+
+        // Rotates compass needle
+        app.elements.compassNeedle.style.transform  = 'rotate(' + alpha + 'deg)';
 
         // Makes tunnel roll (affects direction if paired with z rotation)
         app.three.tunnel.rotation.y = THREE.Math.degToRad( 90 + alpha );
