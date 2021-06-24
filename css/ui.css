@@ -268,6 +268,87 @@ main section:last-child header {
   background-size: cover;
 }
 
+.rose {
+  position: relative;
+  display: flex;
+  height: 100%;
+}
+
+.directions {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+}
+
+.direction::before,
+.direction::after {
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: calc( var(--basis) * 1.2 );
+  letter-spacing: calc( var(--basis) * .4 );
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--accent-100);
+  width: calc( var(--basis) * 4.8 );
+  height: calc( var(--basis) * 4.8 );
+}
+
+.direction:nth-of-type(1)::before {
+  content: 'N';
+  top: 0;
+  left: 50%;
+  margin-left: calc( var(--basis) * -2.4 );
+}
+.direction:nth-of-type(1)::after {
+  content: 'S';
+  bottom: 0;
+  left: 50%;
+  margin-left: calc( var(--basis) * -2.4 );
+}
+.direction:nth-of-type(2)::before {
+  content: 'W';
+  top: 50%;
+  left: 0;
+  margin-top: calc( var(--basis) * -2.4 );
+}
+.direction:nth-of-type(2)::after {
+  content: 'E';
+  top: 50%;
+  right: 0;
+  margin-top: calc( var(--basis) * -2.4 );
+}
+
+.draggable-area {
+  display: flex;
+  position: absolute;
+  top: calc( var(--basis) * ( 4.8 + .4 ) );
+  right: calc( var(--basis) * ( 4.8 + .4 ) );
+  bottom: calc( var(--basis) * ( 4.8 + .4 ) );
+  left: calc( var(--basis) * ( 4.8 + .4 ) );
+}
+
+.draggable-area::before,
+.draggable-area::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  margin-left: calc( var(--basis) * -.05 );
+  width: 0;
+  height: 100%;
+  border: calc( var(--basis) * .1 ) dashed var(--accent-100);
+}
+
+.draggable-area::after {
+  transform: rotate( 90deg )
+}
+
+
 /* Form elements */
 
 form {
