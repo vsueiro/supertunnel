@@ -38,7 +38,6 @@
   padding: 0;
   box-sizing: border-box;
   list-style-type: none;
-  -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
 }
 
@@ -446,21 +445,22 @@ main section:last-child header {
   height: calc( var(--basis) * 6.4 );
   background: var(--accent-100);
   border-radius: 50%;
-  transform: translate( -50%, -50% ) scale( 1 );
+  transform: translate( -50%, -50% ) scale3d( 1, 1, 1);
   opacity: 0;
   animation: pulse 1.2s infinite;
   pointer-events: none;
+  perspective: 1000;
 }
 
 @keyframes pulse {
 
   0%   {
-    transform: translate( -50%, -50% ) scale( .5 );
+    transform: translate( -50%, -50% ) scale3d( .5, .5, .5);
     opacity: 1;
   }
 
   100% {
-    transform: translate( -50%, -50% ) scale( 1 );
+    transform: translate( -50%, -50% ) scale3d( 1, 1, 1);
     opacity: 0;
   }
 
