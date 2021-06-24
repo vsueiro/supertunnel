@@ -176,13 +176,13 @@ nav {
 
 .compass .needle {
   position: absolute;
-  top: 0;
+  top: calc( var(--basis) * -.6 );
   left: 50%;
   display: flex;
   justify-content: center;
   align-items: center;
   margin-left: calc( var(--basis) * -.6 );
-  height: calc( var(--basis) * 3.2 );
+  height: calc( var(--basis) * 4.8 );
   width: calc( var(--basis) * 1.2 );
 }
 
@@ -191,10 +191,10 @@ nav {
   position: absolute;
   display: flex;
   top: calc( var(--basis) * .2 );
-  bottom:0;
-  width: calc( var(--basis) * .2 );
-  height: 100%;
-  /* background: var(--accent-100); */
+  bottom: 0;
+  width: calc( var(--basis) * .3 );
+  height: calc( var(--basis) * 1 );
+  background: var(--accent-100);
 }
 
 .compass .needle::after {
@@ -206,7 +206,7 @@ nav {
   height: 0;
   border-left: calc( var(--basis) * .6 ) solid transparent;
   border-right: calc( var(--basis) * .6 ) solid transparent;
-  border-bottom: calc( var(--basis) * .8 ) solid var(--accent-100);
+  border-bottom: calc( var(--basis) * .6 ) solid var(--accent-100);
 }
 
 /* Logo */
