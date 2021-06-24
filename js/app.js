@@ -863,9 +863,16 @@ let app = {
 
   orientation : {
 
+    landscape : function() {
+
+      // Checks if window width is larger than its height (i.e., landscape mode)
+      return window.innerHeight < window.innerWidth;
+
+    },
+
     handle : function( event ) {
 
-      // Implements world-based calibration on iOS (alpha is 0 when pointing North), based on:      
+      // Implements world-based calibration on iOS (alpha is 0 when pointing North), based on:
       // https://www.w3.org/2008/geolocation/wiki/images/e/e0/Device_Orientation_%27alpha%27_Calibration-_Implementation_Status_and_Challenges.pdf
 
       document.querySelector( 'pre' ).textContent = event.alpha + '\n' + event.beta + '\n' + event.gamma;
