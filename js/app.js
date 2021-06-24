@@ -281,6 +281,18 @@ let app = {
 
         // Moves tunnel according to shovel inclination
 
+        if ( app.orientation.landscape() ) {
+
+          // Handles landscape orientation
+
+
+        } else {
+
+          // Handles portrait orientation
+
+
+        }
+
         // Makes tunnel roll (affects direction if paired with z rotation)
         app.three.tunnel.rotation.y = THREE.Math.degToRad( 90 + alpha );
         app.three.chord.rotation.y  = THREE.Math.degToRad( 90 + alpha);
@@ -288,8 +300,8 @@ let app = {
         app.three.tunnel.rotation.z = THREE.Math.degToRad( beta );
         app.three.chord.rotation.z  = THREE.Math.degToRad( beta );
 
-        app.three.tunnel.rotation.x = THREE.Math.degToRad( gamma );
-        app.three.chord.rotation.x  = THREE.Math.degToRad( gamma );
+        app.three.tunnel.rotation.x = THREE.Math.degToRad( 90 + gamma );
+        app.three.chord.rotation.x  = THREE.Math.degToRad( 90 + gamma );
 
 
       }
