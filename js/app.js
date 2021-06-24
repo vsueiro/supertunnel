@@ -283,10 +283,15 @@ let app = {
 
         // Makes tunnel roll (affects direction if paired with z rotation)
         app.three.tunnel.rotation.y = THREE.Math.degToRad( 90 + alpha );
-        app.three.chord.rotation.y = THREE.Math.degToRad( 90 + alpha);
+        app.three.chord.rotation.y  = THREE.Math.degToRad( 90 + alpha);
 
         app.three.tunnel.rotation.z = THREE.Math.degToRad( beta );
-        app.three.chord.rotation.z = THREE.Math.degToRad( beta );
+        app.three.chord.rotation.z  = THREE.Math.degToRad( beta );
+
+        app.three.tunnel.rotation.x = THREE.Math.degToRad( gamma );
+        app.three.chord.rotation.x  = THREE.Math.degToRad( gamma );
+
+
       }
 
       // Rotates crust so default location is at latitude and longitude 0
