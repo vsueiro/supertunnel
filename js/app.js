@@ -874,12 +874,16 @@ let app = {
 
     request : function() {
 
-      // Request permission for iOS 13+ devices
+      // Requests permission for iOS 13+ devices
       if ( DeviceMotionEvent && typeof DeviceMotionEvent.requestPermission === 'function' ) {
 
-        DeviceMotionEvent.requestPermission();
+        DeviceMotionEvent.requestPermission()
+        .then( response => {
 
-        window.addEventListener( 'deviceorientation', app.orientation.handle );
+          if ( response == 'granted' )
+            window.addEventListener( 'deviceorientation', app.orientation.handle );
+
+        } );
 
       }
 
@@ -887,7 +891,7 @@ let app = {
 
     initialize : function() {
 
-      // Checks if device supports retrieving device orientation values
+      // Checks if device supports retrieving device orientation values (uses https://sensor-js.xyz)
       if ( DeviceMotionEvent && typeof DeviceMotionEvent.requestPermission === 'function' ) {
 
         app.element.dataset.statusOrientation = 'supported';
