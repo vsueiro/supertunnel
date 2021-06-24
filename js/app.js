@@ -865,33 +865,23 @@ let app = {
 
     handle : function( event ) {
 
-      // Enables orientationControl
-      app.options.orientationControl = true;
-
       // Implements world-based calibration on iOS (alpha is 0 when pointing North)
       // https://www.w3.org/2008/geolocation/wiki/images/e/e0/Device_Orientation_%27alpha%27_Calibration-_Implementation_Status_and_Challenges.pdf
 
       console.log( 'orientationControl: ', app.options.orientationControl );
       console.log( 'event.absolute: ', event.absolute );
       console.log( 'event.webkitCompassAccuracy: ', event.webkitCompassAccuracy );
-
-      if (
-        app.data.orientation.initialOffset === undefined &&
-        event.absolute                     !== true      &&
-        +event.webkitCompassAccuracy        >  0         &&
-        +event.webkitCompassAccuracy        <  50
-      ) {
-
-        console.log( 'event.webkitCompassHeading: ', event.webkitCompassHeading );
-
-        app.data.orientation.initialOffset = event.webkitCompassHeading || 0;
-
-      }
-
+      console.log( 'event.webkitCompassHeading: ', event.webkitCompassHeading );
       console.log( 'event.alpha: ', event.alpha );
       console.log( 'app.data.orientation.initialOffset: ', app.data.orientation.initialOffset );
 
-      let alpha = event.alpha - app.data.orientation.initialOffset;
+      if ( app.data.orientation.initialOffset === undefined && event.absolute !== true )
+        app.data.orientation.initialOffset = event.webkitCompassHeading || 0;
+
+      let alpha = event.alpha;
+
+      if ( event.absolute !== true )
+        alpha = alpha - app.data.orientation.initialOffset;
 
       if ( alpha < 0 )
         alpha +=360;
@@ -913,8 +903,14 @@ let app = {
         DeviceMotionEvent.requestPermission()
         .then( response => {
 
-          if ( response == 'granted' )
+          if ( response == 'granted' ) {
+
+            // Enables orientationControl
+            app.options.orientationControl = true;
+
             window.addEventListener( 'deviceorientation', app.orientation.handle );
+
+          }
 
         } );
 
