@@ -6,15 +6,17 @@ let app = {
 
   elements : {
 
-    background    : document.querySelector( '.background'             ),
-    canvas        : document.querySelector( '.canvas'                 ),
-    connectButton : document.querySelector( '.connect'                ),
-    findButton    : document.querySelector( '.find'                   ),
-    form          : document.querySelector( 'form'                    ),
-    latitude      : document.querySelector( 'input[name="latitude"]'  ),
-    longitude     : document.querySelector( 'input[name="longitude"]' ),
-    deviceFront   : document.querySelector( '.device-front'           ),
-    deviceSide    : document.querySelector( '.device-side'            )
+    findButton    : document.querySelectorAll( '.find'                   ),
+    connectButton : document.querySelector(    '.connect'                ),
+    trackButton   : document.querySelector(    '.track'                  ),
+    background    : document.querySelector(    '.background'             ),
+    canvas        : document.querySelector(    '.canvas'                 ),
+    form          : document.querySelector(    'form'                    ),
+    latitude      : document.querySelector(    'input[name="latitude"]'  ),
+    longitude     : document.querySelector(    'input[name="longitude"]' ),
+    deviceFront   : document.querySelector(    '.device-front'           ),
+    deviceSide    : document.querySelector(    '.device-side'            ),
+    compassNeedle : document.querySelector(    '.needle'                 ),
 
   },
 
@@ -30,6 +32,7 @@ let app = {
   options : {
 
     mouseControl : false,
+    orientationControl : false,
     rotateDrawings : false,
 
   },
@@ -134,16 +137,22 @@ let app = {
 
     },
 
-    incoming : {
-      stream : '',
-      json : undefined,
-    },
-
     outgoing : {
       origin          : undefined, // country name
       destination     : undefined, // country name
       destinationType : undefined, // (land|water|air)
       distance        : undefined, // in km
+    },
+
+    orientation : {
+
+      initialOffset   : undefined, // Used to calibrate alpha to face North
+
+      alpha           : undefined,
+      beta            : undefined,
+      gamma           : undefined,
+
+
     },
 
     user : {                // In decimal degrees
@@ -235,7 +244,7 @@ let app = {
       // Creates a simple time counter (since the animation started)
       app.data.seconds = time * .001;
 
-      // Initializes values to be updated according to inclination sensor
+      // Initializes values to be updated according to mouse sensor
       let northsouth = 0; // +90 to -90
       let eastwest   = 0; // +90 to -90
 
@@ -265,55 +274,63 @@ let app = {
 
         }
 
-      } else if ( app.data.incoming.json ) {
+      } else if ( app.options.orientationControl ) {
 
-        // If there is data coming from the Arduino sensor
-
-        console.log( app.data.incoming.json )
-
-        // Creates different variables (ditches northsouth and eastwest)
-
-        // Starting position is 180
-        let heading = app.data.incoming.json[ 0 ];
-
-        // Moving towards north makes vlue
-        let pitch   = app.data.incoming.json[ 1 ];
+        let alpha = app.data.orientation.alpha;
+        let beta  = app.data.orientation.beta;
+        let gamma = app.data.orientation.gamma;
 
         // Moves tunnel according to shovel inclination
 
-        // Makes tunnel roll (affects direction if paired with z rotation)
-        app.three.tunnel.rotation.y = THREE.Math.degToRad( 90 + heading );
-        app.three.chord.rotation.y = THREE.Math.degToRad( 90 + heading);
+        if ( app.orientation.landscape() ) {
 
-        app.three.tunnel.rotation.z = THREE.Math.degToRad( pitch );
-        app.three.chord.rotation.z = THREE.Math.degToRad( pitch );
+          // Handles landscape orientation
+
+
+        } else {
+
+          // Handles portrait orientation
+
+
+        }
+
+        // Rotates compass needle
+        app.elements.compassNeedle.style.transform  = 'rotate(' + alpha + 'deg)';
+
+        // Makes tunnel roll (affects direction if paired with z rotation)
+        app.three.tunnel.rotation.y = THREE.Math.degToRad( 90 + alpha );
+        app.three.chord.rotation.y  = THREE.Math.degToRad( 90 + alpha);
+
+        app.three.tunnel.rotation.z = THREE.Math.degToRad( beta );
+        app.three.chord.rotation.z  = THREE.Math.degToRad( beta );
+
       }
 
-
       // Rotates crust so default location is at latitude and longitude 0
-      app.three.crust.rotation.y = THREE.Math.degToRad( -90 )
+      app.three.crust.rotation.y = THREE.Math.degToRad( -90 );
 
       // Rotates countries so default location is at latitude and longitude 0
       if ( app.three.land ) {
-        app.three.land.rotation.y = THREE.Math.degToRad( -180)
+        app.three.land.rotation.y = THREE.Math.degToRad( -180 );
+
       }
 
       // Rotates crust & countries so it looks like the pivot point is the user location
       if ( app.data.user.latitude && app.data.user.longitude ) {
 
         // Crust
-        app.three.crust.rotation.x = THREE.Math.degToRad( app.data.user.latitude )
-        app.three.crust.rotation.y = THREE.Math.degToRad( -90 - app.data.user.longitude )
+        app.three.crust.rotation.x = THREE.Math.degToRad( app.data.user.latitude );
+        app.three.crust.rotation.y = THREE.Math.degToRad( -90 - app.data.user.longitude );
 
         // Countries
         if ( app.three.land ) {
-          app.three.land.rotation.y = THREE.Math.degToRad( -180 - app.data.user.longitude )
+          app.three.land.rotation.y = THREE.Math.degToRad( -180 - app.data.user.longitude );
         }
 
       }
 
       // Rotates Earth (group) to counter-act previous rotation so OrbitControls work better
-      app.three.earth.rotation.x = THREE.Math.degToRad( - app.data.user.latitude )
+      app.three.earth.rotation.x = THREE.Math.degToRad( - app.data.user.latitude );
 
       // Gets position & direction of chord (center of tunnel)
       let chordPosition = app.three.chord.geometry.getAttribute( 'position' );
@@ -330,7 +347,6 @@ let app = {
 
       // Makes raycaster match the position and angle of the tunnel
       app.three.raycaster.set( worldOrigin, chordDirection );
-
 
       // Checks collision of chord (tunnel center) with every country
       if ( app.three.land ) {
@@ -862,6 +878,79 @@ let app = {
 
   },
 
+  orientation : {
+
+    landscape : function() {
+
+      // Checks if window width is larger than its height (i.e., landscape mode)
+      return window.innerHeight < window.innerWidth;
+
+    },
+
+    handle : function( event ) {
+
+      // Implements world-based calibration on iOS (alpha is 0 when pointing North), based on:
+      // https://www.w3.org/2008/geolocation/wiki/images/e/e0/Device_Orientation_%27alpha%27_Calibration-_Implementation_Status_and_Challenges.pdf
+
+      // TODO: This works, but not always (quality reading?)
+
+      document.querySelector( 'pre' ).textContent = event.alpha + '\n' + event.beta + '\n' + event.gamma;
+
+      if ( app.data.orientation.initialOffset === undefined && event.absolute !== true )
+        app.data.orientation.initialOffset = event.webkitCompassHeading || 0;
+
+      let alpha = event.alpha;
+
+      // Calibrates alpha to make it North-based
+      if ( event.absolute !== true )
+        alpha = alpha - app.data.orientation.initialOffset;
+
+      if ( alpha < 0 )
+        alpha +=360;
+
+      // Updates values to be used on render function
+      app.data.orientation.alpha = alpha;
+      app.data.orientation.beta  = event.beta;
+      app.data.orientation.gamma = event.gamma;
+
+    },
+
+    request : function() {
+
+      // Requests permission for iOS 13+ devices
+      if ( DeviceMotionEvent && typeof DeviceMotionEvent.requestPermission === 'function' ) {
+
+        DeviceMotionEvent.requestPermission()
+        .then( response => {
+
+          if ( response == 'granted' ) {
+
+            // Enables orientationControl
+            app.options.orientationControl = true;
+
+            window.addEventListener( 'deviceorientation', app.orientation.handle );
+
+          }
+
+        } );
+
+      }
+
+    },
+
+    initialize : function() {
+
+      // Checks if device supports retrieving device orientation values (uses https://sensor-js.xyz)
+      if ( DeviceMotionEvent && typeof DeviceMotionEvent.requestPermission === 'function' ) {
+
+        app.element.dataset.statusOrientation = 'supported';
+
+      }
+
+    }
+
+  },
+
   geolocation : {
 
     found : function( position ) {
@@ -949,94 +1038,17 @@ let app = {
 
   },
 
-  serial : {
-
-    split : function() {
-
-      // Splits concatenated string by newline character
-      let parts = app.data.incoming.stream.split( "\n" );
-
-      // If there is at least one newline character
-      if ( parts.length > 1 ) {
-
-        // Stores JSON string in variable
-        let string = parts[ 0 ];
-
-        // Checks if it is a valid JSON
-        if ( app.validates.json( string ) ) {
-
-          // Parses and store most recent JSON received
-          app.data.incoming.json = JSON.parse( string );
-
-        }
-
-        // Resets incoming stream (concatenated strings) for next JSON package
-        app.data.incoming.stream = parts[ 1 ];
-
-        // Enabels recursion to account for multiple newline characters in string
-        app.serial.split();
-
-      }
-
-    },
-
-    connect : function() {
-
-      if ( 'serial' in navigator ) {
-
-        // Begins asynchronous call
-        (async() => {
-
-          // Requests serial ports using Web Serial API
-          const port = await navigator.serial.requestPort();
-
-          // Sets rate to 9600 bits per second (must match Arduino’s)
-          await port.open({
-            baudRate: 9600
-          });
-
-          // Converts messages to strings
-          const textDecoder = new TextDecoderStream();
-          const readableStreamClosed = port.readable.pipeTo( textDecoder.writable );
-          const reader = textDecoder.readable.getReader();
-
-          // Listens to data coming from the serial device
-          while ( true ) {
-
-            const { value, done } = await reader.read();
-
-            if ( done ) {
-
-              // Allows the serial port to be closed later
-              reader.releaseLock();
-              break;
-
-            }
-
-            // Puts incoming strings together until it finds a new line
-            app.data.incoming.stream += value;
-            app.serial.split();
-
-          }
-
-
-        })();
-
-      }
-
-    }
-
-  },
-
   events : {
 
     initialize : function() {
 
-      // Connects to serial port when button is clicked
-      app.elements.connectButton.addEventListener( 'click', app.serial.connect );
+      // Tracks phone’s orientation when clicked
+      app.elements.trackButton.addEventListener( 'click', app.orientation.request );
 
       // Finds user’s location when button is clicked
-      app.elements.findButton.addEventListener( 'click', app.geolocation.find );
+      app.elements.findButton.forEach( button =>
+        button.addEventListener( 'click', app.geolocation.find )
+      );
 
       // Handles location form
       app.elements.form.addEventListener( 'submit', function() {
@@ -1115,6 +1127,7 @@ let app = {
     app.three.initialize();
     app.events.initialize();
     app.parameters.initialize();
+    app.orientation.initialize();
 
   }
 

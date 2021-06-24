@@ -9,7 +9,7 @@
   </head>
   <body>
 
-    <div class="app" data-status-geolocation="unlocated" data-status-bluetooth="unpaired">
+    <div class="app" data-status-geolocation="unlocated" data-status-bluetooth="unpaired" data-status-orientation="unsupported">
 
       <div class="background">
         <canvas class="canvas"></canvas>
@@ -26,10 +26,15 @@
             </h1>
           </div>
           <nav>
+            <!--
             <a href="#" target="_blank">About</a>
+            -->
+            <div class="compass">
+              <div class="needle"></div>
+            </div>
           </nav>
-        </header>
 
+        </header>
         <main>
 
           <section>
@@ -44,12 +49,12 @@
 
               <label for="latitude">
                 <span>Latitude:</span>
-                <input type="text" name="latitude" value="-33.4489">
+                <input type="text" name="latitude" value="0">
               </label>
 
               <label for="longitude">
                 <span>Longitude:</span>
-                <input type="text" name="longitude" value="-70.6693">
+                <input type="text" name="longitude" value="0">
               </label>
 
               <input type="submit" value="Submit coordinates" style="display: none">
@@ -67,6 +72,26 @@
             <p class="tip">Simulate a tunnel through Earth, starting from where you are</p>
 
           </section>
+
+          <ol>
+            <li>
+              <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor</p>
+              <button class="find">
+                <span>Get my location</span>
+                <span>Locating...</span>
+                <span>Found you</span>
+              </button>
+            </li>
+            <li>
+              <p>Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt</p>
+
+              <pre class="log"></pre>
+
+              <button class="track">
+                <span>Track device orientation</span>
+              </button>
+            </li>
+          </ol>
 
           <section>
 
@@ -128,30 +153,9 @@
 
         </footer>
 
-
-        <!--
-        <img src="assets/shovel/front.svg">
-        <img src="assets/shovel/side.svg">
-
-        <img src="assets/shovel/front-paired.svg">
-        <img src="assets/shovel/side-paired.svg">
-
-        -->
-
       </div>
 
     </div>
-
-    <!-- p5.js -->
-
-    <!-- https://unpkg.com/browse/p5@0.7.2/lib/p5.min.js -->
-    <script src="js/p5.min.js"></script>
-
-    <!-- https://unpkg.com/browse/p5@0.7.2/lib/addons/p5.dom.min.js -->
-    <script src="js/p5.dom.min.js"></script>
-
-    <!-- https://unpkg.com/browse/p5ble@0.0.4/dist/p5.ble.min.js -->
-    <script src="js/p5.ble.min.js"></script>
 
     <!-- three.js -->
 
