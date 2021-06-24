@@ -307,29 +307,30 @@ let app = {
       }
 
       // Rotates crust so default location is at latitude and longitude 0
-      app.three.crust.rotation.y = THREE.Math.degToRad( -90 )
+      app.three.crust.rotation.y = THREE.Math.degToRad( -90 );
 
       // Rotates countries so default location is at latitude and longitude 0
       if ( app.three.land ) {
-        app.three.land.rotation.y = THREE.Math.degToRad( -180)
+        app.three.land.rotation.y = THREE.Math.degToRad( -180 );
+
       }
 
       // Rotates crust & countries so it looks like the pivot point is the user location
       if ( app.data.user.latitude && app.data.user.longitude ) {
 
         // Crust
-        app.three.crust.rotation.x = THREE.Math.degToRad( app.data.user.latitude )
-        app.three.crust.rotation.y = THREE.Math.degToRad( -90 - app.data.user.longitude )
+        app.three.crust.rotation.x = THREE.Math.degToRad( app.data.user.latitude );
+        app.three.crust.rotation.y = THREE.Math.degToRad( -90 - app.data.user.longitude );
 
         // Countries
         if ( app.three.land ) {
-          app.three.land.rotation.y = THREE.Math.degToRad( -180 - app.data.user.longitude )
+          app.three.land.rotation.y = THREE.Math.degToRad( -180 - app.data.user.longitude );
         }
 
       }
 
       // Rotates Earth (group) to counter-act previous rotation so OrbitControls work better
-      app.three.earth.rotation.x = THREE.Math.degToRad( - app.data.user.latitude )
+      app.three.earth.rotation.x = THREE.Math.degToRad( - app.data.user.latitude );
 
       // Gets position & direction of chord (center of tunnel)
       let chordPosition = app.three.chord.geometry.getAttribute( 'position' );
@@ -346,7 +347,6 @@ let app = {
 
       // Makes raycaster match the position and angle of the tunnel
       app.three.raycaster.set( worldOrigin, chordDirection );
-
 
       // Checks collision of chord (tunnel center) with every country
       if ( app.three.land ) {
