@@ -31,6 +31,7 @@ let app = {
   options : {
 
     mouseControl : false,
+    orientationControl : false,
     rotateDrawings : false,
 
   },
@@ -135,16 +136,22 @@ let app = {
 
     },
 
-    incoming : {
-      stream : '',
-      json : undefined,
-    },
-
     outgoing : {
       origin          : undefined, // country name
       destination     : undefined, // country name
       destinationType : undefined, // (land|water|air)
       distance        : undefined, // in km
+    },
+
+    orientation : {
+
+      initialOffset   : undefined, // Used to calibrate alpha to face North
+
+      alpha           : undefined,
+      beta            : undefined,
+      gamma           : undefined,
+
+
     },
 
     user : {                // In decimal degrees
@@ -236,7 +243,7 @@ let app = {
       // Creates a simple time counter (since the animation started)
       app.data.seconds = time * .001;
 
-      // Initializes values to be updated according to inclination sensor
+      // Initializes values to be updated according to mouse sensor
       let northsouth = 0; // +90 to -90
       let eastwest   = 0; // +90 to -90
 
@@ -266,30 +273,21 @@ let app = {
 
         }
 
-      } else if ( app.data.incoming.json ) {
+      } else if ( app.options.orientationControl ) {
 
-        // If there is data coming from the Arduino sensor
-
-        console.log( app.data.incoming.json )
-
-        // Creates different variables (ditches northsouth and eastwest)
-
-        // Starting position is 180
-        let heading = app.data.incoming.json[ 0 ];
-
-        // Moving towards north makes vlue
-        let pitch   = app.data.incoming.json[ 1 ];
+        let alpha = app.data.orientation.alpha;
+        let beta  = app.data.orientation.beta;
+        let gamma = app.data.orientation.gamma;
 
         // Moves tunnel according to shovel inclination
 
         // Makes tunnel roll (affects direction if paired with z rotation)
-        app.three.tunnel.rotation.y = THREE.Math.degToRad( 90 + heading );
-        app.three.chord.rotation.y = THREE.Math.degToRad( 90 + heading);
+        app.three.tunnel.rotation.y = THREE.Math.degToRad( 90 + alpha );
+        app.three.chord.rotation.y = THREE.Math.degToRad( 90 + alpha);
 
-        app.three.tunnel.rotation.z = THREE.Math.degToRad( pitch );
-        app.three.chord.rotation.z = THREE.Math.degToRad( pitch );
+        app.three.tunnel.rotation.z = THREE.Math.degToRad( beta );
+        app.three.chord.rotation.z = THREE.Math.degToRad( beta );
       }
-
 
       // Rotates crust so default location is at latitude and longitude 0
       app.three.crust.rotation.y = THREE.Math.degToRad( -90 )
@@ -867,8 +865,33 @@ let app = {
 
     handle : function( event ) {
 
-      // Prints values
-      document.querySelector( 'pre' ).textContent = event.alpha + '\n' + event.beta + '\n' + event.gamma;
+      // Enables orientationControl
+      app.options.orientationControl = true;
+
+      // Implements world-based calibration on iOS (alpha is 0 when pointing North)
+      // https://www.w3.org/2008/geolocation/wiki/images/e/e0/Device_Orientation_%27alpha%27_Calibration-_Implementation_Status_and_Challenges.pdf
+
+      if (
+        app.data.orientation.initialOffset === undefined &&
+        event.absolute                     !== true      &&
+        +event.webkitCompassAccuracy        >  0         &&
+        +event.webkitCompassAccuracy        <  50
+      ) {
+
+        app.data.orientation.initialOffset = event.webkitCompassHeading || 0;
+
+      }
+
+      let alpha = event.alpha - initialOffset;
+
+      if ( alpha < 0 )
+        alpha +=360;
+
+
+      // Updates values to be used on render function
+      app.data.orientation.alpha = alpha;
+      app.data.orientation.beta  = event.beta;
+      app.data.orientation.gamma = event.gamma;
 
     },
 
@@ -989,94 +1012,12 @@ let app = {
 
   },
 
-  serial : {
-
-    split : function() {
-
-      // Splits concatenated string by newline character
-      let parts = app.data.incoming.stream.split( "\n" );
-
-      // If there is at least one newline character
-      if ( parts.length > 1 ) {
-
-        // Stores JSON string in variable
-        let string = parts[ 0 ];
-
-        // Checks if it is a valid JSON
-        if ( app.validates.json( string ) ) {
-
-          // Parses and store most recent JSON received
-          app.data.incoming.json = JSON.parse( string );
-
-        }
-
-        // Resets incoming stream (concatenated strings) for next JSON package
-        app.data.incoming.stream = parts[ 1 ];
-
-        // Enabels recursion to account for multiple newline characters in string
-        app.serial.split();
-
-      }
-
-    },
-
-    connect : function() {
-
-      if ( 'serial' in navigator ) {
-
-        // Begins asynchronous call
-        (async() => {
-
-          // Requests serial ports using Web Serial API
-          const port = await navigator.serial.requestPort();
-
-          // Sets rate to 9600 bits per second (must match Arduino’s)
-          await port.open({
-            baudRate: 9600
-          });
-
-          // Converts messages to strings
-          const textDecoder = new TextDecoderStream();
-          const readableStreamClosed = port.readable.pipeTo( textDecoder.writable );
-          const reader = textDecoder.readable.getReader();
-
-          // Listens to data coming from the serial device
-          while ( true ) {
-
-            const { value, done } = await reader.read();
-
-            if ( done ) {
-
-              // Allows the serial port to be closed later
-              reader.releaseLock();
-              break;
-
-            }
-
-            // Puts incoming strings together until it finds a new line
-            app.data.incoming.stream += value;
-            app.serial.split();
-
-          }
-
-
-        })();
-
-      }
-
-    }
-
-  },
-
   events : {
 
     initialize : function() {
 
       // Tracks phone’s orientation when clicked
       app.elements.trackButton.addEventListener( 'click', app.orientation.request );
-
-      // Connects to serial port when button is clicked
-      app.elements.connectButton.addEventListener( 'click', app.serial.connect );
 
       // Finds user’s location when button is clicked
       app.elements.findButton.forEach( button =>
