@@ -304,10 +304,6 @@ let app = {
         app.three.tunnel.rotation.z = THREE.Math.degToRad( beta );
         app.three.chord.rotation.z  = THREE.Math.degToRad( beta );
 
-        app.three.tunnel.rotation.x = THREE.Math.degToRad( 90 + gamma );
-        app.three.chord.rotation.x  = THREE.Math.degToRad( 90 + gamma );
-
-
       }
 
       // Rotates crust so default location is at latitude and longitude 0
@@ -895,6 +891,8 @@ let app = {
 
       // Implements world-based calibration on iOS (alpha is 0 when pointing North), based on:
       // https://www.w3.org/2008/geolocation/wiki/images/e/e0/Device_Orientation_%27alpha%27_Calibration-_Implementation_Status_and_Challenges.pdf
+
+      // TODO: This works, but not always (quality reading?)
 
       document.querySelector( 'pre' ).textContent = event.alpha + '\n' + event.beta + '\n' + event.gamma;
 
