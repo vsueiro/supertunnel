@@ -6,17 +6,20 @@ let app = {
 
   elements : {
 
-    findButton    : document.querySelectorAll( '.find'                   ),
-    connectButton : document.querySelector(    '.connect'                ),
-    trackButton   : document.querySelector(    '.track'                  ),
-    background    : document.querySelector(    '.background'             ),
-    canvas        : document.querySelector(    '.canvas'                 ),
-    form          : document.querySelector(    'form'                    ),
-    latitude      : document.querySelector(    'input[name="latitude"]'  ),
-    longitude     : document.querySelector(    'input[name="longitude"]' ),
-    deviceFront   : document.querySelector(    '.device-front'           ),
-    deviceSide    : document.querySelector(    '.device-side'            ),
-    compassNeedle : document.querySelector(    '.needle'                 ),
+    findButton      : document.querySelectorAll( '.find'                   ),
+    connectButton   : document.querySelector(    '.connect'                ),
+    trackButton     : document.querySelector(    '.track'                  ),
+    background      : document.querySelector(    '.background'             ),
+    canvas          : document.querySelector(    '.canvas'                 ),
+    form            : document.querySelector(    'form'                    ),
+    latitude        : document.querySelector(    'input[name="latitude"]'  ),
+    longitude       : document.querySelector(    'input[name="longitude"]' ),
+    deviceFront     : document.querySelector(    '.device-front'           ),
+    deviceSide      : document.querySelector(    '.device-side'            ),
+    compassNeedle   : document.querySelector(    '.needle'                 ),
+    grabArea        : document.querySelector(    '.rose'                   ),
+    area            : document.querySelector(    '.draggable-area'         ),
+    handle          : document.querySelector(    '.draggable-handle'       ),
 
   },
 
@@ -878,6 +881,136 @@ let app = {
 
   },
 
+  drag : {
+
+    grabbing : false,
+
+    position : {
+
+      percentage : {
+        top : undefined,
+        left : undefined,
+      },
+
+      initial : {
+        x : undefined,
+        y : undefined,
+        top : 0,
+        left: 0,
+      },
+
+      current : {
+        x : undefined,
+        y : undefined,
+      },
+
+      offset : {
+        x : 0,
+        y : 0,
+      }
+
+    },
+
+    start : function() {
+
+      if ( event.type === 'touchstart' ) {
+
+        app.drag.position.initial.x = event.touches[ 0 ].clientX - app.drag.position.offset.x;
+        app.drag.position.initial.y = event.touches[ 0 ].clientY - app.drag.position.offset.y;
+
+      } else {
+
+        app.drag.position.initial.x = event.clientX - app.drag.position.offset.x;
+        app.drag.position.initial.y = event.clientY - app.drag.position.offset.y;
+
+      }
+
+      app.drag.position.initial.top = parseFloat( getComputedStyle( app.elements.handle ).top );
+      app.drag.position.initial.left = parseFloat( getComputedStyle( app.elements.handle ).top );
+
+      if ( event.target === app.elements.handle )
+        app.drag.grabbing = true;
+
+    },
+
+    move : function() {
+
+      if ( app.drag.grabbing ) {
+
+        event.preventDefault();
+
+        if ( event.type === 'touchmove' ) {
+
+          app.drag.position.current.x = event.touches[ 0 ].clientX - app.drag.position.initial.x;
+          app.drag.position.current.y = event.touches[ 0 ].clientY - app.drag.position.initial.y;
+
+        } else {
+
+          app.drag.position.current.x = event.clientX - app.drag.position.initial.x;
+          app.drag.position.current.y = event.clientY - app.drag.position.initial.y;
+
+        }
+
+        // Converts absolute pixels offset into percentage offset
+        app.drag.position.percentage.top  = app.drag.position.initial.top  + ( 100 * app.drag.position.current.y / app.elements.area.offsetHeight );
+        app.drag.position.percentage.left = app.drag.position.initial.left + ( 100 * app.drag.position.current.x / app.elements.area.offsetWidth  );
+
+
+        // // Limits offset within 0 to 100% boundary
+        if ( app.drag.position.percentage.top < 0 )
+          app.drag.position.percentage.top = 0
+
+        if ( app.drag.position.percentage.top > 100 )
+          app.drag.position.percentage.top = 100
+
+        if ( app.drag.position.percentage.left < 0 )
+          app.drag.position.percentage.left = 0
+
+        if ( app.drag.position.percentage.left > 100 )
+          app.drag.position.percentage.left = 100
+
+
+
+        if ( app.drag.position.current.x >= 0 && app.drag.position.current.x <= 100 )
+          app.drag.position.offset.x = app.drag.position.current.x;
+
+        if ( app.drag.position.current.y >= 0 && app.drag.position.current.y <= 100 )
+          app.drag.position.offset.y = app.drag.position.current.y;
+
+
+        app.elements.handle.style.top  = app.drag.position.percentage.top  + '%';
+        app.elements.handle.style.left = app.drag.position.percentage.left + '%';
+
+      }
+
+    },
+
+    leave : function() {
+
+      app.drag.position.initial.top = parseFloat( getComputedStyle( app.elements.handle ).top );
+      app.drag.position.initial.left = parseFloat( getComputedStyle( app.elements.handle ).top );
+
+      app.drag.position.initial.x = app.drag.position.current.x;
+      app.drag.position.initial.y = app.drag.position.current.y;
+
+      app.drag.grabbing = false;
+
+    },
+
+    end : function() {
+
+      app.drag.position.initial.top = parseFloat( getComputedStyle( app.elements.handle ).top );
+      app.drag.position.initial.left = parseFloat( getComputedStyle( app.elements.handle ).top );
+
+      app.drag.position.initial.x = app.drag.position.current.x;
+      app.drag.position.initial.y = app.drag.position.current.y;
+
+      app.drag.grabbing = false;
+
+    },
+
+  },
+
   orientation : {
 
     landscape : function() {
@@ -1066,6 +1199,16 @@ let app = {
       app.elements.longitude.addEventListener( 'change', app.geolocation.submit );
       app.elements.longitude.addEventListener( 'blur',   app.geolocation.submit );
       app.elements.longitude.addEventListener( 'input',  app.geolocation.validate );
+
+      // Enables drag on handle to control tunnel angles on desktop
+      app.elements.grabArea.addEventListener( 'touchstart', app.drag.start, false);
+      app.elements.grabArea.addEventListener( 'touchmove',  app.drag.move,  false);
+      app.elements.grabArea.addEventListener( 'touchend',   app.drag.end,   false);
+
+      app.elements.grabArea.addEventListener( 'mousedown',  app.drag.start, false);
+      app.elements.grabArea.addEventListener( 'mousemove',  app.drag.move,  false);
+      app.elements.grabArea.addEventListener( 'mouseup',    app.drag.end,   false);
+      app.elements.grabArea.addEventListener( 'mouseleave', app.drag.leave, false);
 
       // Calculates mouse position in normalized device coordinates (-1 to +1)
       window.addEventListener( 'mousemove', app.three.normalizeMouse, false );
