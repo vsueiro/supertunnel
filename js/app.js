@@ -7,15 +7,12 @@ let app = {
   elements : {
 
     findButton      : document.querySelectorAll( '.find'                   ),
-    connectButton   : document.querySelector(    '.connect'                ),
     trackButton     : document.querySelector(    '.track'                  ),
     background      : document.querySelector(    '.background'             ),
     canvas          : document.querySelector(    '.canvas'                 ),
     form            : document.querySelector(    'form'                    ),
     latitude        : document.querySelector(    'input[name="latitude"]'  ),
     longitude       : document.querySelector(    'input[name="longitude"]' ),
-    deviceFront     : document.querySelector(    '.device-front'           ),
-    deviceSide      : document.querySelector(    '.device-side'            ),
     compassNeedle   : document.querySelector(    '.needle'                 ),
     area            : document.querySelector(    '.draggable-area'         ),
     handle          : document.querySelector(    '.draggable-handle'       ),

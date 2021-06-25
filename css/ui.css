@@ -534,15 +534,13 @@ form p:last-child {
   user-select: none;
 }
 
-.app[data-status-geolocation="locating"] button.find,
-.app[data-status-bluetooth="pairing"] button.connect {
+.app[data-status-geolocation="locating"] button.find {
   pointer-events: none;
   background: rgba( var(--accent-100-rgb), .2 );
   color: var(--accent-100);
 }
 
-.app[data-status-geolocation="located"] button.find,
-.app[data-status-bluetooth="paired"] button.connect {
+.app[data-status-geolocation="located"] button.find {
   pointer-events: none;
   background: rgba( var(--success-100-rgb), .25 );
   color: var(--success-100);
@@ -557,28 +555,8 @@ form p:last-child {
   color: transparent;
 }
 
-.app[data-status-bluetooth="paired"] main section:last-child {
-  border-color: var(--success-100);
-}
-
-.app[data-status-bluetooth="paired"] main section:last-child header {
-  color: var(--success-100);
-}
-
-.app[data-status-bluetooth="paired"] .backlight {
-  background: rgba( var(--success-100-rgb), .0666 );
-}
-
-.app[data-status-bluetooth="paired"] .device-front {
-  background: url('../assets/shovel/front-paired.svg');
-  background-repeat: no-repeat;
-  background-size: cover;
-}
-
-.app[data-status-bluetooth="paired"] .device-side {
-  background: url('../assets/shovel/side-paired.svg');
-  background-repeat: no-repeat;
-  background-size: cover;
+.app[data-status-orientation="unsupported"] .compass {
+  display: none;
 }
 
 .app[data-status-orientation="supported"] main section:first-child,
