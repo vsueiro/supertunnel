@@ -561,6 +561,16 @@ form p:last-child {
   color: transparent;
 }
 
+.app[data-status-geolocation="located"] .step:nth-child(1) {
+  border-color: var(--success-100);
+}
+
+.app[data-status-geolocation="located"] .step:nth-child(1) > div {
+  display: none;
+}
+
+
+
 /*
 
 .app[data-status-orientation="supported"] main section:first-child,
