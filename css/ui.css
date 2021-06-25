@@ -664,4 +664,8 @@ ol {
     display: flex;
   }
 
+  .label-destination {
+    font-size: calc( var(--basis) * 2.4 );
+  }
+
 }
