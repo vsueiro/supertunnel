@@ -187,10 +187,8 @@ let app = {
         element    : undefined,
         object     : undefined
       },
-      origin       : {
-        element    : undefined,
-        object     : undefined
-      }
+      origin       : document.querySelector( '.label-origin' ),
+      angle        : document.querySelector( '.label-angle' ),
     },
     markers        : {
       origin       : {
@@ -235,6 +233,51 @@ let app = {
         // Updates camera accordingly
         app.three.camera.aspect = c.clientWidth / c.clientHeight;
         app.three.camera.updateProjectionMatrix();
+
+        // Moves camera closer or further away to adjust Earth’s dimensions on screen
+
+        let distance = app.data.earth.radius.crust * 3;
+        let min      = app.data.earth.radius.crust * 3;
+        let max      = app.data.earth.radius.crust * 4.5;
+
+        if ( app.three.camera.aspect > 4/3 ) {
+
+          // Handles landscape viewports (wider than 4:3)
+          console.log( 'Handles landscape viewports (wider than 4:3)' );
+
+          distance = distance * 1280 / c.clientWidth;
+          if ( distance > max ) { distance = max }
+          if ( distance < min ) { distance = min }
+
+          app.three.camera.position.z = distance
+
+        } else if ( app.three.camera.aspect >= 3/4 ) {
+
+          // Handles square-ish viewports (from 3:4 to 4:3)
+          console.log( 'Handles square-ish viewports (from 3:4 to 4:3)' );
+
+          distance = distance * 1280 / c.clientWidth;
+          if ( distance > max ) { distance = max }
+          if ( distance < min ) { distance = min }
+
+          app.three.camera.position.z = distance
+
+        } else {
+
+          // Handles portrait viewports (narrower than 3:4)
+          console.log( 'Handles portrait viewports (narrower than 3:4)' );
+
+          distance = distance * 1280 / c.clientWidth;
+          if ( distance > max ) { distance = max }
+          if ( distance < min ) { distance = min }
+
+          app.three.camera.position.z = distance
+
+        }
+
+        // It will be 3 Earth’s radiuses away if window is 1280px wide
+
+        // app.three.camera.position.z = ( app.data.earth.radius.crust * 3 ) * 1280 / c.clientWidth;
 
       }
 
@@ -369,7 +412,6 @@ let app = {
 
             let country = intersection.object.name;
             let distance = intersection.distance;
-            let exit = intersection.point;
 
             // Checks intersection close to user location
             if ( distance < 10 ) {
@@ -377,7 +419,7 @@ let app = {
               foundOrigin = true;
 
               app.data.outgoing.origin = country;
-              app.three.labels.origin.element.textContent = app.data.outgoing.origin;
+              app.three.labels.origin.textContent = app.data.outgoing.origin;
 
             }
 
@@ -468,7 +510,7 @@ let app = {
         if ( !foundOrigin ) {
 
           app.data.outgoing.origin = '';
-          app.three.labels.origin.element.textContent = app.data.outgoing.origin;
+          app.three.labels.origin.textContent = app.data.outgoing.origin;
 
         }
 
@@ -839,11 +881,8 @@ let app = {
 
       }
 
-      { // Origin label
+      { // Origin Marker
 
-        app.three.labels.origin.element = document.querySelector( '.label.label-origin' );
-
-        // Marker
         app.three.markers.origin.element = document.createElement( 'div' );
         app.three.markers.origin.element.classList.add( 'marker', 'marker-origin' );
 
@@ -1014,6 +1053,22 @@ let app = {
         // Calculates values as if each axis was a divergent range input (from -N to +N)
         app.drag.value.x = ( app.drag.position.current.percentage.left - 50 ) / 50 * app.drag.range;
         app.drag.value.y = ( app.drag.position.current.percentage.top - 50 ) / 50 * -app.drag.range;
+
+        // Creates human-readable string from angles
+        let label = '';
+
+        if ( app.drag.value.y > 0 )
+          label += Math.round( app.drag.value.y ) + '°N, ';
+        else
+          label += Math.round( app.drag.value.y * -1 ) + '°S, ';
+
+        if ( app.drag.value.x > 0 )
+          label += Math.round( app.drag.value.x ) + '°E';
+        else
+          label += Math.round( app.drag.value.x * -1 ) + '°W';
+
+        // Updates angle label with new values
+        app.three.labels.angle.textContent = label;
 
       }
 
