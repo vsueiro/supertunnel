@@ -639,26 +639,6 @@ ol {
 }
 
 @media ( max-width: 1024px ) {
-  :root { --basis : 8px; }
-}
-
-/* @media ( max-width: 768px ) {
-
-}
-
-@media ( max-width: 414px ) {
-
-}
-
-@media ( max-width: 360px ) {
-
-}
-
-@media ( max-width: 320px ) {
-
-} */
-
-@media ( max-width: 1024px ) {
 
   .foreground {
     padding: calc( var(--basis) * 1.2 );
