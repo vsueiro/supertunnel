@@ -884,6 +884,13 @@ let app = {
 
     grabbing : false,
 
+    value : {
+
+      x : undefined, // Float from -90 to 90
+      y : undefined, // Float from -90 to 90
+
+    },
+
     position : {
 
       initial : {
@@ -925,32 +932,23 @@ let app = {
         app.drag.grabbing = true;
         app.element.dataset.grabbing = true;
 
-        app.drag.position.initial.x = event.clientX;
-        app.drag.position.initial.y = event.clientY;
+        // Gets initial position of mouse pointer or finger
+        if ( event.type === 'touchstart' ) {
+
+          app.drag.position.initial.x = event.touches[ 0 ].clientX;
+          app.drag.position.initial.y = event.touches[ 0 ].clientY;
+
+        } else {
+
+          app.drag.position.initial.x = event.clientX;
+          app.drag.position.initial.y = event.clientY;
+
+        }
 
         app.drag.position.initial.left = app.elements.handle.offsetLeft;
         app.drag.position.initial.top  = app.elements.handle.offsetTop;
 
       }
-
-
-      // if ( event.type === 'touchstart' ) {
-      //
-      //   app.drag.position.initial.x = event.touches[ 0 ].clientX - app.drag.position.offset.x;
-      //   app.drag.position.initial.y = event.touches[ 0 ].clientY - app.drag.position.offset.y;
-      //
-      // } else {
-      //
-      //   app.drag.position.initial.x = event.clientX - app.drag.position.offset.x;
-      //   app.drag.position.initial.y = event.clientY - app.drag.position.offset.y;
-      //
-      // }
-      //
-      // app.drag.position.initial.top = parseFloat( getComputedStyle( app.elements.handle ).top );
-      // app.drag.position.initial.left = parseFloat( getComputedStyle( app.elements.handle ).top );
-      //
-      // if ( event.target === app.elements.handle )
-      //   app.drag.grabbing = true;
 
     },
 
@@ -958,8 +956,18 @@ let app = {
 
       if ( app.drag.grabbing ) {
 
-        app.drag.position.current.x = event.clientX;
-        app.drag.position.current.y = event.clientY;
+        // Gets current position of mouse pointer or finger
+        if ( event.type === 'touchmove' ) {
+
+          app.drag.position.current.x = event.touches[ 0 ].clientX;
+          app.drag.position.current.y = event.touches[ 0 ].clientY;
+
+        } else {
+
+          app.drag.position.current.x = event.clientX;
+          app.drag.position.current.y = event.clientY;
+
+        }
 
         // Calculates offset (in pixels)
         app.drag.position.offset.x = app.drag.position.current.x - app.drag.position.initial.x;
@@ -994,55 +1002,11 @@ let app = {
         app.elements.handle.style.left = app.drag.position.current.percentage.left + '%';
         app.elements.handle.style.top  = app.drag.position.current.percentage.top  + '%';
 
-      }
+        // Calculates values as if each axis was a divergent range input (from -90 to +90)
+        app.drag.value.x = ( app.drag.position.current.percentage.left - 50 ) / 50 * 90;
+        app.drag.value.y = ( app.drag.position.current.percentage.top - 50 ) / 50 * 90;
 
-      // if ( app.drag.grabbing ) {
-      //
-      //   event.preventDefault();
-      //
-      //   if ( event.type === 'touchmove' ) {
-      //
-      //     app.drag.position.current.x = event.touches[ 0 ].clientX - app.drag.position.initial.x;
-      //     app.drag.position.current.y = event.touches[ 0 ].clientY - app.drag.position.initial.y;
-      //
-      //   } else {
-      //
-      //     app.drag.position.current.x = event.clientX - app.drag.position.initial.x;
-      //     app.drag.position.current.y = event.clientY - app.drag.position.initial.y;
-      //
-      //   }
-      //
-      //   // Converts absolute pixels offset into percentage offset
-      //   app.drag.position.percentage.top  = app.drag.position.initial.top  + ( 100 * app.drag.position.current.y / app.elements.area.offsetHeight );
-      //   app.drag.position.percentage.left = app.drag.position.initial.left + ( 100 * app.drag.position.current.x / app.elements.area.offsetWidth  );
-      //
-      //
-      //   // // Limits offset within 0 to 100% boundary
-      //   if ( app.drag.position.percentage.top < 0 )
-      //     app.drag.position.percentage.top = 0
-      //
-      //   if ( app.drag.position.percentage.top > 100 )
-      //     app.drag.position.percentage.top = 100
-      //
-      //   if ( app.drag.position.percentage.left < 0 )
-      //     app.drag.position.percentage.left = 0
-      //
-      //   if ( app.drag.position.percentage.left > 100 )
-      //     app.drag.position.percentage.left = 100
-      //
-      //
-      //
-      //   if ( app.drag.position.current.x >= 0 && app.drag.position.current.x <= 100 )
-      //     app.drag.position.offset.x = app.drag.position.current.x;
-      //
-      //   if ( app.drag.position.current.y >= 0 && app.drag.position.current.y <= 100 )
-      //     app.drag.position.offset.y = app.drag.position.current.y;
-      //
-      //
-      //   app.elements.handle.style.top  = app.drag.position.percentage.top  + '%';
-      //   app.elements.handle.style.left = app.drag.position.percentage.left + '%';
-      //
-      // }
+      }
 
     },
 
@@ -1051,28 +1015,12 @@ let app = {
       app.drag.grabbing = false;
       app.element.dataset.grabbing = false;
 
-      // app.drag.position.initial.top = parseFloat( getComputedStyle( app.elements.handle ).top );
-      // app.drag.position.initial.left = parseFloat( getComputedStyle( app.elements.handle ).top );
-      //
-      // app.drag.position.initial.x = app.drag.position.current.x;
-      // app.drag.position.initial.y = app.drag.position.current.y;
-      //
-      // app.drag.grabbing = false;
-
     },
 
     end : function() {
 
       app.drag.grabbing = false;
       app.element.dataset.grabbing = false;
-
-      // app.drag.position.initial.top = parseFloat( getComputedStyle( app.elements.handle ).top );
-      // app.drag.position.initial.left = parseFloat( getComputedStyle( app.elements.handle ).top );
-      //
-      // app.drag.position.initial.x = app.drag.position.current.x;
-      // app.drag.position.initial.y = app.drag.position.current.y;
-      //
-      // app.drag.grabbing = false;
 
     },
 
