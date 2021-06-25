@@ -875,7 +875,8 @@ let app = {
 
     grabbing : false,
 
-    range : 60, 
+    range : 60,
+    tolerance : .05, // 5% tolerance until handle snaps to the center of the chart
 
     value : {
 
@@ -985,6 +986,17 @@ let app = {
 
         if ( app.drag.position.current.top > app.elements.area.offsetHeight ) {
           app.drag.position.current.top = app.elements.area.offsetHeight
+        }
+
+        // Snaps to the center if it’s within a close range (-5% to 5%)
+        if (
+          app.drag.position.current.left > app.elements.area.offsetWidth * ( .5 - app.drag.tolerance ) &&
+          app.drag.position.current.left < app.elements.area.offsetWidth * ( .5 + app.drag.tolerance ) &&
+          app.drag.position.current.top > app.elements.area.offsetHeight * ( .5 - app.drag.tolerance ) &&
+          app.drag.position.current.top < app.elements.area.offsetHeight * ( .5 + app.drag.tolerance )
+        ) {
+          app.drag.position.current.left = app.elements.area.offsetWidth * .5
+          app.drag.position.current.top = app.elements.area.offsetHeight * .5
         }
 
         // Calculates left and top distances (in percentage) related to parent
