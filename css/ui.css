@@ -615,6 +615,42 @@ ol {
 
 /* Media queries */
 
+@media ( min-width: 1921px ) {
+  :root { --basis : 14px; }
+}
+
+@media ( max-width: 1920px ) {
+  :root { --basis : 12px; }
+}
+
+@media ( max-width: 1536px ) {
+  :root { --basis : 10px; }
+}
+
+@media ( max-width: 1280px ) {
+  :root { --basis : 10px; }
+}
+
+@media ( max-width: 1024px ) {
+  :root { --basis : 8px; }
+}
+
+/* @media ( max-width: 768px ) {
+
+}
+
+@media ( max-width: 414px ) {
+
+}
+
+@media ( max-width: 360px ) {
+
+}
+
+@media ( max-width: 320px ) {
+
+} */
+
 @media ( max-width: 1024px ) {
 
   .foreground {
