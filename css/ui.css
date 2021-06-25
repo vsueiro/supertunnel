@@ -50,6 +50,7 @@ input::-webkit-inner-spin-button {
 input[type=number],
 input[type=text] {
   -moz-appearance: textfield;
+  font-variant-numeric: tabular-nums;
 }
 
 button,
@@ -612,6 +613,11 @@ ol {
   font-size: calc( var(--basis) * 1.2 );
   letter-spacing: calc( var(--basis) * .3 );
   text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+}
+
+.label-angle {
+  font-variant-numeric: tabular-nums;
 }
 
 /* Media queries */
