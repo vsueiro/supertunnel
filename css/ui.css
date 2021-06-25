@@ -561,15 +561,15 @@ form p:last-child {
   color: transparent;
 }
 
-.app[data-status-orientation="unsupported"] .compass {
-  display: none;
-}
+/*
 
 .app[data-status-orientation="supported"] main section:first-child,
 .app[data-status-orientation="supported"] main section:last-child,
 .app[data-status-orientation="supported"] footer {
   display: none;
 }
+
+*/
 
 /* List of steps for mobile */
 
@@ -639,6 +639,8 @@ form p:last-child {
 
 .step figure {
   position: relative;
+  display: flex;
+  justify-content: center;
   width: 80%;
   min-width: calc( var(--basis) * 25.6 );
 }
@@ -665,15 +667,10 @@ form p:last-child {
 
 }
 
-.app[data-step="1"] .step:nth-child(1) {
-  display: flex;
-}
-
-.app[data-step="2"] .step:nth-child(2) {
-  display: flex;
-}
-
-.app[data-step="3"] .step:nth-child(3) {
+.app[data-step="1"] .step:nth-child(1),
+.app[data-step="2"] .step:nth-child(2),
+.app[data-step="3"] .step:nth-child(3),
+.app[data-step="4"] .step:nth-child(4) {
   display: flex;
 }
 
