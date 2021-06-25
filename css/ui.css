@@ -157,6 +157,14 @@ nav {
   align-items: center;
 }
 
+.info {
+  display: flex;
+  width: calc( var(--basis) * 2.4 );
+  height: calc( var(--basis) * 2.4 );
+  margin: calc( var(--basis) * 1.2 );
+  margin-right: 0;
+}
+
 .compass {
   position: relative;
   display: flex;
@@ -214,6 +222,7 @@ nav {
 
 .logo {
   display: flex;
+  user-select: none;
 }
 
 .logo img {
@@ -641,7 +650,7 @@ ol {
 @media ( max-width: 1024px ) {
 
   .foreground {
-    padding: calc( var(--basis) * 1.2 );
+    padding: calc( var(--basis) * 1.2 ) calc( var(--basis) * 2.4 );
   }
 
   header,
@@ -649,6 +658,12 @@ ol {
     border: none;
   }
 
+  header {
+    height: initial;
+    min-height: calc( var(--basis) * 4.8 );
+    padding-bottom: calc( var(--basis) * 1.2 );
+    border-bottom: calc( var(--basis) * .2 ) solid var(--neutral-100);
+  }
 
   main ol {
     display: none;
