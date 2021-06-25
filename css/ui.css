@@ -655,26 +655,48 @@ form p:last-child {
   min-width: calc( var(--basis) * 25.6 );
 }
 
-.illustration {
+.illustrations .placeholder {
+  position: relative;
   display: flex;
   width: 100%;
-  padding-top: 50%; /* 2:1 aspect ratio */
-  background-image:
-    url('../assets/phone/right.svg'),
-    url('../assets/phone/center.svg'),
-    url('../assets/phone/left.svg');
-  background-repeat: no-repeat;
-  background-size: contain, 0, 0;
-  animation: switch 2.4s infinite;
+  padding-top: 50%;
 }
 
-@keyframes switch {
+.illustration:nth-child(1) {
+  background-image: url('../assets/phone/right.svg');
+  animation-delay: 0s;
+}
 
-  0%  { background-size: contain, 0, 0; }
-  25% { background-size: 0, contain, 0; }
-  50% { background-size: 0, 0, contain; }
-  75% { background-size: 0, contain, 0; }
+.illustration:nth-child(2) {
+  background-image: url('../assets/phone/center.svg');
+  animation-delay: -1s;
+}
 
+.illustration:nth-child(3) {
+  background-image: url('../assets/phone/left.svg');
+  animation-delay: -2s;
+}
+
+.illustration:nth-child(4) {
+  background-image: url('../assets/phone/center.svg');
+  animation-delay: -3s;
+}
+
+.illustration {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background-repeat: no-repeat;
+  background-size: contain;
+  animation: toggle 4s infinite;
+}
+
+@keyframes toggle {
+  0%   { visibility: visible }
+  25%  { visibility: hidden  }
+  100% { visibility: hidden  }
 }
 
 .app[data-step="1"] .step:nth-child(1),
