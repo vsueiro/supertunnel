@@ -134,6 +134,7 @@ footer {
   width: 100%;
   height: calc( var(--basis) * 4.8 );
   border-top: calc( var(--basis) * .2 ) solid var(--neutral-100);
+  flex-shrink: 0;
 }
 
 main header {
