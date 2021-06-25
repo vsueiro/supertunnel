@@ -237,6 +237,7 @@ nav {
   padding: calc( var(--basis) * 4.8 );
   padding-bottom: calc( var(--basis) * .4 ); /* To account for .2 border */
   pointer-events: none;
+  z-index: 4;
 }
 
 /* Boxes */
