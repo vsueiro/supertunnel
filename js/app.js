@@ -887,49 +887,70 @@ let app = {
 
     position : {
 
-      percentage : {
-        top : undefined,
-        left : undefined,
-      },
-
       initial : {
-        x : undefined,
-        y : undefined,
-        top : 0,
-        left: 0,
-      },
 
-      current : {
-        x : undefined,
-        y : undefined,
+        x    : undefined, // Cursor position (in pixels) relative to viewport
+        y    : undefined, // Cursor position (in pixels) relative to viewport
+        left : undefined, // Distance (in pixels) relative to parent
+        top  : undefined, // Distance (in pixels) relative to parent
+
       },
 
       offset : {
-        x : 0,
-        y : 0,
-      }
+
+        x    : undefined, // Distance (in pixels) relative to initial position
+        y    : undefined, // Distance (in pixels) relative to initial position
+
+      },
+
+      current : {
+
+        x    : undefined, // Cursor position (in pixels) relative to viewport
+        y    : undefined, // Cursor position (in pixels) relative to viewport
+        left : undefined, // Distance (in pixels) relative to parent
+        top  : undefined, // Distance (in pixels) relative to parent
+
+        percentage : {
+          left : undefined, // Distance (in percentage) relative to parent
+          top  : undefined, // Distance (in percentage) relative to parent
+        }
+
+      },
 
     },
 
     start : function() {
 
-      if ( event.type === 'touchstart' ) {
+      if ( event.target === app.elements.handle ) {
 
-        app.drag.position.initial.x = event.touches[ 0 ].clientX - app.drag.position.offset.x;
-        app.drag.position.initial.y = event.touches[ 0 ].clientY - app.drag.position.offset.y;
+        app.drag.grabbing = true;
 
-      } else {
+        app.drag.position.initial.x = event.clientX;
+        app.drag.position.initial.y = event.clientY;
 
-        app.drag.position.initial.x = event.clientX - app.drag.position.offset.x;
-        app.drag.position.initial.y = event.clientY - app.drag.position.offset.y;
+        app.drag.position.initial.left = app.elements.handle.offsetLeft;
+        app.drag.position.initial.top  = app.elements.handle.offsetTop;
 
       }
 
-      app.drag.position.initial.top = parseFloat( getComputedStyle( app.elements.handle ).top );
-      app.drag.position.initial.left = parseFloat( getComputedStyle( app.elements.handle ).top );
 
-      if ( event.target === app.elements.handle )
-        app.drag.grabbing = true;
+      // if ( event.type === 'touchstart' ) {
+      //
+      //   app.drag.position.initial.x = event.touches[ 0 ].clientX - app.drag.position.offset.x;
+      //   app.drag.position.initial.y = event.touches[ 0 ].clientY - app.drag.position.offset.y;
+      //
+      // } else {
+      //
+      //   app.drag.position.initial.x = event.clientX - app.drag.position.offset.x;
+      //   app.drag.position.initial.y = event.clientY - app.drag.position.offset.y;
+      //
+      // }
+      //
+      // app.drag.position.initial.top = parseFloat( getComputedStyle( app.elements.handle ).top );
+      // app.drag.position.initial.left = parseFloat( getComputedStyle( app.elements.handle ).top );
+      //
+      // if ( event.target === app.elements.handle )
+      //   app.drag.grabbing = true;
 
     },
 
@@ -937,75 +958,102 @@ let app = {
 
       if ( app.drag.grabbing ) {
 
-        event.preventDefault();
+        app.drag.position.current.x = event.clientX;
+        app.drag.position.current.y = event.clientY;
 
-        if ( event.type === 'touchmove' ) {
+        // Calculates offset (in pixels)
+        app.drag.position.offset.x = app.drag.position.current.x - app.drag.position.initial.x;
+        app.drag.position.offset.y = app.drag.position.current.y - app.drag.position.initial.y;
 
-          app.drag.position.current.x = event.touches[ 0 ].clientX - app.drag.position.initial.x;
-          app.drag.position.current.y = event.touches[ 0 ].clientY - app.drag.position.initial.y;
+        // Calculates left and top distances (in pixels) related to parent
+        app.drag.position.current.left = app.drag.position.initial.left + app.drag.position.offset.x;
+        app.drag.position.current.top  = app.drag.position.initial.top  + app.drag.position.offset.y;
 
-        } else {
+        // Calculates left and top distances (in percentage) related to parent
+        app.drag.position.current.percentage.left = 100 * app.drag.position.current.left / app.elements.area.offsetWidth;
+        app.drag.position.current.percentage.top  = 100 * app.drag.position.current.top  / app.elements.area.offsetHeight;
 
-          app.drag.position.current.x = event.clientX - app.drag.position.initial.x;
-          app.drag.position.current.y = event.clientY - app.drag.position.initial.y;
-
-        }
-
-        // Converts absolute pixels offset into percentage offset
-        app.drag.position.percentage.top  = app.drag.position.initial.top  + ( 100 * app.drag.position.current.y / app.elements.area.offsetHeight );
-        app.drag.position.percentage.left = app.drag.position.initial.left + ( 100 * app.drag.position.current.x / app.elements.area.offsetWidth  );
-
-
-        // // Limits offset within 0 to 100% boundary
-        if ( app.drag.position.percentage.top < 0 )
-          app.drag.position.percentage.top = 0
-
-        if ( app.drag.position.percentage.top > 100 )
-          app.drag.position.percentage.top = 100
-
-        if ( app.drag.position.percentage.left < 0 )
-          app.drag.position.percentage.left = 0
-
-        if ( app.drag.position.percentage.left > 100 )
-          app.drag.position.percentage.left = 100
-
-
-
-        if ( app.drag.position.current.x >= 0 && app.drag.position.current.x <= 100 )
-          app.drag.position.offset.x = app.drag.position.current.x;
-
-        if ( app.drag.position.current.y >= 0 && app.drag.position.current.y <= 100 )
-          app.drag.position.offset.y = app.drag.position.current.y;
-
-
-        app.elements.handle.style.top  = app.drag.position.percentage.top  + '%';
-        app.elements.handle.style.left = app.drag.position.percentage.left + '%';
+        // Sets top and left distances (in percentage)
+        app.elements.handle.style.left = app.drag.position.current.percentage.left + '%';
+        app.elements.handle.style.top  = app.drag.position.current.percentage.top  + '%';
 
       }
+
+      // if ( app.drag.grabbing ) {
+      //
+      //   event.preventDefault();
+      //
+      //   if ( event.type === 'touchmove' ) {
+      //
+      //     app.drag.position.current.x = event.touches[ 0 ].clientX - app.drag.position.initial.x;
+      //     app.drag.position.current.y = event.touches[ 0 ].clientY - app.drag.position.initial.y;
+      //
+      //   } else {
+      //
+      //     app.drag.position.current.x = event.clientX - app.drag.position.initial.x;
+      //     app.drag.position.current.y = event.clientY - app.drag.position.initial.y;
+      //
+      //   }
+      //
+      //   // Converts absolute pixels offset into percentage offset
+      //   app.drag.position.percentage.top  = app.drag.position.initial.top  + ( 100 * app.drag.position.current.y / app.elements.area.offsetHeight );
+      //   app.drag.position.percentage.left = app.drag.position.initial.left + ( 100 * app.drag.position.current.x / app.elements.area.offsetWidth  );
+      //
+      //
+      //   // // Limits offset within 0 to 100% boundary
+      //   if ( app.drag.position.percentage.top < 0 )
+      //     app.drag.position.percentage.top = 0
+      //
+      //   if ( app.drag.position.percentage.top > 100 )
+      //     app.drag.position.percentage.top = 100
+      //
+      //   if ( app.drag.position.percentage.left < 0 )
+      //     app.drag.position.percentage.left = 0
+      //
+      //   if ( app.drag.position.percentage.left > 100 )
+      //     app.drag.position.percentage.left = 100
+      //
+      //
+      //
+      //   if ( app.drag.position.current.x >= 0 && app.drag.position.current.x <= 100 )
+      //     app.drag.position.offset.x = app.drag.position.current.x;
+      //
+      //   if ( app.drag.position.current.y >= 0 && app.drag.position.current.y <= 100 )
+      //     app.drag.position.offset.y = app.drag.position.current.y;
+      //
+      //
+      //   app.elements.handle.style.top  = app.drag.position.percentage.top  + '%';
+      //   app.elements.handle.style.left = app.drag.position.percentage.left + '%';
+      //
+      // }
 
     },
 
     leave : function() {
 
-      app.drag.position.initial.top = parseFloat( getComputedStyle( app.elements.handle ).top );
-      app.drag.position.initial.left = parseFloat( getComputedStyle( app.elements.handle ).top );
-
-      app.drag.position.initial.x = app.drag.position.current.x;
-      app.drag.position.initial.y = app.drag.position.current.y;
-
       app.drag.grabbing = false;
+
+      // app.drag.position.initial.top = parseFloat( getComputedStyle( app.elements.handle ).top );
+      // app.drag.position.initial.left = parseFloat( getComputedStyle( app.elements.handle ).top );
+      //
+      // app.drag.position.initial.x = app.drag.position.current.x;
+      // app.drag.position.initial.y = app.drag.position.current.y;
+      //
+      // app.drag.grabbing = false;
 
     },
 
     end : function() {
 
-      app.drag.position.initial.top = parseFloat( getComputedStyle( app.elements.handle ).top );
-      app.drag.position.initial.left = parseFloat( getComputedStyle( app.elements.handle ).top );
-
-      app.drag.position.initial.x = app.drag.position.current.x;
-      app.drag.position.initial.y = app.drag.position.current.y;
-
       app.drag.grabbing = false;
+
+      // app.drag.position.initial.top = parseFloat( getComputedStyle( app.elements.handle ).top );
+      // app.drag.position.initial.left = parseFloat( getComputedStyle( app.elements.handle ).top );
+      //
+      // app.drag.position.initial.x = app.drag.position.current.x;
+      // app.drag.position.initial.y = app.drag.position.current.y;
+      //
+      // app.drag.grabbing = false;
 
     },
 
