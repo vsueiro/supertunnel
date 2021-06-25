@@ -529,6 +529,10 @@ form p:last-child {
 
 /* Handles status */
 
+.app[data-grabbing="true"] {
+  user-select: none;
+}
+
 .app[data-status-geolocation="locating"] button.find,
 .app[data-status-bluetooth="pairing"] button.connect {
   pointer-events: none;

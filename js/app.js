@@ -923,6 +923,7 @@ let app = {
       if ( event.target === app.elements.handle ) {
 
         app.drag.grabbing = true;
+        app.element.dataset.grabbing = true;
 
         app.drag.position.initial.x = event.clientX;
         app.drag.position.initial.y = event.clientY;
@@ -1048,6 +1049,7 @@ let app = {
     leave : function() {
 
       app.drag.grabbing = false;
+      app.element.dataset.grabbing = false;
 
       // app.drag.position.initial.top = parseFloat( getComputedStyle( app.elements.handle ).top );
       // app.drag.position.initial.left = parseFloat( getComputedStyle( app.elements.handle ).top );
@@ -1062,6 +1064,7 @@ let app = {
     end : function() {
 
       app.drag.grabbing = false;
+      app.element.dataset.grabbing = false;
 
       // app.drag.position.initial.top = parseFloat( getComputedStyle( app.elements.handle ).top );
       // app.drag.position.initial.left = parseFloat( getComputedStyle( app.elements.handle ).top );
