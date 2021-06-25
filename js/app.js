@@ -17,7 +17,6 @@ let app = {
     deviceFront     : document.querySelector(    '.device-front'           ),
     deviceSide      : document.querySelector(    '.device-side'            ),
     compassNeedle   : document.querySelector(    '.needle'                 ),
-    grabArea        : document.querySelector(    '.rose'                   ),
     area            : document.querySelector(    '.draggable-area'         ),
     handle          : document.querySelector(    '.draggable-handle'       ),
 
@@ -969,6 +968,23 @@ let app = {
         app.drag.position.current.left = app.drag.position.initial.left + app.drag.position.offset.x;
         app.drag.position.current.top  = app.drag.position.initial.top  + app.drag.position.offset.y;
 
+        // Constrains values
+        if ( app.drag.position.current.left < 0 ) {
+          app.drag.position.current.left = 0
+        }
+
+        if ( app.drag.position.current.left > app.elements.area.offsetWidth ) {
+          app.drag.position.current.left = app.elements.area.offsetWidth
+        }
+
+        if ( app.drag.position.current.top < 0 ) {
+          app.drag.position.current.top = 0
+        }
+
+        if ( app.drag.position.current.top > app.elements.area.offsetHeight ) {
+          app.drag.position.current.top = app.elements.area.offsetHeight
+        }
+
         // Calculates left and top distances (in percentage) related to parent
         app.drag.position.current.percentage.left = 100 * app.drag.position.current.left / app.elements.area.offsetWidth;
         app.drag.position.current.percentage.top  = 100 * app.drag.position.current.top  / app.elements.area.offsetHeight;
@@ -1249,14 +1265,14 @@ let app = {
       app.elements.longitude.addEventListener( 'input',  app.geolocation.validate );
 
       // Enables drag on handle to control tunnel angles on desktop
-      app.elements.grabArea.addEventListener( 'touchstart', app.drag.start, false);
-      app.elements.grabArea.addEventListener( 'touchmove',  app.drag.move,  false);
-      app.elements.grabArea.addEventListener( 'touchend',   app.drag.end,   false);
+      window.addEventListener( 'touchstart', app.drag.start, false);
+      window.addEventListener( 'touchmove',  app.drag.move,  false);
+      window.addEventListener( 'touchend',   app.drag.end,   false);
 
-      app.elements.grabArea.addEventListener( 'mousedown',  app.drag.start, false);
-      app.elements.grabArea.addEventListener( 'mousemove',  app.drag.move,  false);
-      app.elements.grabArea.addEventListener( 'mouseup',    app.drag.end,   false);
-      app.elements.grabArea.addEventListener( 'mouseleave', app.drag.leave, false);
+      window.addEventListener( 'mousedown',  app.drag.start, false);
+      window.addEventListener( 'mousemove',  app.drag.move,  false);
+      window.addEventListener( 'mouseup',    app.drag.end,   false);
+      window.addEventListener( 'mouseleave', app.drag.leave, false);
 
       // Calculates mouse position in normalized device coordinates (-1 to +1)
       window.addEventListener( 'mousemove', app.three.normalizeMouse, false );
