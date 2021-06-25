@@ -7,6 +7,7 @@ let app = {
   elements : {
 
     findButton      : document.querySelectorAll( '.find'                   ),
+    nextButton      : document.querySelectorAll( '.next'                   ),
     trackButton     : document.querySelector(    '.track'                  ),
     background      : document.querySelector(    '.background'             ),
     canvas          : document.querySelector(    '.canvas'                 ),
@@ -1131,6 +1132,7 @@ let app = {
 
             // Enables orientationControl
             app.options.orientationControl = true;
+            app.steps.next()
 
             window.addEventListener( 'deviceorientation', app.orientation.handle );
 
@@ -1169,6 +1171,7 @@ let app = {
       app.parameters.update();
 
       app.element.dataset.statusGeolocation = 'located';
+      app.steps.next()
 
     },
 
@@ -1242,6 +1245,16 @@ let app = {
 
   },
 
+  steps : {
+
+    next : () => {
+
+      app.element.dataset.step = parseInt( app.element.dataset.step ) + 1
+
+    }
+
+  },
+
   events : {
 
     initialize : function() {
@@ -1252,6 +1265,11 @@ let app = {
       // Finds user’s location when button is clicked
       app.elements.findButton.forEach( button =>
         button.addEventListener( 'click', app.geolocation.find )
+      );
+
+      // Goes to next step (mobile navigation)
+      app.elements.nextButton.forEach( button =>
+        button.addEventListener( 'click', app.steps.next )
       );
 
       // Handles location form
@@ -1270,6 +1288,9 @@ let app = {
       app.elements.longitude.addEventListener( 'change', app.geolocation.submit );
       app.elements.longitude.addEventListener( 'blur',   app.geolocation.submit );
       app.elements.longitude.addEventListener( 'input',  app.geolocation.validate );
+
+
+      app.elements.nextButton
 
       // Enables drag on handle to control tunnel angles on desktop
       window.addEventListener( 'touchstart', app.drag.start, false);
