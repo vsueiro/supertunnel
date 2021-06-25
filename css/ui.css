@@ -253,14 +253,9 @@ nav {
 
 /* Boxes */
 
-main ol {
-  display: none;
-}
-
 main section {
   position: relative;
   background: rgba( var(--neutral-0-rgb), .75 );
-  /* background: black; */
   border: calc( var(--basis) * .2 ) solid var(--neutral-100);
   width: calc( ( var(--basis) * 26.4 ) + ( var(--basis) * .4 ) ); /* To account for .2 border */
   height: calc( ( var(--basis) * 26.4 ) + ( var(--basis) * .4 ) ); /* To account for .2 border */
@@ -578,12 +573,109 @@ form p:last-child {
 
 /* List of steps for mobile */
 
-ol {
+.steps {
+  position: relative;
+  width: 100%;
   display: flex;
   flex-direction: column;
   align-self: flex-end;
+  max-width: calc( var(--basis) * 4.8 * 8 );
 }
 
+.steps {
+  display: none;
+}
+
+.step {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  min-width: 100%;
+  background: rgba( var(--neutral-0-rgb), .75 );
+  border: calc( var(--basis) * .2 ) solid var(--accent-100);
+  padding: calc( var(--basis) * .4 );
+  margin-top: calc( var(--basis) * 1.2 );
+  display: none;
+}
+
+.step > div {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  width: 100%;
+  padding: calc( var(--basis) * 1.2 );
+  margin-bottom: calc( var(--basis) * .4 );
+}
+
+.note {
+  margin-top: calc( var(--basis) * .8 );
+  font-size: calc( var(--basis) * 1.2 );
+  color: var(--accent-100);
+}
+
+.water,
+.land {
+  display: none;
+}
+
+.app[data-destination-type="water"] .water,
+.app[data-destination-type="land"] .land {
+  display: block;
+}
+
+.water strong {
+  color: var(--success-100);
+}
+
+.land strong {
+  color: var(--accent-100);
+}
+
+.step figure {
+  position: relative;
+  width: 80%;
+  min-width: calc( var(--basis) * 25.6 );
+}
+
+.illustration {
+  display: flex;
+  width: 100%;
+  padding-top: 50%; /* 2:1 aspect ratio */
+  background-image:
+    url('../assets/phone/right.svg'),
+    url('../assets/phone/center.svg'),
+    url('../assets/phone/left.svg');
+  background-repeat: no-repeat;
+  background-size: contain, 0, 0;
+  animation: switch 2.4s infinite;
+}
+
+@keyframes switch {
+
+  0%  { background-size: contain, 0, 0; }
+  25% { background-size: 0, contain, 0; }
+  50% { background-size: 0, 0, contain; }
+  75% { background-size: 0, contain, 0; }
+
+}
+
+.app[data-step="1"] .step:nth-child(1) {
+  display: flex;
+}
+
+.app[data-step="2"] .step:nth-child(2) {
+  display: flex;
+}
+
+.app[data-step="3"] .step:nth-child(3) {
+  display: flex;
+}
 
 /* Markers & labels */
 
@@ -647,10 +739,15 @@ ol {
   :root { --basis : 10px; }
 }
 
+@media ( max-width: 360px ) {
+  :root { --basis : 9px; }
+}
+
 @media ( max-width: 1024px ) {
 
   .foreground {
-    padding: calc( var(--basis) * 1.2 ) calc( var(--basis) * 2.4 );
+    padding: calc( var(--basis) * 2.4 );
+    padding-top: calc( var(--basis) * 1.2 );
   }
 
   header,
@@ -665,8 +762,9 @@ ol {
     border-bottom: calc( var(--basis) * .2 ) solid var(--neutral-100);
   }
 
-  main ol {
-    display: none;
+  main {
+    padding: 0;
+    justify-content: center;
   }
 
   main section:first-child,
@@ -675,7 +773,7 @@ ol {
     display: none;
   }
 
-  main > ol {
+  .steps {
     display: flex;
   }
 
