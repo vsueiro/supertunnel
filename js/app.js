@@ -38,11 +38,18 @@ let app = {
 
     update : function() {
 
+      // Constructs URLSearchParams object instance from current URL query string
+      let query = new URLSearchParams( window.location.search );
+
+      // Sets new or modify existing parameter values
+      query.set( 'latitude' , app.data.user.latitude );
+      query.set( 'longitude', app.data.user.longitude );
+
+      // Replaces current query string with new one
       window.history.replaceState(
-        {},
-        app.title,
-        '/?latitude=' + app.data.user.latitude +
-        '&longitude=' + app.data.user.longitude
+        null,
+        null,
+        '?' + query.toString()
       );
 
     },
