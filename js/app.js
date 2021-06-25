@@ -33,9 +33,7 @@ let app = {
 
   options : {
 
-    mouseControl : false,
     orientationControl : false,
-    rotateDrawings : false,
 
   },
 
@@ -247,36 +245,16 @@ let app = {
       app.data.seconds = time * .001;
 
       // Initializes values to be updated according to mouse sensor
-      let northsouth = 0; // +90 to -90
-      let eastwest   = 0; // +90 to -90
+      // let northsouth = 0; // +90 to -90
+      // let eastwest   = 0; // +90 to -90
 
       // Makes tunnel face straight down, into the core
       app.three.tunnel.rotation.x = THREE.Math.degToRad( 90 + 0 );
       app.three.chord.rotation.x = THREE.Math.degToRad( 90 + 0 );
 
-      if ( app.options.mouseControl ) {
+      if ( app.options.orientationControl ) {
 
-        // Enables mouse control over tunnel direction
-        northsouth = app.three.mouse.y * 90;
-        eastwest   = app.three.mouse.x * 90;
-
-        // Moves tunnel according to mouse-simulated inclination
-        app.three.tunnel.rotation.x = THREE.Math.degToRad( 90 + northsouth );
-        app.three.chord.rotation.x = THREE.Math.degToRad( 90 + northsouth );
-
-        app.three.tunnel.rotation.z = THREE.Math.degToRad( eastwest );
-        app.three.chord.rotation.z = THREE.Math.degToRad( eastwest );
-
-
-        if ( app.options.rotateDrawings ) {
-
-          // Animates shovel drawings to rotate accordingly
-          app.elements.deviceFront.style.transform = 'rotate(' + eastwest * -1 + 'deg)';
-          app.elements.deviceSide.style.transform  = 'rotate(' + northsouth + 'deg)';
-
-        }
-
-      } else if ( app.options.orientationControl ) {
+        // Controls using phone orientation sensor
 
         let alpha = app.data.orientation.alpha;
         let beta  = app.data.orientation.beta;
@@ -288,11 +266,9 @@ let app = {
 
           // Handles landscape orientation
 
-
         } else {
 
           // Handles portrait orientation
-
 
         }
 
@@ -305,6 +281,21 @@ let app = {
 
         app.three.tunnel.rotation.z = THREE.Math.degToRad( beta );
         app.three.chord.rotation.z  = THREE.Math.degToRad( beta );
+
+      } else {
+
+        // Controls using draggable handle
+
+        // Enables mouse control over tunnel direction
+        let northsouth = app.drag.value.y;
+        let eastwest   = app.drag.value.x;
+
+        // Moves tunnel according to mouse-simulated inclination
+        app.three.tunnel.rotation.x = THREE.Math.degToRad( 90 + northsouth );
+        app.three.chord.rotation.x = THREE.Math.degToRad( 90 + northsouth );
+
+        app.three.tunnel.rotation.z = THREE.Math.degToRad( eastwest );
+        app.three.chord.rotation.z = THREE.Math.degToRad( eastwest );
 
       }
 
@@ -884,10 +875,12 @@ let app = {
 
     grabbing : false,
 
+    range : 60, 
+
     value : {
 
-      x : undefined, // Float from -90 to 90
-      y : undefined, // Float from -90 to 90
+      x : 0, // Float from -90 to 90
+      y : 0, // Float from -90 to 90
 
     },
 
@@ -1002,9 +995,9 @@ let app = {
         app.elements.handle.style.left = app.drag.position.current.percentage.left + '%';
         app.elements.handle.style.top  = app.drag.position.current.percentage.top  + '%';
 
-        // Calculates values as if each axis was a divergent range input (from -90 to +90)
-        app.drag.value.x = ( app.drag.position.current.percentage.left - 50 ) / 50 * 90;
-        app.drag.value.y = ( app.drag.position.current.percentage.top - 50 ) / 50 * 90;
+        // Calculates values as if each axis was a divergent range input (from -N to +N)
+        app.drag.value.x = ( app.drag.position.current.percentage.left - 50 ) / 50 * app.drag.range;
+        app.drag.value.y = ( app.drag.position.current.percentage.top - 50 ) / 50 * -app.drag.range;
 
       }
 
