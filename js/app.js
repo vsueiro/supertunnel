@@ -141,13 +141,6 @@ let app = {
 
     },
 
-    outgoing : {
-      origin          : undefined, // country name
-      destination     : undefined, // country name
-      destinationType : undefined, // (land|water|air)
-      distance        : undefined, // in km
-    },
-
     orientation : {
 
       initialOffset   : undefined, // Used to calibrate alpha to face North
@@ -156,12 +149,11 @@ let app = {
       beta            : undefined,
       gamma           : undefined,
 
-
     },
 
     user : {                // In decimal degrees
-      latitude  : 0, //-33.4489, // south is negative
-      longitude : 0, //-70.6693  // west is negative
+      latitude  : -33.4489, // south is negative
+      longitude : -70.6693  // west is negative
     },
 
     seconds : 0
@@ -418,8 +410,8 @@ let app = {
 
               foundOrigin = true;
 
-              app.data.outgoing.origin = country;
-              app.three.labels.origin.textContent = app.data.outgoing.origin;
+              app.element.dataset.origin = country;
+              app.three.labels.origin.textContent = country;
 
             }
 
@@ -436,9 +428,9 @@ let app = {
               app.three.labels.distance.element.textContent = (parseInt( distance / 100 ) * 100).toLocaleString('en-US') + ' km'
 
               // Stores data to be sent to device
-              app.data.outgoing.destination = country;
-              app.data.outgoing.destinationType = 'land';
-              app.data.outgoing.distance = parseInt( distance );
+              app.element.dataset.destination = country;
+              app.element.dataset.destinationType = 'land';
+              app.element.dataset.distance = parseInt( distance );
 
               // Shortens tunnel length to match distance until country
               let reduction = distance / ( app.data.earth.radius.crust * 2 );
@@ -460,7 +452,7 @@ let app = {
           app.three.labels.destination.element.textContent = '';
 
           // Removes country from data to be sent to device
-          app.data.outgoing.destination = '';
+          app.element.dataset.destination = '';
 
           // Shortens tunnel length to match distance until other side of Earth
           let intersections = app.three.raycaster.intersectObject( app.three.crust );
@@ -487,8 +479,8 @@ let app = {
 
             }
 
-            app.data.outgoing.destinationType = 'water';
-            app.data.outgoing.distance = -1;
+            app.element.dataset.destinationType = 'water';
+            app.element.dataset.distance = -1;
 
           } else {
 
@@ -500,8 +492,8 @@ let app = {
             // Clears distance label
             app.three.labels.distance.element.textContent = ''
 
-            app.data.outgoing.destinationType = 'air';
-            app.data.outgoing.distance = -1;
+            app.element.dataset.destinationType = 'air';
+            app.element.dataset.distance = -1;
 
           }
 
@@ -509,8 +501,8 @@ let app = {
 
         if ( !foundOrigin ) {
 
-          app.data.outgoing.origin = '';
-          app.three.labels.origin.textContent = app.data.outgoing.origin;
+          app.element.dataset.origin = '';
+          app.three.labels.origin.textContent = '';
 
         }
 
@@ -904,8 +896,8 @@ let app = {
       app.three.scene.add( app.three.earth );
 
       // Debugs axes
-      let axesHelper = new THREE.AxesHelper( 1000 );
-      app.three.scene.add( axesHelper );
+      // let axesHelper = new THREE.AxesHelper( 1000 );
+      // app.three.scene.add( axesHelper );
 
       // Animate 3D elements
       requestAnimationFrame( app.three.render );
