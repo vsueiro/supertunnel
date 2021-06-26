@@ -841,6 +841,18 @@ input[type="search"] + button:not(:hover) {
     display: none;
   }
 
+  button,
+  input[type="text"],
+  input[type="search"],
+  input[type="number"],
+  input[type="submit"] {
+    font-size: calc( var(--basis) * 1.6 );
+  }
+
+  button span {
+    justify-content: center;
+  }
+
   .steps {
     display: flex;
   }
