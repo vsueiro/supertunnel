@@ -1174,7 +1174,7 @@ let app = {
       app.element.dataset.statusGeolocation = 'located';
 
       // Changes step with a 1s delay
-      setTimeout( app.steps.next, 1000 );
+      setTimeout( app.steps.next, 2400 );
 
     },
 
