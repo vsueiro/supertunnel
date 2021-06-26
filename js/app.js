@@ -12,6 +12,7 @@ let app = {
     background      : document.querySelector(    '.background'             ),
     canvas          : document.querySelector(    '.canvas'                 ),
     form            : document.querySelector(    'form'                    ),
+    address         : document.querySelector(    'input[name="address"]'   ),
     latitude        : document.querySelector(    'input[name="latitude"]'  ),
     longitude       : document.querySelector(    'input[name="longitude"]' ),
     compassNeedle   : document.querySelector(    '.needle'                 ),
@@ -70,12 +71,17 @@ let app = {
 
       if ( parameters.has( 'longitude' ) ) {
 
-        let lng = app.validates.coordinates( parameters.get( 'longitude' ), 180 )
+        let lon = app.validates.coordinates( parameters.get( 'longitude' ), 180 )
 
-        app.elements.longitude.value = lng;
-        app.data.user.longitude = lng;
+        app.elements.longitude.value = lon;
+        app.data.user.longitude = lon;
 
       }
+
+      if ( parameters.has( 'latitude' ) || parameters.has( 'longitude' ) )
+        app.search.clear();
+
+      app.geolocation.updateLabel();
 
     }
 
@@ -181,6 +187,7 @@ let app = {
         object     : undefined
       },
       origin       : document.querySelector( '.label-origin' ),
+      coordinates  : document.querySelector( '.label-coordinates' ),
       angle        : document.querySelector( '.label-angle' ),
     },
     markers        : {
@@ -428,6 +435,7 @@ let app = {
 
               app.element.dataset.origin = country;
               app.three.labels.origin.textContent = country;
+              app.search.initialize();
 
             }
 
@@ -1097,6 +1105,21 @@ let app = {
 
     },
 
+    reset : () => {
+
+      // Sets top and left distances (in percentage)
+      app.elements.handle.style.left = '50%';
+      app.elements.handle.style.top  = '50%';
+
+      // Calculates values as if each axis was a divergent range input (from -N to +N)
+      app.drag.value.x = 0;
+      app.drag.value.y = 0;
+
+      // Updates angle label with original values
+      app.three.labels.angle.textContent = '0°S, 0°W';
+
+    }
+
   },
 
   orientation : {
@@ -1163,7 +1186,7 @@ let app = {
       // Checks if device supports retrieving device orientation values (uses https://sensor-js.xyz)
       if ( DeviceMotionEvent && typeof DeviceMotionEvent.requestPermission === 'function' ) {
 
-        app.element.dataset.statusOrientation = 'supported';
+        app.element.dataset.orientation = 'supported';
 
       }
 
@@ -1172,6 +1195,29 @@ let app = {
   },
 
   geolocation : {
+
+    updateLabel : () => {
+
+      let lat = app.data.user.latitude;
+      let lon = app.data.user.longitude;
+
+      // Creates human-readable string from coordinates
+      let label = '';
+
+      if ( lat > 0 )
+        label += Math.round( lat ) + '°N, ';
+      else
+        label += Math.round( lat * -1 ) + '°S, ';
+
+      if ( lon > 0 )
+        label += Math.round( lon ) + '°E';
+      else
+        label += Math.round( lon * -1 ) + '°W';
+
+      // Updates coordinates label with new values
+      app.three.labels.coordinates.textContent = label;
+
+    },
 
     found : function( position ) {
 
@@ -1183,8 +1229,9 @@ let app = {
       app.elements.longitude.value = app.data.user.longitude;
 
       app.parameters.update();
+      app.drag.reset();
 
-      app.element.dataset.statusGeolocation = 'located';
+      app.element.dataset.geolocation = 'located';
 
       // Changes step with a 1s delay
       setTimeout( app.steps.next, 2400 );
@@ -1193,13 +1240,12 @@ let app = {
 
     error : function() {
 
-      app.element.dataset.statusGeolocation = 'unlocated';
+      app.element.dataset.geolocation = 'unlocated';
 
       window.alert(
 
-        'Sorry, there was an error. ' +
-        'Please type in your latitude and longitude as decimal degrees ' +
-        '(West and South are negative).'
+        'Unable to find your location. ' +
+        'Please type in your address.'
 
       );
 
@@ -1207,7 +1253,7 @@ let app = {
 
     find : function() {
 
-      app.element.dataset.statusGeolocation = 'locating';
+      app.element.dataset.geolocation = 'locating';
 
       if ( navigator.geolocation ) {
 
@@ -1227,35 +1273,36 @@ let app = {
     submit : () => {
 
       let lat = app.elements.latitude.value;
-      let lng = app.elements.longitude.value;
+      let lon = app.elements.longitude.value;
 
       // Validades coordinates
       lat = app.validates.coordinates( lat, 90 );
-      lng = app.validates.coordinates( lng, 180 );
+      lon = app.validates.coordinates( lon, 180 );
 
       app.elements.latitude.value  = lat;
-      app.elements.longitude.value = lng;
+      app.elements.longitude.value = lon;
 
       app.data.user.latitude  = lat;
-      app.data.user.longitude = lng;
+      app.data.user.longitude = lon;
 
       app.parameters.update();
+      app.geolocation.updateLabel();
 
-      app.element.dataset.statusGeolocation = 'unlocated';
+      app.element.dataset.geolocation = 'unlocated';
 
     },
 
     validate : () => {
 
       let lat = app.elements.latitude.value;
-      let lng = app.elements.longitude.value;
+      let lon = app.elements.longitude.value;
 
       // Validades coordinates
       lat = app.validates.coordinates( lat );
-      lng = app.validates.coordinates( lng );
+      lon = app.validates.coordinates( lon );
 
       app.elements.latitude.value  = lat;
-      app.elements.longitude.value = lng;
+      app.elements.longitude.value = lon;
 
     },
 
@@ -1274,6 +1321,156 @@ let app = {
     next : () => {
 
       app.element.dataset.step = parseInt( app.element.dataset.step ) + 1
+
+    }
+
+  },
+
+  search : {
+
+    api : 'https://nominatim.openstreetmap.org/search.php',
+
+    query : {
+
+      q : '',
+      limit : 1,
+      format : 'jsonv2'
+
+    },
+
+    parameters  : '',
+    url         : '',
+    initialized : false,
+
+    success : () => {
+
+      let lat = app.search.result.lat;
+      let lon = app.search.result.lon;
+
+      app.data.user.latitude  = parseFloat( lat ).toFixed( 4 );
+      app.data.user.longitude = parseFloat( lon ).toFixed( 4 );
+
+      // Updates manual input values to match the retrieved coordinates
+      app.elements.latitude.value  = app.data.user.latitude;
+      app.elements.longitude.value = app.data.user.longitude;
+
+      app.element.dataset.search = 'searched';
+
+      app.geolocation.submit();
+      app.drag.reset();
+
+    },
+
+    error : () => {
+
+      alert( 'Unable to find address' );
+      app.element.dataset.search = 'unsearched';
+
+    },
+
+    result : undefined,
+
+    results : function( list ) {
+
+      if ( list.length > 0 ) {
+
+        // Stores first result
+        app.search.result = list[ 0 ];
+        app.search.success();
+
+        /*
+        console.log( app.search.result );
+
+        let lat = app.search.result.lat;
+        let lon = app.search.result.lon;
+
+        app.data.user.latitude  = parseFloat( lat ).toFixed( 4 );
+        app.data.user.longitude = parseFloat( lon ).toFixed( 4 );
+
+        // Updates manual input values to match the retrieved coordinates
+        app.elements.latitude.value  = app.data.user.latitude;
+        app.elements.longitude.value = app.data.user.longitude;
+
+        app.parameters.update();
+        app.geolocation.submit();
+
+        app.element.dataset.geolocation = 'located';
+
+        // Changes step with a 1s delay
+        setTimeout( app.steps.next, 2400 );
+        */
+
+      } else {
+
+        app.search.error()
+
+      }
+
+    },
+
+    get : ( address ) => {
+
+      if ( address ) {
+
+        app.element.dataset.search = 'searching';
+
+        app.search.query.q    = address;
+        app.search.parameters = new URLSearchParams( app.search.query ).toString();
+        app.search.url        = app.search.api + '?' + app.search.parameters;
+
+        // Gets countries geometries
+        fetch( app.search.url )
+         .then( response => response.json() )
+         .then( list => app.search.results( list ) )
+
+      }
+
+    },
+
+    submit : () => {
+
+      let address = app.elements.address.value.trim();
+      app.search.get( address )
+
+    },
+
+    clear : () => {
+
+      app.elements.address.value = '';
+      app.element.dataset.search = 'unsearched';
+
+    },
+
+    fill : ( value ) => {
+
+      if ( app.elements.address.value.trim() == '' ) {
+
+        app.elements.address.value = value
+        app.element.dataset.search = 'searched';
+
+      }
+
+    },
+
+    validate : () => {
+
+      // Removes success state
+      app.element.dataset.search = 'unsearched';
+
+    },
+
+    initialize : () => {
+
+      if ( !app.search.initialized ) {
+
+        // Runs this code only once, after origin country is identified
+
+        let country = app.element.dataset.origin;
+        app.search.fill( country );
+
+        app.search.initialized = true;
+
+      }
 
     }
 
@@ -1300,7 +1497,7 @@ let app = {
       app.elements.form.addEventListener( 'submit', function() {
 
         event.preventDefault();
-        app.geolocation.submit();
+        app.search.submit();
 
       }, false );
 
@@ -1313,8 +1510,9 @@ let app = {
       app.elements.longitude.addEventListener( 'blur',   app.geolocation.submit );
       app.elements.longitude.addEventListener( 'input',  app.geolocation.validate );
 
-
-      app.elements.nextButton
+      // Removes success state of search if it is changes
+      app.elements.address.addEventListener(  'change', app.search.validate );
+      app.elements.address.addEventListener(  'input',  app.search.validate );
 
       // Enables drag on handle to control tunnel angles on desktop
       window.addEventListener( 'touchstart', app.drag.start, false);
