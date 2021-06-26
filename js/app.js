@@ -182,6 +182,7 @@ let app = {
         object     : undefined
       },
       origin       : document.querySelector( '.label-origin' ),
+      coordinates  : document.querySelector( '.label-coordinates' ),
       angle        : document.querySelector( '.label-angle' ),
     },
     markers        : {
@@ -1259,6 +1260,22 @@ let app = {
       app.parameters.update();
 
       app.element.dataset.statusGeolocation = 'unlocated';
+
+      // Creates human-readable string from coordinates
+      let label = '';
+
+      if ( lat > 0 )
+        label += Math.round( lat ) + '°N, ';
+      else
+        label += Math.round( lat * -1 ) + '°S, ';
+
+      if ( lon > 0 )
+        label += Math.round( lon ) + '°E';
+      else
+        label += Math.round( lon * -1 ) + '°W';
+
+      // Updates coordinates label with new values
+      app.three.labels.coordinates.textContent = label;
 
     },
 
