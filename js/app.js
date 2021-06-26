@@ -844,11 +844,11 @@ let app = {
       );
 
       // Makes camera move automatically and with inertia
-      app.three.controls.autoRotate = false;
+      app.three.controls.autoRotate      = true;
       app.three.controls.autoRotateSpeed =   2; // 1 orbit in 30 seconds
       app.three.controls.autoRotateSpeed = .25; // 1 orbit in 240 seconds
-      app.three.controls.enableDamping = true;
-      app.three.controls.enableZoom = false;
+      app.three.controls.enableDamping   = true;
+      app.three.controls.enableZoom      = false;
 
       // Creates labels
 
