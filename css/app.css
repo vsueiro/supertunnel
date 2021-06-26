@@ -96,7 +96,8 @@ body {
 }
 
 .background,
-.foreground {
+.foreground,
+.loader {
   position: absolute;
   top: 0;
   right: 0;
@@ -133,17 +134,34 @@ body {
   display: none
 }
 
-.app[data-geolocation="unlocated"] .find  span:nth-child(1) {
+.loader {
   display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba( var(--neutral-0-rgb), .9 );
+  z-index: 2;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .2s linear;
 }
 
-.app[data-geolocation="locating"] .find  span:nth-child(2) {
+.loader::before {
+  content: '';
   display: flex;
+  width: calc( var(--basis) * 4.8 );
+  height: calc( var(--basis) * 4.8 );
+  border-radius: 50%;
+  border: calc( var(--basis) * .4 ) solid rgba( var(--neutral-100-rgb), .25 );
+  border-top: calc( var(--basis) * .4 ) solid var(--success-100);
+  animation: spin .8s infinite linear;
+  animation-play-state: paused;
 }
 
-.app[data-geolocation="located"] .find  span:nth-child(3) {
-  display: flex;
+@keyframes spin {
+  0%   { transform: rotate(   0deg ); }
+  100% { transform: rotate( 360deg ); }
 }
+
 
 body {
   font-family: 'Poppins';
@@ -639,6 +657,18 @@ input[type="search"] + button:not(:hover) {
   user-select: none;
 }
 
+.app[data-geolocation="unlocated"] .find  span:nth-child(1) {
+  display: flex;
+}
+
+.app[data-geolocation="locating"] .find  span:nth-child(2) {
+  display: flex;
+}
+
+.app[data-geolocation="located"] .find  span:nth-child(3) {
+  display: flex;
+}
+
 .app[data-geolocation="locating"] button.find {
   pointer-events: none;
   background: rgba( var(--accent-100-rgb), .2 );
@@ -666,6 +696,30 @@ input[type="search"] + button:not(:hover) {
 
 .app[data-geolocation="located"] .step:nth-child(1) > div {
   display: none;
+}
+
+.app[data-search="searching"] .loader,
+.app[data-geolocation="locating"] .loader {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.app[data-search="searching"] .loader::before,
+.app[data-geolocation="locating"] .loader::before {
+  animation-play-state: running;
+}
+
+.app[data-search="searched"] .search-container {
+  background: rgba( var(--success-100-rgb), .25 );
+}
+
+.app[data-search="searched"] input[type="search"] {
+  color: var(--success-100);
+}
+
+.app[data-search="searched"] input[type="search"] + button {
+  color: var(--success-100);
+  pointer-events: none;
 }
 
 /*

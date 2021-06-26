@@ -1364,6 +1364,7 @@ let app = {
     error : () => {
 
       alert( 'Unable to find address' );
+      app.element.dataset.search = 'unsearched';
 
     },
 
@@ -1436,6 +1437,7 @@ let app = {
     clear : () => {
 
       app.elements.address.value = '';
+      app.element.dataset.search = 'unsearched';
 
     },
 
@@ -1444,8 +1446,16 @@ let app = {
       if ( app.elements.address.value.trim() == '' ) {
 
         app.elements.address.value = value
+        app.element.dataset.search = 'searched';
 
       }
+
+    },
+
+    validate : () => {
+
+      // Removes success state
+      app.element.dataset.search = 'unsearched';
 
     },
 
@@ -1500,8 +1510,9 @@ let app = {
       app.elements.longitude.addEventListener( 'blur',   app.geolocation.submit );
       app.elements.longitude.addEventListener( 'input',  app.geolocation.validate );
 
-
-      app.elements.nextButton
+      // Removes success state of search if it is changes
+      app.elements.address.addEventListener(  'change', app.search.validate );
+      app.elements.address.addEventListener(  'input',  app.search.validate );
 
       // Enables drag on handle to control tunnel angles on desktop
       window.addEventListener( 'touchstart', app.drag.start, false);
