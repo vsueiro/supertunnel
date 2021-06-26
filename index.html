@@ -9,7 +9,7 @@
   </head>
   <body>
 
-    <div class="app" data-step="1" data-grabbing="false" data-status-geolocation="unlocated" data-status-orientation="unsupported">
+    <div class="app" data-step="1" data-grabbing="false" data-status-search="unsearched" data-status-geolocation="unlocated" data-status-orientation="unsupported">
 
       <div class="background">
         <canvas class="canvas"></canvas>
@@ -29,7 +29,7 @@
 
           <nav>
             <a href="https://github.com/vsueiro/tunnel-simulator" target="_blank" aria-label="About">
-              <img src="assets/info.svg" alt="Information icon" class="info">
+              <i class="icon-info"></i>
             </a>
           </nav>
 
@@ -40,33 +40,51 @@
           <section>
 
             <header>
-              <h2>Origin: <span class="label label-origin"></span></h2>
+              <h2>Origin: <span class="label label-coordinates">0°N, 0°S</span></h2>
+              <span class="label label-origin" style="display:none"></span>
             </header>
 
             <form>
 
-              <p>Insert coordinates</p>
+              <p>Enter your address:</p>
 
-              <label for="latitude">
-                <span>Latitude:</span>
-                <input type="text" name="latitude" value="0">
-              </label>
+              <div class="search-container">
+                <input type="search" name="search" value="" placeholder="…">
+                <button>
+                  <i class="icon-search"></i>
+                </button>
+              </div>
 
-              <label for="longitude">
-                <span>Longitude:</span>
-                <input type="text" name="longitude" value="0">
-              </label>
+              <div></div>
 
-              <input type="submit" value="Submit coordinates" style="display: none">
+              <p>Or enable geolocation:</p>
 
-              <p>Or</p>
+              <div style="display: none">
+
+                <p>Insert coordinates</p>
+
+                <label for="latitude">
+                  <span>Latitude:</span>
+                  <input type="text" name="latitude" value="0">
+                </label>
+
+                <label for="longitude">
+                  <span>Longitude:</span>
+                  <input type="text" name="longitude" value="0">
+                </label>
+
+                <input type="submit" value="Submit" style="display: none">
+
+                <p>Or</p>
+
+              </div>
 
             </form>
 
             <button class="find">
-              <span>Get my location</span>
-              <span>Locating...</span>
-              <span>Found you</span>
+              <span><i class="icon-location"></i> Get my position</span>
+              <span><i class="icon-location"></i> Locating...</span>
+              <span><i class="icon-location"></i> Found you</span>
             </button>
 
             <p class="tip">Simulate a tunnel through Earth, starting from where you are</p>
