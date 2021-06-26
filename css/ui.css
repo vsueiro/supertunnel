@@ -574,32 +574,32 @@ input[type="search"] + button:not(:hover) {
   user-select: none;
 }
 
-.app[data-status-geolocation="locating"] button.find {
+.app[data-geolocation="locating"] button.find {
   pointer-events: none;
   background: rgba( var(--accent-100-rgb), .2 );
   color: var(--accent-100);
 }
 
-.app[data-status-geolocation="located"] button.find {
+.app[data-geolocation="located"] button.find {
   pointer-events: none;
   background: rgba( var(--success-100-rgb), .25 );
   color: var(--success-100);
 }
 
-.app[data-status-geolocation="located"] form input {
+.app[data-geolocation="located"] form input {
   color: var(--success-100);
 }
 
-.app[data-status-geolocation="located"] form p:last-child {
+.app[data-geolocation="located"] form p:last-child {
   pointer-events: none;
   color: transparent;
 }
 
-.app[data-status-geolocation="located"] .step:nth-child(1) {
+.app[data-geolocation="located"] .step:nth-child(1) {
   border-color: var(--success-100);
 }
 
-.app[data-status-geolocation="located"] .step:nth-child(1) > div {
+.app[data-geolocation="located"] .step:nth-child(1) > div {
   display: none;
 }
 
@@ -607,9 +607,9 @@ input[type="search"] + button:not(:hover) {
 
 /*
 
-.app[data-status-orientation="supported"] main section:first-child,
-.app[data-status-orientation="supported"] main section:last-child,
-.app[data-status-orientation="supported"] footer {
+.app[data-orientation="supported"] main section:first-child,
+.app[data-orientation="supported"] main section:last-child,
+.app[data-orientation="supported"] footer {
   display: none;
 }
 

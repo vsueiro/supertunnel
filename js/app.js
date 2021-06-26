@@ -1186,7 +1186,7 @@ let app = {
       // Checks if device supports retrieving device orientation values (uses https://sensor-js.xyz)
       if ( DeviceMotionEvent && typeof DeviceMotionEvent.requestPermission === 'function' ) {
 
-        app.element.dataset.statusOrientation = 'supported';
+        app.element.dataset.orientation = 'supported';
 
       }
 
@@ -1231,7 +1231,7 @@ let app = {
       app.parameters.update();
       app.drag.reset();
 
-      app.element.dataset.statusGeolocation = 'located';
+      app.element.dataset.geolocation = 'located';
 
       // Changes step with a 1s delay
       setTimeout( app.steps.next, 2400 );
@@ -1240,7 +1240,7 @@ let app = {
 
     error : function() {
 
-      app.element.dataset.statusGeolocation = 'unlocated';
+      app.element.dataset.geolocation = 'unlocated';
 
       window.alert(
 
@@ -1253,7 +1253,7 @@ let app = {
 
     find : function() {
 
-      app.element.dataset.statusGeolocation = 'locating';
+      app.element.dataset.geolocation = 'locating';
 
       if ( navigator.geolocation ) {
 
@@ -1288,7 +1288,7 @@ let app = {
       app.parameters.update();
       app.geolocation.updateLabel();
 
-      app.element.dataset.statusGeolocation = 'unlocated';
+      app.element.dataset.geolocation = 'unlocated';
 
     },
 
@@ -1354,7 +1354,7 @@ let app = {
       app.elements.latitude.value  = app.data.user.latitude;
       app.elements.longitude.value = app.data.user.longitude;
 
-      app.element.dataset.statusSearch = 'searched';
+      app.element.dataset.search = 'searched';
 
       app.geolocation.submit();
       app.drag.reset();
@@ -1393,7 +1393,7 @@ let app = {
         app.parameters.update();
         app.geolocation.submit();
 
-        app.element.dataset.statusGeolocation = 'located';
+        app.element.dataset.geolocation = 'located';
 
         // Changes step with a 1s delay
         setTimeout( app.steps.next, 2400 );
@@ -1411,7 +1411,7 @@ let app = {
 
       if ( address ) {
 
-        app.element.dataset.statusSearch = 'searching';
+        app.element.dataset.search = 'searching';
 
         app.search.query.q    = address;
         app.search.parameters = new URLSearchParams( app.search.query ).toString();

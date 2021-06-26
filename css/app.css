@@ -56,15 +56,15 @@ body {
   display: none
 }
 
-.app[data-status-geolocation="unlocated"] .find  span:nth-child(1) {
+.app[data-geolocation="unlocated"] .find  span:nth-child(1) {
   display: flex;
 }
 
-.app[data-status-geolocation="locating"] .find  span:nth-child(2) {
+.app[data-geolocation="locating"] .find  span:nth-child(2) {
   display: flex;
 }
 
-.app[data-status-geolocation="located"] .find  span:nth-child(3) {
+.app[data-geolocation="located"] .find  span:nth-child(3) {
   display: flex;
 }
 
@@ -72,14 +72,14 @@ body {
   display: none
 }
 
-.app[data-status-bluetooth="unpaired"] .connect  span:nth-child(1) {
+.app[data-bluetooth="unpaired"] .connect  span:nth-child(1) {
   display: flex;
 }
 
-.app[data-status-bluetooth="pairing"] .connect  span:nth-child(2) {
+.app[data-bluetooth="pairing"] .connect  span:nth-child(2) {
   display: flex;
 }
 
-.app[data-status-bluetooth="paired"] .connect  span:nth-child(3) {
+.app[data-bluetooth="paired"] .connect  span:nth-child(3) {
   display: flex;
 }
