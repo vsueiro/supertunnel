@@ -12,6 +12,7 @@ let app = {
     background      : document.querySelector(    '.background'             ),
     canvas          : document.querySelector(    '.canvas'                 ),
     form            : document.querySelector(    'form'                    ),
+    address         : document.querySelector(    'input[name="address"]'   ),
     latitude        : document.querySelector(    'input[name="latitude"]'  ),
     longitude       : document.querySelector(    'input[name="longitude"]' ),
     compassNeedle   : document.querySelector(    '.needle'                 ),
@@ -1097,6 +1098,21 @@ let app = {
 
     },
 
+    reset : () => {
+
+      // Sets top and left distances (in percentage)
+      app.elements.handle.style.left = '50%';
+      app.elements.handle.style.top  = '50%';
+
+      // Calculates values as if each axis was a divergent range input (from -N to +N)
+      app.drag.value.x = 0;
+      app.drag.value.y = 0;
+
+      // Updates angle label with original values
+      app.three.labels.angle.textContent = '0°S, 0°W';
+
+    }
+
   },
 
   orientation : {
@@ -1183,6 +1199,7 @@ let app = {
       app.elements.longitude.value = app.data.user.longitude;
 
       app.parameters.update();
+      app.drag.reset();
 
       app.element.dataset.statusGeolocation = 'located';
 
@@ -1294,7 +1311,26 @@ let app = {
     parameters : '',
     url        : '',
 
-    error : function() {
+    success : () => {
+
+      let lat = app.search.result.lat;
+      let lon = app.search.result.lon;
+
+      app.data.user.latitude  = parseFloat( lat ).toFixed( 4 );
+      app.data.user.longitude = parseFloat( lon ).toFixed( 4 );
+
+      // Updates manual input values to match the retrieved coordinates
+      app.elements.latitude.value  = app.data.user.latitude;
+      app.elements.longitude.value = app.data.user.longitude;
+
+      app.element.dataset.statusSearch = 'searched';
+
+      app.geolocation.submit();
+      app.drag.reset();
+
+    },
+
+    error : () => {
 
       alert( 'Unable to find address' );
 
@@ -1306,8 +1342,11 @@ let app = {
 
       if ( list.length > 0 ) {
 
-        // Handles first result
+        // Stores first result
         app.search.result = list[ 0 ];
+        app.search.success();
+
+        /*
         console.log( app.search.result );
 
         let lat = app.search.result.lat;
@@ -1321,11 +1360,13 @@ let app = {
         app.elements.longitude.value = app.data.user.longitude;
 
         app.parameters.update();
+        app.geolocation.submit();
 
         app.element.dataset.statusGeolocation = 'located';
 
         // Changes step with a 1s delay
         setTimeout( app.steps.next, 2400 );
+        */
 
       } else {
 
@@ -1335,18 +1376,31 @@ let app = {
 
     },
 
-    get : function( address ) {
+    get : ( address ) => {
 
-      app.search.query.q    = address;
-      app.search.parameters = new URLSearchParams( app.search.query ).toString();
-      app.search.url        = app.search.api + '?' + app.search.parameters;
+      if ( address ) {
 
-      // Gets countries geometries
-      fetch( app.search.url )
-       .then( response => response.json() )
-       .then( list => app.search.results( list ) )
+        app.element.dataset.statusSearch = 'searching';
+
+        app.search.query.q    = address;
+        app.search.parameters = new URLSearchParams( app.search.query ).toString();
+        app.search.url        = app.search.api + '?' + app.search.parameters;
+
+        // Gets countries geometries
+        fetch( app.search.url )
+         .then( response => response.json() )
+         .then( list => app.search.results( list ) )
+
+      }
 
     },
+
+    submit : () => {
+
+      let address = app.elements.address.value.trim();
+      app.search.get( address )
+
+    }
 
   },
 
@@ -1371,7 +1425,7 @@ let app = {
       app.elements.form.addEventListener( 'submit', function() {
 
         event.preventDefault();
-        app.geolocation.submit();
+        app.search.submit();
 
       }, false );
 
