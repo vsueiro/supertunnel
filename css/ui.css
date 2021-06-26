@@ -47,12 +47,6 @@ input::-webkit-inner-spin-button {
   margin: 0;
 }
 
-input[type=number],
-input[type=text] {
-  -moz-appearance: textfield;
-  font-variant-numeric: tabular-nums;
-}
-
 button,
 input[type=text],
 input[type=number],
@@ -68,6 +62,13 @@ input[type="submit"] {
   height: calc( var(--basis) * 4.8 );
   padding: calc( var(--basis) * .8 );
   white-space: nowrap;
+}
+
+input[type=number],
+input[type=text] {
+  -moz-appearance: textfield;
+  font-variant-numeric: tabular-nums;
+  padding: calc( var(--basis) * .8 ) 0;
 }
 
 a {
