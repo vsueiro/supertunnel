@@ -707,6 +707,11 @@ form p:last-child {
   display: flex;
 }
 
+.app[data-step="3"] .marker-origin,
+.app[data-step="3"] .label-distance {
+  opacity: 0;
+}
+
 /* Markers & labels */
 
 .marker-origin {
