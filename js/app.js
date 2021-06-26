@@ -268,10 +268,6 @@ let app = {
 
         }
 
-        // It will be 3 Earth’s radiuses away if window is 1280px wide
-
-        // app.three.camera.position.z = ( app.data.earth.radius.crust * 3 ) * 1280 / c.clientWidth;
-
       }
 
     },
@@ -280,6 +276,25 @@ let app = {
 
       // Makes canvas responsive
       app.three.resize();
+
+      // Handles different steps
+      switch ( app.element.dataset.step ) {
+        case '1':
+          app.three.controls.autoRotate = true;
+          break;
+        case '2':
+          app.three.controls.autoRotate = true;
+          break;
+        case '3':
+          app.three.controls.autoRotate = false;
+          break;
+        case '4':
+          app.three.controls.autoRotate = false;
+          break;
+        case '5':
+          app.three.controls.autoRotate = false;
+          break;
+      }
 
       // Creates a simple time counter (since the animation started)
       app.data.seconds = time * .001;
