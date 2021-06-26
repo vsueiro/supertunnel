@@ -1232,6 +1232,7 @@ let app = {
 
       // Makes origin country be filled in search input
       app.search.initialized = false;
+      app.element.dataset.origin = '';
 
       app.parameters.update();
       app.drag.reset();
@@ -1466,12 +1467,16 @@ let app = {
 
       if ( !app.search.initialized ) {
 
-        // Runs this code only once, after origin country is identified
-
         let country = app.element.dataset.origin;
-        app.search.fill( country );
 
-        app.search.initialized = true;
+        if ( country !== '' ) {
+
+          app.search.fill( country );
+
+          // Runs this code only once, after origin country is identified
+          app.search.initialized = true;
+
+        }
 
       }
 
