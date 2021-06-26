@@ -709,6 +709,11 @@ input[type="search"] + button:not(:hover) {
   animation-play-state: running;
 }
 
+.app[data-search="searching"] .draggable-handle::before,
+.app[data-geolocation="locating"] .draggable-handle::before {
+  animation-play-state: paused;
+}
+
 .app[data-search="searched"] .search-container {
   background: rgba( var(--success-100-rgb), .25 );
 }
@@ -721,6 +726,9 @@ input[type="search"] + button:not(:hover) {
   color: var(--success-100);
   pointer-events: none;
 }
+
+
+
 
 /*
 
