@@ -544,7 +544,7 @@ main section:last-child header {
   border-radius: 50%;
   transform: translate( -50%, -50% ) scale3d( 1, 1, 1);
   opacity: 0;
-  animation: pulse 1.2s infinite;
+  animation: pulse 2.4s infinite;
   pointer-events: none;
   perspective: 1000;
 }
@@ -556,8 +556,13 @@ main section:last-child header {
     opacity: 1;
   }
 
-  100% {
+  50% {
     transform: translate( -50%, -50% ) scale3d( 1, 1, 1);
+    opacity: 0;
+  }
+
+  100% {
+    transform: translate( -50%, -50% ) scale3d( .5, .5, .5);
     opacity: 0;
   }
 
