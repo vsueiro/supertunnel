@@ -811,4 +811,9 @@ form p:last-child {
     font-size: calc( var(--basis) * 2.4 );
   }
 
+  .marker-origin {
+    width: calc( var(--basis) * 2.4 );
+    height: calc( var(--basis) * 2.4 );
+  }
+
 }
