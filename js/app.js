@@ -70,10 +70,10 @@ let app = {
 
       if ( parameters.has( 'longitude' ) ) {
 
-        let lng = app.validates.coordinates( parameters.get( 'longitude' ), 180 )
+        let lon = app.validates.coordinates( parameters.get( 'longitude' ), 180 )
 
-        app.elements.longitude.value = lng;
-        app.data.user.longitude = lng;
+        app.elements.longitude.value = lon;
+        app.data.user.longitude = lon;
 
       }
 
@@ -1227,17 +1227,17 @@ let app = {
     submit : () => {
 
       let lat = app.elements.latitude.value;
-      let lng = app.elements.longitude.value;
+      let lon = app.elements.longitude.value;
 
       // Validades coordinates
       lat = app.validates.coordinates( lat, 90 );
-      lng = app.validates.coordinates( lng, 180 );
+      lon = app.validates.coordinates( lon, 180 );
 
       app.elements.latitude.value  = lat;
-      app.elements.longitude.value = lng;
+      app.elements.longitude.value = lon;
 
       app.data.user.latitude  = lat;
-      app.data.user.longitude = lng;
+      app.data.user.longitude = lon;
 
       app.parameters.update();
 
@@ -1248,14 +1248,14 @@ let app = {
     validate : () => {
 
       let lat = app.elements.latitude.value;
-      let lng = app.elements.longitude.value;
+      let lon = app.elements.longitude.value;
 
       // Validades coordinates
       lat = app.validates.coordinates( lat );
-      lng = app.validates.coordinates( lng );
+      lon = app.validates.coordinates( lon );
 
       app.elements.latitude.value  = lat;
-      app.elements.longitude.value = lng;
+      app.elements.longitude.value = lon;
 
     },
 
@@ -1276,6 +1276,77 @@ let app = {
       app.element.dataset.step = parseInt( app.element.dataset.step ) + 1
 
     }
+
+  },
+
+  search : {
+
+    api : 'https://nominatim.openstreetmap.org/search.php',
+
+    query : {
+
+      q : '',
+      limit : 1,
+      format : 'jsonv2'
+
+    },
+
+    parameters : '',
+    url        : '',
+
+    error : function() {
+
+      alert( 'Unable to find address' );
+
+    },
+
+    result : undefined,
+
+    results : function( list ) {
+
+      if ( list.length > 0 ) {
+
+        // Handles first result
+        app.search.result = list[ 0 ];
+        console.log( app.search.result );
+
+        let lat = app.search.result.lat;
+        let lon = app.search.result.lon;
+
+        app.data.user.latitude  = parseFloat( lat ).toFixed( 4 );
+        app.data.user.longitude = parseFloat( lon ).toFixed( 4 );
+
+        // Updates manual input values to match the retrieved coordinates
+        app.elements.latitude.value  = app.data.user.latitude;
+        app.elements.longitude.value = app.data.user.longitude;
+
+        app.parameters.update();
+
+        app.element.dataset.statusGeolocation = 'located';
+
+        // Changes step with a 1s delay
+        setTimeout( app.steps.next, 2400 );
+
+      } else {
+
+        app.search.error()
+
+      }
+
+    },
+
+    get : function( address ) {
+
+      app.search.query.q    = address;
+      app.search.parameters = new URLSearchParams( app.search.query ).toString();
+      app.search.url        = app.search.api + '?' + app.search.parameters;
+
+      // Gets countries geometries
+      fetch( app.search.url )
+       .then( response => response.json() )
+       .then( list => app.search.results( list ) )
+
+    },
 
   },
 
