@@ -1228,10 +1228,13 @@ let app = {
       app.elements.latitude.value = app.data.user.latitude;
       app.elements.longitude.value = app.data.user.longitude;
 
+      app.element.dataset.geolocation = 'located';
+
+      // Makes origin country be filled in search input
+      app.search.initialized = false;
+
       app.parameters.update();
       app.drag.reset();
-
-      app.element.dataset.geolocation = 'located';
 
       // Changes step with a 1s delay
       setTimeout( app.steps.next, 2400 );
