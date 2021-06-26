@@ -849,6 +849,7 @@ let app = {
       app.three.controls.autoRotateSpeed = .25; // 1 orbit in 240 seconds
       app.three.controls.enableDamping   = true;
       app.three.controls.enableZoom      = false;
+      app.three.controls.enablePan       = false;
 
       // Creates labels
 
