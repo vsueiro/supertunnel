@@ -1115,8 +1115,6 @@ let app = {
 
       // TODO: This works, but not always (quality reading?)
 
-      document.querySelector( 'pre' ).textContent = event.alpha + '\n' + event.beta + '\n' + event.gamma;
-
       if ( app.data.orientation.initialOffset === undefined && event.absolute !== true )
         app.data.orientation.initialOffset = event.webkitCompassHeading || 0;
 
