@@ -1219,7 +1219,7 @@ let app = {
       lat = app.validates.coordinates( lat, 90 );
       lng = app.validates.coordinates( lng, 180 );
 
-      app.elements.latitude.value = lat;
+      app.elements.latitude.value  = lat;
       app.elements.longitude.value = lng;
 
       app.data.user.latitude  = lat;
@@ -1240,8 +1240,16 @@ let app = {
       lat = app.validates.coordinates( lat );
       lng = app.validates.coordinates( lng );
 
-      app.elements.latitude.value = lat;
+      app.elements.latitude.value  = lat;
       app.elements.longitude.value = lng;
+
+    },
+
+    initialize : () => {
+
+      // Updates manual input values to match the initial coordinates
+      app.elements.latitude.value  = app.data.user.latitude;
+      app.elements.longitude.value = app.data.user.longitude;
 
     }
 
@@ -1365,6 +1373,7 @@ let app = {
     app.events.initialize();
     app.parameters.initialize();
     app.orientation.initialize();
+    app.geolocation.initialize();
 
   }
 
