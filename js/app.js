@@ -78,6 +78,11 @@ let app = {
 
       }
 
+      if ( parameters.has( 'latitude' ) || parameters.has( 'longitude' ) )
+        app.search.clear();
+
+      app.geolocation.updateLabel();
+
     }
 
   },
@@ -430,6 +435,7 @@ let app = {
 
               app.element.dataset.origin = country;
               app.three.labels.origin.textContent = country;
+              app.search.initialize();
 
             }
 
@@ -1190,6 +1196,29 @@ let app = {
 
   geolocation : {
 
+    updateLabel : () => {
+
+      let lat = app.data.user.latitude;
+      let lon = app.data.user.longitude;
+
+      // Creates human-readable string from coordinates
+      let label = '';
+
+      if ( lat > 0 )
+        label += Math.round( lat ) + '°N, ';
+      else
+        label += Math.round( lat * -1 ) + '°S, ';
+
+      if ( lon > 0 )
+        label += Math.round( lon ) + '°E';
+      else
+        label += Math.round( lon * -1 ) + '°W';
+
+      // Updates coordinates label with new values
+      app.three.labels.coordinates.textContent = label;
+
+    },
+
     found : function( position ) {
 
       app.data.user.latitude = position.coords.latitude.toFixed( 4 );
@@ -1215,9 +1244,8 @@ let app = {
 
       window.alert(
 
-        'Sorry, there was an error. ' +
-        'Please type in your latitude and longitude as decimal degrees ' +
-        '(West and South are negative).'
+        'Unable to find your location. ' +
+        'Please type in your address.'
 
       );
 
@@ -1258,24 +1286,9 @@ let app = {
       app.data.user.longitude = lon;
 
       app.parameters.update();
+      app.geolocation.updateLabel();
 
       app.element.dataset.statusGeolocation = 'unlocated';
-
-      // Creates human-readable string from coordinates
-      let label = '';
-
-      if ( lat > 0 )
-        label += Math.round( lat ) + '°N, ';
-      else
-        label += Math.round( lat * -1 ) + '°S, ';
-
-      if ( lon > 0 )
-        label += Math.round( lon ) + '°E';
-      else
-        label += Math.round( lon * -1 ) + '°W';
-
-      // Updates coordinates label with new values
-      app.three.labels.coordinates.textContent = label;
 
     },
 
@@ -1325,8 +1338,9 @@ let app = {
 
     },
 
-    parameters : '',
-    url        : '',
+    parameters  : '',
+    url         : '',
+    initialized : false,
 
     success : () => {
 
@@ -1416,6 +1430,37 @@ let app = {
 
       let address = app.elements.address.value.trim();
       app.search.get( address )
+
+    },
+
+    clear : () => {
+
+      app.elements.address.value = '';
+
+    },
+
+    fill : ( value ) => {
+
+      if ( app.elements.address.value.trim() == '' ) {
+
+        app.elements.address.value = value
+
+      }
+
+    },
+
+    initialize : () => {
+
+      if ( !app.search.initialized ) {
+
+        // Runs this code only once, after origin country is identified
+
+        let country = app.element.dataset.origin;
+        app.search.fill( country );
+
+        app.search.initialized = true;
+
+      }
 
     }
 
