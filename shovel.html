@@ -52,6 +52,12 @@
 
     let app = {
 
+      options : {
+
+        firstPerson : true
+
+      },
+
       elements : {
 
         canvas : document.querySelector( '.canvas' ),
@@ -222,10 +228,27 @@
           // Makes canvas responsive
           app.three.resize();
 
-          // Rotates tunnel according to readings
-          app.three.cylinder.rotation.x = THREE.Math.degToRad( app.data.orientation.beta  );
-          app.three.tunnel.rotation.y   = THREE.Math.degToRad( app.data.orientation.alpha );
-          app.three.cylinder.rotation.z = THREE.Math.degToRad( app.data.orientation.gamma );
+          if ( app.options.firstPerson ) {
+
+            // Rotates Earth to always match real-world North
+            app.three.sphere.rotation.y   = THREE.Math.degToRad( app.data.orientation.alpha * -1 );
+
+            // Rotates tunnel only on two axes
+            app.three.cylinder.rotation.x = THREE.Math.degToRad( app.data.orientation.beta  );
+            app.three.tunnel.rotation.y   = THREE.Math.degToRad( 0 );
+            app.three.cylinder.rotation.z = THREE.Math.degToRad( app.data.orientation.gamma );
+
+          } else {
+
+            // Keeps Earth still
+            app.three.sphere.rotation.y   = THREE.Math.degToRad( 0 );
+
+            // Rotates tunnel on all axes
+            app.three.cylinder.rotation.x = THREE.Math.degToRad( app.data.orientation.beta  );
+            app.three.tunnel.rotation.y   = THREE.Math.degToRad( app.data.orientation.alpha );
+            app.three.cylinder.rotation.z = THREE.Math.degToRad( app.data.orientation.gamma );
+
+          }
 
           // Makes camera orbit
           app.three.controls.update();
