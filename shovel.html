@@ -128,6 +128,44 @@
               app.three.cylinder
             );
 
+          },
+
+          renderer : () => {
+
+            // Creates renderer with transparent background
+            app.three.renderer = new THREE.WebGLRenderer( {
+              canvas : app.elements.canvas,
+              alpha : true,
+              logarithmicDepthBuffer: true // prevents z fighting
+            } );
+
+          },
+
+          camera : () => {
+
+            // Creates camera
+            app.three.camera = new THREE.PerspectiveCamera( 50, 1, .1, app.data.earth.radius.crust * 30 );
+            app.three.camera.position.y = app.data.earth.radius.crust * 3;
+
+            // Makes camera move with mouse
+            app.three.controls = new THREE.OrbitControls(
+              app.three.camera,
+              app.elements.canvas
+            );
+
+            // Makes camera move automatically and with inertia
+            app.three.controls.enableDamping = true;
+            app.three.controls.enableZoom    = false;
+            app.three.controls.enablePan     = false;
+
+          },
+
+          scene : () => {
+
+            // Creates scene
+            app.three.scene = new THREE.Scene();
+            app.three.scene.add( app.three.tunnel );
+
           }
 
         },
@@ -137,39 +175,12 @@
           app.three.create.cylinder();
           app.three.create.tunnel();
 
-
-
-
-
-          // Begins renderer with transparent background
-          app.three.renderer = new THREE.WebGLRenderer( {
-            canvas : app.elements.canvas,
-            alpha : true,
-            logarithmicDepthBuffer: true // prevents z fighting
-          } );
-
-          // Creates camera
-          app.three.camera = new THREE.PerspectiveCamera( 50, 1, .1, app.data.earth.radius.crust * 30 );
-          app.three.camera.position.y = app.data.earth.radius.crust * 3;
-
-          // Makes camera move with mouse
-          app.three.controls = new THREE.OrbitControls(
-            app.three.camera,
-            app.elements.canvas
-          );
-
-          // Makes camera move automatically and with inertia
-          app.three.controls.enableDamping   = true;
-          app.three.controls.enableZoom      = false;
-          app.three.controls.enablePan       = false;
-
-          // Creates scene
-          app.three.scene = new THREE.Scene();
-          app.three.scene.add( app.three.tunnel );
+          app.three.create.renderer();
+          app.three.create.camera();
+          app.three.create.scene();
 
           // Debugs axes
-          let axesHelper = new THREE.AxesHelper( 1000 );
-          app.three.scene.add( axesHelper );
+          app.three.scene.add( new THREE.AxesHelper( 1000 ) );
 
           // Animate 3D elements
           requestAnimationFrame( app.three.render );
