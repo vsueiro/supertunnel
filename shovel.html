@@ -156,8 +156,8 @@
 
             let material = new THREE.MeshBasicMaterial( {
               color : 'gray',
-              // wireframe: true,
-              opacity : 0.75,
+              wireframe: true,
+              opacity : 1,
               transparent : true,
               map : texture
             } );
@@ -304,6 +304,13 @@
               app.three.tunnel.rotation.y   = THREE.Math.degToRad( 0 );
               app.three.cylinder.rotation.z = THREE.Math.degToRad( app.data.orientation.gamma );
 
+              // Deactivates camera controls
+              app.three.controls.enabled = false;
+
+              // Resets camera position
+              app.three.camera.position.set( 0, 0, app.data.earth.radius.crust * 3 );
+              app.three.camera.lookAt( new THREE.Vector3( 0, 0, 0 ) );
+
             } else { // Enables third-person view
 
               // Keeps Earth still
@@ -313,6 +320,9 @@
               app.three.cylinder.rotation.x = THREE.Math.degToRad( app.data.orientation.beta  );
               app.three.tunnel.rotation.y   = THREE.Math.degToRad( app.data.orientation.alpha );
               app.three.cylinder.rotation.z = THREE.Math.degToRad( app.data.orientation.gamma );
+
+              // Activates camera controls
+              app.three.controls.enabled = true;
 
             }
 
