@@ -123,6 +123,31 @@
 
           },
 
+          sphere : () => {
+
+            let geometry = new THREE.SphereGeometry(
+              app.data.earth.radius.crust * 0.99,
+              16,
+              16
+            );
+
+            let material = new THREE.MeshBasicMaterial( {
+              color: 'gray',
+              // wireframe: true,
+              opacity: 0.75,
+              transparent: true
+            } );
+
+            // Allows raycaster to detect collision on both sides of the object
+            material.side = THREE.DoubleSide;
+
+            // Applies satellite texture for debugging
+            material.map = THREE.ImageUtils.loadTexture( '../assets/texture.jpg' );
+
+            app.three.sphere = new THREE.Mesh( geometry, material );
+
+          },
+
           renderer : () => {
 
             // Creates renderer with transparent background
@@ -161,7 +186,10 @@
 
             // Creates scene
             app.three.scene = new THREE.Scene();
-            app.three.scene.add( app.three.tunnel );
+            app.three.scene.add(
+              app.three.tunnel,
+              app.three.sphere,
+            );
 
           }
 
@@ -169,8 +197,12 @@
 
         initialize : () => {
 
+          // Creates Tunnel group
           app.three.create.cylinder();
           app.three.create.tunnel();
+
+
+          app.three.create.sphere();
 
           app.three.create.renderer();
           app.three.create.camera();
