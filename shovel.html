@@ -208,7 +208,6 @@
           app.three.create.cylinder();
           app.three.create.tunnel();
 
-
           app.three.create.sphere();
 
           app.three.create.renderer();
@@ -224,68 +223,102 @@
 
         },
 
+        update : {
+
+          dimensions : () => {
+
+            let c = app.elements.canvas;
+
+            // If canvas dimensions are different from window dimensios
+            if ( c.width !== c.clientWidth || c.height !== c.clientHeight ) {
+
+              // Resizes
+              app.three.renderer.setSize(
+                c.clientWidth,
+                c.clientHeight,
+                false
+              );
+
+              // Updates camera accordingly
+              app.three.camera.aspect = c.clientWidth / c.clientHeight;
+              app.three.camera.updateProjectionMatrix();
+
+            }
+
+          },
+
+          tunnel : () => {
+
+            // Enables first-person view
+            if ( app.options.firstPerson ) {
+
+              // Rotates Earth to always match real-world North
+              app.three.sphere.rotation.y   = THREE.Math.degToRad( app.data.orientation.alpha * -1 );
+
+              // Rotates tunnel only on two axes
+              app.three.cylinder.rotation.x = THREE.Math.degToRad( app.data.orientation.beta  );
+              app.three.tunnel.rotation.y   = THREE.Math.degToRad( 0 );
+              app.three.cylinder.rotation.z = THREE.Math.degToRad( app.data.orientation.gamma );
+
+            } else { // Enables third-person view
+
+              // Keeps Earth still
+              app.three.sphere.rotation.y   = THREE.Math.degToRad( 0 );
+
+              // Rotates tunnel on all axes
+              app.three.cylinder.rotation.x = THREE.Math.degToRad( app.data.orientation.beta  );
+              app.three.tunnel.rotation.y   = THREE.Math.degToRad( app.data.orientation.alpha );
+              app.three.cylinder.rotation.z = THREE.Math.degToRad( app.data.orientation.gamma );
+
+            }
+
+          },
+
+          coordinates : () => {
+
+            /*
+            // Rotates crust so default location is at latitude and longitude 0
+            app.three.crust.rotation.y = THREE.Math.degToRad( -90 );
+
+            // Rotates countries so default location is at latitude and longitude 0
+            if ( app.three.land ) {
+              app.three.land.rotation.y = THREE.Math.degToRad( -180 );
+
+            }
+
+            // Rotates crust & countries so it looks like the pivot point is the user location
+            if ( app.data.user.latitude && app.data.user.longitude ) {
+
+              // Crust
+              app.three.crust.rotation.x = THREE.Math.degToRad( app.data.user.latitude );
+              app.three.crust.rotation.y = THREE.Math.degToRad( -90 - app.data.user.longitude );
+
+              // Countries
+              if ( app.three.land ) {
+                app.three.land.rotation.y = THREE.Math.degToRad( -180 - app.data.user.longitude );
+              }
+
+            }
+
+            // Rotates Earth (group) to counter-act previous rotation so OrbitControls work better
+            app.three.earth.rotation.x = THREE.Math.degToRad( - app.data.user.latitude );
+
+            */
+
+          }
+
+        },
+
         render : ( time ) => {
 
           // Makes canvas responsive
-          app.three.resize();
+          app.three.update.dimensions();
 
-          // Enables first-person view
-          if ( app.options.firstPerson ) {
+          // Controls tunnel using motion sensor
+          app.three.update.tunnel();
 
-            // Rotates Earth to always match real-world North
-            app.three.sphere.rotation.y   = THREE.Math.degToRad( app.data.orientation.alpha * -1 );
-
-            // Rotates tunnel only on two axes
-            app.three.cylinder.rotation.x = THREE.Math.degToRad( app.data.orientation.beta  );
-            app.three.tunnel.rotation.y   = THREE.Math.degToRad( 0 );
-            app.three.cylinder.rotation.z = THREE.Math.degToRad( app.data.orientation.gamma );
-
-          } else { // Enables third-person view
-
-            // Keeps Earth still
-            app.three.sphere.rotation.y   = THREE.Math.degToRad( 0 );
-
-            // Rotates tunnel on all axes
-            app.three.cylinder.rotation.x = THREE.Math.degToRad( app.data.orientation.beta  );
-            app.three.tunnel.rotation.y   = THREE.Math.degToRad( app.data.orientation.alpha );
-            app.three.cylinder.rotation.z = THREE.Math.degToRad( app.data.orientation.gamma );
-
-          }
-
-
-
-
-          /*
-          // Rotates crust so default location is at latitude and longitude 0
-          app.three.crust.rotation.y = THREE.Math.degToRad( -90 );
-
-          // Rotates countries so default location is at latitude and longitude 0
-          if ( app.three.land ) {
-            app.three.land.rotation.y = THREE.Math.degToRad( -180 );
-
-          }
-
-          // Rotates crust & countries so it looks like the pivot point is the user location
-          if ( app.data.user.latitude && app.data.user.longitude ) {
-
-            // Crust
-            app.three.crust.rotation.x = THREE.Math.degToRad( app.data.user.latitude );
-            app.three.crust.rotation.y = THREE.Math.degToRad( -90 - app.data.user.longitude );
-
-            // Countries
-            if ( app.three.land ) {
-              app.three.land.rotation.y = THREE.Math.degToRad( -180 - app.data.user.longitude );
-            }
-
-          }
-
-          // Rotates Earth (group) to counter-act previous rotation so OrbitControls work better
-          app.three.earth.rotation.x = THREE.Math.degToRad( - app.data.user.latitude );
-
-          */
-
-
-
+          // Rotates Earth or Tunnel to match origin latitude and longitude
+          app.three.update.coordinates();
 
           // Makes camera orbit
           app.three.controls.update();
@@ -299,28 +332,6 @@
           requestAnimationFrame( app.three.render );
 
         },
-
-        resize : () => {
-
-          let c = app.elements.canvas;
-
-          // If canvas dimensions are different from window dimensios
-          if ( c.width !== c.clientWidth || c.height !== c.clientHeight ) {
-
-            // Resizes
-            app.three.renderer.setSize(
-              c.clientWidth,
-              c.clientHeight,
-              false
-            );
-
-            // Updates camera accordingly
-            app.three.camera.aspect = c.clientWidth / c.clientHeight;
-            app.three.camera.updateProjectionMatrix();
-
-          }
-
-        }
 
       },
 
