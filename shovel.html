@@ -80,8 +80,8 @@
         },
 
         user : {
-          latitude : 0,
-          longitude : 0
+          latitude : -23.5475,
+          longitude : -46.63611
         }
 
       },
@@ -319,6 +319,10 @@
           },
 
           coordinates : () => {
+
+            // Rotates sphere so the user location coincides with the tunnel beginning
+            app.three.sphere.rotation.x = THREE.Math.degToRad( app.data.user.latitude );
+            app.three.sphere.rotation.z = THREE.Math.degToRad( app.data.user.longitude );
 
             // Rotates sphere so default location is at latitude 0 and longitude 0
             // app.three.sphere.rotation.x = THREE.Math.degToRad( -90 );
