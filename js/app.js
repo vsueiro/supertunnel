@@ -1447,12 +1447,8 @@ let app = {
 
     fill : ( value ) => {
 
-      if ( app.elements.address.value.trim() == '' ) {
-
-        app.elements.address.value = value
-        app.element.dataset.search = 'searched';
-
-      }
+      app.elements.address.value = value
+      app.element.dataset.search = 'searched';
 
     },
 
