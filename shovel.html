@@ -131,6 +131,9 @@
 
           sphere : () => {
 
+            // Applies satellite texture for debugging
+            let texture = new THREE.TextureLoader().load( '../assets/texture.jpg' );
+
             let geometry = new THREE.SphereGeometry(
               app.data.earth.radius.crust * 0.99,
               16,
@@ -141,14 +144,12 @@
               color: 'gray',
               // wireframe: true,
               opacity: 0.75,
-              transparent: true
+              transparent: true,
+              map: texture
             } );
 
             // Allows raycaster to detect collision on both sides of the object
             material.side = THREE.DoubleSide;
-
-            // Applies satellite texture for debugging
-            material.map = THREE.ImageUtils.loadTexture( '../assets/texture.jpg' );
 
             app.three.sphere = new THREE.Mesh( geometry, material );
 
