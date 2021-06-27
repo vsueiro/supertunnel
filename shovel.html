@@ -7,10 +7,33 @@
 
     <style>
 
+    * {
+      margin: 0;
+      padding: 0;
+      overflow: hidden
+    }
+
+    html {
+      background: black;
+    }
+
+    canvas {
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
     </style>
 
   </head>
   <body>
+
+    <canvas class="canvas"></canvas>
 
     <!-- https://unpkg.com/browse/three@0.124.0/build/three.min.js -->
     <script src="js/three.min.js"></script>
@@ -24,7 +47,180 @@
     <!-- Custom -->
 
     <script>
-    
+
+    let app = {
+
+      elements : {
+
+        canvas : document.querySelector( '.canvas' ),
+
+      },
+
+      data : {
+
+        earth : {
+          radius : {
+            crust : 6371
+          }
+        }
+
+      },
+
+      three : {
+
+        renderer       : undefined,
+        camera         : undefined,
+        scene          : undefined,
+        controls       : undefined,
+        materials      : {},
+        geometries     : {},
+
+        tunnel         : undefined,
+
+        initialize : () => {
+
+          // Tunnel
+
+          // app.three.materials.tunnel =
+          // app.three.tunnel
+
+
+          { // Tunnel
+
+            app.three.geometries.tunnel = new THREE.CylinderGeometry(
+              app.data.earth.radius.crust / 20,
+              app.data.earth.radius.crust / 20,
+              app.data.earth.radius.crust * 2,
+              6,
+              32,
+              true
+            );
+
+            app.three.materials.tunnel = new THREE.MeshBasicMaterial({
+              color: 0xff0000,
+              wireframe: true,
+              opacity: 1,
+              transparent: true
+            });
+
+
+
+            // Rotates around end, not center
+            // app.three.tunnelGeometry.translate( 0, -app.data.earth.radius.crust, 0);
+
+            app.three.tunnel = new THREE.Mesh( app.three.geometries.tunnel, app.three.materials.tunnel );
+            // app.three.tunnel.position.z = app.data.earth.radius.crust;
+
+          }
+
+          /*
+
+          { // Chord
+
+            let material = new THREE.LineBasicMaterial( { color: 0x0000ff } );
+
+            let points = [
+              new THREE.Vector3( 0,  app.data.earth.radius.crust, 0 ),
+              new THREE.Vector3( 0, -app.data.earth.radius.crust, 0 )
+            ];
+
+            let geometry = new THREE.BufferGeometry().setFromPoints( points );
+            geometry.translate( 0, -app.data.earth.radius.crust, 0);
+
+            app.three.chord = new THREE.Line( geometry, material );
+            app.three.chord.position.z = app.data.earth.radius.crust;
+            // app.three.chord.visible = false;
+
+          }
+          */
+
+          // Begins renderer with transparent background
+          app.three.renderer = new THREE.WebGLRenderer({
+            canvas : app.elements.canvas,
+            alpha : true,
+            logarithmicDepthBuffer: true // prevents z fighting
+          });
+
+          // Creates camera
+          app.three.camera = new THREE.PerspectiveCamera( 50, 1, .1, app.data.earth.radius.crust * 30 );
+          app.three.camera.position.z = app.data.earth.radius.crust * 3;
+
+          // Makes camera move with mouse
+          app.three.controls = new THREE.OrbitControls(
+            app.three.camera,
+            app.elements.canvas
+          );
+
+          // Makes camera move automatically and with inertia
+          app.three.controls.enableDamping   = true;
+          app.three.controls.enableZoom      = false;
+          app.three.controls.enablePan       = false;
+
+          // Creates scene
+          app.three.scene = new THREE.Scene();
+          app.three.scene.add( app.three.tunnel );
+
+          // Debugs axes
+          let axesHelper = new THREE.AxesHelper( 1000 );
+          app.three.scene.add( axesHelper );
+
+          // Animate 3D elements
+          requestAnimationFrame( app.three.render );
+
+        },
+
+        render : ( time ) => {
+
+          // Makes canvas responsive
+          app.three.resize();
+
+          // Makes camera orbit
+          app.three.controls.update();
+
+          app.three.renderer.render(
+            app.three.scene,
+            app.three.camera
+          );
+
+          // Enables recursion (this function calls itself to draw frames of 3D animation)
+          requestAnimationFrame( app.three.render );
+
+        },
+
+        resize : function() {
+
+          let c = app.elements.canvas;
+
+          // If canvas dimensions are different from window dimensios
+          if ( c.width !== c.clientWidth || c.height !== c.clientHeight ) {
+
+            // Resizes
+            app.three.renderer.setSize(
+              c.clientWidth,
+              c.clientHeight,
+              false
+            );
+
+            // Updates camera accordingly
+            app.three.camera.aspect = c.clientWidth / c.clientHeight;
+            app.three.camera.updateProjectionMatrix();
+
+          }
+
+        }
+
+      },
+
+      initialize : () => {
+
+        app.three.initialize();
+
+      }
+
+    }
+
+    app.initialize();
+
     </script>
 
   </body>
