@@ -371,10 +371,6 @@ main section:last-child {
   border-color: var(--accent-100);
 }
 
-main section:last-child header {
-  color: var(--accent-100);
-}
-
 .device {
   position: relative;
   display: flex;
