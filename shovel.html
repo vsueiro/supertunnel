@@ -65,6 +65,12 @@
 
       data : {
 
+        orientation : {
+          alpha : 0,
+          beta  : 0,
+          gamma : 0,
+        },
+
         earth : {
           radius : {
             crust : 6371
@@ -75,56 +81,80 @@
 
       three : {
 
+        world          : {
+          x            : new THREE.Vector3( 1, 0, 0 ),
+          y            : new THREE.Vector3( 0, 1, 0 ),
+          z            : new THREE.Vector3( 0, 0, 1 ),
+        },
+
         renderer       : undefined,
         camera         : undefined,
         scene          : undefined,
         controls       : undefined,
-        materials      : {},
-        geometries     : {},
 
-        tunnel         : undefined,
+        tunnel         : undefined, // Group
+        cylinder       : undefined,
+        chord          : undefined,
+
+
+        create : {
+
+          cylinder : () => {
+
+            let geometry = new THREE.CylinderGeometry(
+              app.data.earth.radius.crust / 20,
+              app.data.earth.radius.crust / 20,
+              app.data.earth.radius.crust * 2,
+              6,
+              32
+            );
+
+            let material = new THREE.MeshBasicMaterial( {
+                color: 0xff0000,
+                wireframe: true,
+                opacity: 1,
+                transparent: true
+            } );
+
+            // Rotates around end, not center
+            // app.three.tunnelGeometry.translate( 0, -app.data.earth.radius.crust, 0);
+
+            app.three.cylinder = new THREE.Mesh( geometry, material );
+            // app.three.tunnel.position.z = app.data.earth.radius.crust;
+
+          },
+
+          tunnel : () => {
+
+            app.three.tunnel = new THREE.Group();
+
+            app.three.tunnel.add(
+              app.three.cylinder
+            );
+
+          }
+
+        },
 
         initialize : () => {
 
-          // Tunnel
+          app.three.create.cylinder();
+          app.three.create.tunnel();
 
-          app.three.geometries.tunnel = new THREE.CylinderGeometry(
-            app.data.earth.radius.crust / 20,
-            app.data.earth.radius.crust / 20,
-            app.data.earth.radius.crust * 2,
-            6,
-            32
-          );
 
-          app.three.materials.tunnel = new THREE.MeshBasicMaterial( {
-              color: 0xff0000,
-              wireframe: true,
-              opacity: 1,
-              transparent: true
-          } );
 
-          // Rotates around end, not center
-          // app.three.tunnelGeometry.translate( 0, -app.data.earth.radius.crust, 0);
-
-          app.three.tunnel = new THREE.Mesh(
-            app.three.geometries.tunnel,
-            app.three.materials.tunnel
-          );
-          // app.three.tunnel.position.z = app.data.earth.radius.crust;
 
 
           // Begins renderer with transparent background
-          app.three.renderer = new THREE.WebGLRenderer(
-            {
-              canvas : app.elements.canvas,
-              alpha : true,
-              logarithmicDepthBuffer: true // prevents z fighting
-            }
-        );
+          app.three.renderer = new THREE.WebGLRenderer( {
+            canvas : app.elements.canvas,
+            alpha : true,
+            logarithmicDepthBuffer: true // prevents z fighting
+          } );
 
           // Creates camera
           app.three.camera = new THREE.PerspectiveCamera( 50, 1, .1, app.data.earth.radius.crust * 30 );
-          app.three.camera.position.z = app.data.earth.radius.crust * 3;
+          app.three.camera.position.y = app.data.earth.radius.crust * 3;
 
           // Makes camera move with mouse
           app.three.controls = new THREE.OrbitControls(
@@ -154,6 +184,11 @@
 
           // Makes canvas responsive
           app.three.resize();
+
+          // Rotates tunnel according to readings
+          app.three.cylinder.rotation.x = THREE.Math.degToRad( app.data.orientation.beta  );
+          app.three.tunnel.rotation.y   = THREE.Math.degToRad( app.data.orientation.alpha );
+          app.three.cylinder.rotation.z = THREE.Math.degToRad( app.data.orientation.gamma );
 
           // Makes camera orbit
           app.three.controls.update();
@@ -225,12 +260,14 @@
           if ( alpha < 0 )
             alpha +=360;
 
-          // Updates values to be used on render function
-          app.data.orientation.alpha = alpha;
+          */
+
+          // Updates values to be used by render method
+          app.data.orientation.alpha = event.alpha;
           app.data.orientation.beta  = event.beta;
           app.data.orientation.gamma = event.gamma;
 
-          */
+
 
         },
 
