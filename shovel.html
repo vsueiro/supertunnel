@@ -177,6 +177,20 @@
 
           },
 
+          universe : () => {
+
+            app.three.universe = new THREE.Group();
+
+            app.three.universe.add(
+              app.three.tunnel,
+              app.three.earth
+            );
+
+            // Rotates all elements so Earth poles are on the Y axis
+            app.three.universe.rotation.x = THREE.Math.degToRad( 90 );
+
+          },
+
           renderer : () => {
 
             // Creates renderer with transparent background
@@ -192,7 +206,7 @@
 
             // Creates camera
             app.three.camera = new THREE.PerspectiveCamera( 50, 1, .1, app.data.earth.radius.crust * 30 );
-            app.three.camera.position.y = app.data.earth.radius.crust * 3;
+            app.three.camera.position.z = app.data.earth.radius.crust * 3;
 
           },
 
@@ -215,9 +229,9 @@
 
             // Creates scene
             app.three.scene = new THREE.Scene();
+
             app.three.scene.add(
-              app.three.tunnel,
-              app.three.earth,
+              app.three.universe
             );
 
           }
@@ -233,6 +247,9 @@
           // Creaates Earth group
           app.three.create.sphere();
           app.three.create.earth();
+
+          // Creates Universe group
+          app.three.create.universe();
 
           // Creates standard objects
           app.three.create.renderer();
