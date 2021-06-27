@@ -77,12 +77,6 @@
 
       three : {
 
-        world          : {
-          x            : new THREE.Vector3( 1, 0, 0 ),
-          y            : new THREE.Vector3( 0, 1, 0 ),
-          z            : new THREE.Vector3( 0, 0, 1 ),
-        },
-
         renderer       : undefined,
         camera         : undefined,
         scene          : undefined,
@@ -91,7 +85,6 @@
         tunnel         : undefined, // Group
         cylinder       : undefined,
         chord          : undefined,
-
 
         create : {
 
@@ -147,6 +140,10 @@
             app.three.camera = new THREE.PerspectiveCamera( 50, 1, .1, app.data.earth.radius.crust * 30 );
             app.three.camera.position.y = app.data.earth.radius.crust * 3;
 
+          },
+
+          controls : () => {
+
             // Makes camera move with mouse
             app.three.controls = new THREE.OrbitControls(
               app.three.camera,
@@ -177,6 +174,7 @@
 
           app.three.create.renderer();
           app.three.create.camera();
+          app.three.create.controls();
           app.three.create.scene();
 
           // Debugs axes
