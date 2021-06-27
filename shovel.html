@@ -8,13 +8,12 @@
     <style>
 
     * {
-      margin: 0;
-      padding: 0;
       overflow: hidden
     }
 
     html {
       background: black;
+      color: white;
     }
 
     canvas {
@@ -26,6 +25,7 @@
       width: 100%;
       height: 100%;
       display: block;
+      z-index: -1;
     }
 
     </style>
@@ -34,6 +34,12 @@
   <body>
 
     <canvas class="canvas"></canvas>
+    <button class="track">Enable motion sensor</button>
+    <pre>
+0
+0
+0
+    </pre>
 
     <!-- https://unpkg.com/browse/three@0.124.0/build/three.min.js -->
     <script src="js/three.min.js"></script>
@@ -53,6 +59,7 @@
       elements : {
 
         canvas : document.querySelector( '.canvas' ),
+        trackButton : document.querySelector( '.track' ),
 
       },
 
@@ -81,65 +88,39 @@
 
           // Tunnel
 
-          // app.three.materials.tunnel =
-          // app.three.tunnel
+          app.three.geometries.tunnel = new THREE.CylinderGeometry(
+            app.data.earth.radius.crust / 20,
+            app.data.earth.radius.crust / 20,
+            app.data.earth.radius.crust * 2,
+            6,
+            32
+          );
 
-
-          { // Tunnel
-
-            app.three.geometries.tunnel = new THREE.CylinderGeometry(
-              app.data.earth.radius.crust / 20,
-              app.data.earth.radius.crust / 20,
-              app.data.earth.radius.crust * 2,
-              6,
-              32,
-              true
-            );
-
-            app.three.materials.tunnel = new THREE.MeshBasicMaterial({
+          app.three.materials.tunnel = new THREE.MeshBasicMaterial( {
               color: 0xff0000,
               wireframe: true,
               opacity: 1,
               transparent: true
-            });
+          } );
 
+          // Rotates around end, not center
+          // app.three.tunnelGeometry.translate( 0, -app.data.earth.radius.crust, 0);
 
+          app.three.tunnel = new THREE.Mesh(
+            app.three.geometries.tunnel,
+            app.three.materials.tunnel
+          );
+          // app.three.tunnel.position.z = app.data.earth.radius.crust;
 
-            // Rotates around end, not center
-            // app.three.tunnelGeometry.translate( 0, -app.data.earth.radius.crust, 0);
-
-            app.three.tunnel = new THREE.Mesh( app.three.geometries.tunnel, app.three.materials.tunnel );
-            // app.three.tunnel.position.z = app.data.earth.radius.crust;
-
-          }
-
-          /*
-
-          { // Chord
-
-            let material = new THREE.LineBasicMaterial( { color: 0x0000ff } );
-
-            let points = [
-              new THREE.Vector3( 0,  app.data.earth.radius.crust, 0 ),
-              new THREE.Vector3( 0, -app.data.earth.radius.crust, 0 )
-            ];
-
-            let geometry = new THREE.BufferGeometry().setFromPoints( points );
-            geometry.translate( 0, -app.data.earth.radius.crust, 0);
-
-            app.three.chord = new THREE.Line( geometry, material );
-            app.three.chord.position.z = app.data.earth.radius.crust;
-            // app.three.chord.visible = false;
-
-          }
-          */
 
           // Begins renderer with transparent background
-          app.three.renderer = new THREE.WebGLRenderer({
-            canvas : app.elements.canvas,
-            alpha : true,
-            logarithmicDepthBuffer: true // prevents z fighting
-          });
+          app.three.renderer = new THREE.WebGLRenderer(
+            {
+              canvas : app.elements.canvas,
+              alpha : true,
+              logarithmicDepthBuffer: true // prevents z fighting
+            }
+        );
 
           // Creates camera
           app.three.camera = new THREE.PerspectiveCamera( 50, 1, .1, app.data.earth.radius.crust * 30 );
@@ -187,7 +168,7 @@
 
         },
 
-        resize : function() {
+        resize : () => {
 
           let c = app.elements.canvas;
 
@@ -211,9 +192,84 @@
 
       },
 
+      orientation : {
+
+        handle : () => {
+
+          let pre = document.querySelector( 'pre' )
+
+          pre.textContent = ''
+          pre.textContent += event.alpha + '\n';
+          pre.textContent += event.beta + '\n';
+          pre.textContent += event.gamma + '\n';
+
+          // Implements world-based calibration on iOS (alpha is 0 when pointing North), based on:
+          // https://www.w3.org/2008/geolocation/wiki/images/e/e0/Device_Orientation_%27alpha%27_Calibration-_Implementation_Status_and_Challenges.pdf
+
+          /*
+
+          if ( app.data.orientation.initialOffset === undefined && event.absolute !== true )
+            app.data.orientation.initialOffset = event.webkitCompassHeading || 0;
+
+          let alpha = event.alpha;
+
+          // Calibrates alpha to make it North-based
+          if ( event.absolute !== true )
+            alpha = alpha - app.data.orientation.initialOffset;
+
+          if ( alpha < 0 )
+            alpha +=360;
+
+          // Updates values to be used on render function
+          app.data.orientation.alpha = alpha;
+          app.data.orientation.beta  = event.beta;
+          app.data.orientation.gamma = event.gamma;
+
+          */
+
+        },
+
+        request : () => {
+
+          // Requests permission for iOS 13+ devices
+          if ( DeviceMotionEvent && typeof DeviceMotionEvent.requestPermission === 'function' ) {
+
+            DeviceMotionEvent.requestPermission()
+            .then( response => {
+
+              if ( response == 'granted' ) {
+
+                // Enables orientationControl
+                // app.options.orientationControl = true;
+                // app.steps.next()
+
+                window.addEventListener( 'deviceorientation', app.orientation.handle );
+
+              }
+
+            } );
+
+          }
+
+        }
+
+      },
+
+      events : {
+
+        initialize : () => {
+
+          // Tracks phone’s orientation when clicked
+          app.elements.trackButton.addEventListener( 'click', app.orientation.request );
+
+        }
+
+      },
+
       initialize : () => {
 
         app.three.initialize();
+        app.events.initialize();
 
       }
 
