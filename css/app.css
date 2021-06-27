@@ -47,6 +47,10 @@ input::-webkit-inner-spin-button {
   margin: 0;
 }
 
+input[type="search"]::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+}
+
 button,
 input[type="text"],
 input[type="search"],
@@ -69,6 +73,7 @@ input[type="number"],
 input[type="text"],
 input[type="search"] {
   -moz-appearance: textfield;
+  -webkit-appearance: none;
   font-variant-numeric: tabular-nums;
   padding: calc( var(--basis) * .8 ) 0;
 }
