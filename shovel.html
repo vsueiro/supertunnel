@@ -77,6 +77,11 @@
           radius : {
             crust : 6371
           }
+        },
+
+        user : {
+          latitude : 0,
+          longitude : 0
         }
 
       },
@@ -91,6 +96,9 @@
         tunnel         : undefined, // Group
         cylinder       : undefined,
         chord          : undefined,
+
+        earth          : undefined, // Group
+        sphere         : undefined,
 
         create : {
 
@@ -155,6 +163,16 @@
 
           },
 
+          earth : () => {
+
+            app.three.earth = new THREE.Group();
+
+            app.three.earth.add(
+              app.three.sphere
+            );
+
+          },
+
           renderer : () => {
 
             // Creates renderer with transparent background
@@ -195,7 +213,7 @@
             app.three.scene = new THREE.Scene();
             app.three.scene.add(
               app.three.tunnel,
-              app.three.sphere,
+              app.three.earth,
             );
 
           }
@@ -208,8 +226,11 @@
           app.three.create.cylinder();
           app.three.create.tunnel();
 
+          // Creaates Earth group
           app.three.create.sphere();
+          app.three.create.earth();
 
+          // Creates standard objects
           app.three.create.renderer();
           app.three.create.camera();
           app.three.create.controls();
@@ -218,7 +239,7 @@
           // Debugs axes
           app.three.scene.add( new THREE.AxesHelper( 1000 ) );
 
-          // Animate 3D elements
+          // Animates 3D elements
           requestAnimationFrame( app.three.render );
 
         },
@@ -232,7 +253,7 @@
             // If canvas dimensions are different from window dimensios
             if ( c.width !== c.clientWidth || c.height !== c.clientHeight ) {
 
-              // Resizes
+              // Resizes canvas
               app.three.renderer.setSize(
                 c.clientWidth,
                 c.clientHeight,
@@ -253,7 +274,7 @@
             if ( app.options.firstPerson ) {
 
               // Rotates Earth to always match real-world North
-              app.three.sphere.rotation.y   = THREE.Math.degToRad( app.data.orientation.alpha * -1 );
+              app.three.earth.rotation.y    = THREE.Math.degToRad( app.data.orientation.alpha * -1 );
 
               // Rotates tunnel only on two axes
               app.three.cylinder.rotation.x = THREE.Math.degToRad( app.data.orientation.beta  );
@@ -263,7 +284,7 @@
             } else { // Enables third-person view
 
               // Keeps Earth still
-              app.three.sphere.rotation.y   = THREE.Math.degToRad( 0 );
+              app.three.earth.rotation.y    = THREE.Math.degToRad( 0 );
 
               // Rotates tunnel on all axes
               app.three.cylinder.rotation.x = THREE.Math.degToRad( app.data.orientation.beta  );
@@ -275,6 +296,9 @@
           },
 
           coordinates : () => {
+
+            // Rotates sphere so default location is at latitude 0 and longitude 0
+
 
             /*
             // Rotates crust so default location is at latitude and longitude 0
@@ -375,7 +399,6 @@
           pre.textContent += '\n';
           pre.textContent += 'webkitCompassHeading:  ' + event.webkitCompassHeading + '\n';
           pre.textContent += 'webkitCompassAccuracy: ' + event.webkitCompassAccuracy + '\n';
-
 
           // Updates values to be used by render method
           app.data.orientation.alpha = north;
