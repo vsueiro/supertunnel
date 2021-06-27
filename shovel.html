@@ -148,12 +148,16 @@
               16
             );
 
+            // Rotates sphere so default location is at latitude 0 and longitude 0
+            geometry.rotateX( THREE.Math.degToRad( -90 ) );
+            geometry.rotateZ( THREE.Math.degToRad(  90 ) );
+
             let material = new THREE.MeshBasicMaterial( {
-              color: 'gray',
+              color : 'gray',
               // wireframe: true,
-              opacity: 0.75,
-              transparent: true,
-              map: texture
+              opacity : 0.75,
+              transparent : true,
+              map : texture
             } );
 
             // Allows raycaster to detect collision on both sides of the object
@@ -298,8 +302,8 @@
           coordinates : () => {
 
             // Rotates sphere so default location is at latitude 0 and longitude 0
-            app.three.sphere.rotation.x = THREE.Math.degToRad( -90 );
-            app.three.sphere.rotation.y = THREE.Math.degToRad( -90 );
+            // app.three.sphere.rotation.x = THREE.Math.degToRad( -90 );
+            // app.three.sphere.rotation.y = THREE.Math.degToRad( -90 );
 
             /*
             // Rotates crust so default location is at latitude and longitude 0
