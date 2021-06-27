@@ -199,9 +199,14 @@
           let pre = document.querySelector( 'pre' )
 
           pre.textContent = ''
-          pre.textContent += event.alpha + '\n';
-          pre.textContent += event.beta + '\n';
-          pre.textContent += event.gamma + '\n';
+          pre.textContent += 'alpha:    ' + event.alpha.toFixed(2) + '\n';
+          pre.textContent += 'beta:     ' + event.beta.toFixed(2)  + '\n';
+          pre.textContent += 'gamma:    ' + event.gamma.toFixed(2) + '\n';
+          pre.textContent += '\n';
+          pre.textContent += 'absolute: ' + event.absolute;
+          pre.textContent += '\n';
+          pre.textContent += 'webkitCompassHeading:  ' + event.webkitCompassHeading;
+          pre.textContent += 'webkitCompassAccuracy: ' + event.webkitCompassAccuracy;
 
           // Implements world-based calibration on iOS (alpha is 0 when pointing North), based on:
           // https://www.w3.org/2008/geolocation/wiki/images/e/e0/Device_Orientation_%27alpha%27_Calibration-_Implementation_Status_and_Challenges.pdf
