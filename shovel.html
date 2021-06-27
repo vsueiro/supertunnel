@@ -246,7 +246,7 @@
 
             // Calibrates alpha to make it North-based
             offset = event.webkitCompassHeading || 0;
-            north  = event.alpha - offset;
+            north  = 360 - offset;
 
             if ( north < 0 )
               north += 360;
