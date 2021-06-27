@@ -429,7 +429,7 @@ let app = {
             let distance = intersection.distance;
 
             // Checks intersection close to user location
-            if ( distance < 10 ) {
+            if ( distance < 100 ) {
 
               foundOrigin = true;
 
@@ -1230,9 +1230,15 @@ let app = {
 
       app.element.dataset.geolocation = 'located';
 
-      // Makes origin country be filled in search input
-      app.search.initialized = false;
-      app.element.dataset.origin = '';
+      setTimeout( () => {
+
+        // Makes origin country be filled in search input
+        app.search.initialized = false;
+        app.element.dataset.origin = '';
+
+        // Uses delay as a way to wait for the app to calculate new origin country
+
+      }, 1000 );
 
       app.parameters.update();
       app.drag.reset();
@@ -1382,28 +1388,6 @@ let app = {
         app.search.result = list[ 0 ];
         app.search.success();
 
-        /*
-        console.log( app.search.result );
-
-        let lat = app.search.result.lat;
-        let lon = app.search.result.lon;
-
-        app.data.user.latitude  = parseFloat( lat ).toFixed( 4 );
-        app.data.user.longitude = parseFloat( lon ).toFixed( 4 );
-
-        // Updates manual input values to match the retrieved coordinates
-        app.elements.latitude.value  = app.data.user.latitude;
-        app.elements.longitude.value = app.data.user.longitude;
-
-        app.parameters.update();
-        app.geolocation.submit();
-
-        app.element.dataset.geolocation = 'located';
-
-        // Changes step with a 1s delay
-        setTimeout( app.steps.next, 2400 );
-        */
-
       } else {
 
         app.search.error()
@@ -1443,6 +1427,9 @@ let app = {
       app.elements.address.value = '';
       app.element.dataset.search = 'unsearched';
 
+      // Removes class default, so value can be replaced by fill function
+      app.elements.address.classList.remove( 'default' );
+
     },
 
     fill : ( value ) => {
@@ -1457,6 +1444,9 @@ let app = {
       // Removes success state
       app.element.dataset.search = 'unsearched';
 
+      // Removes class default, so value can be replaced by fill function
+      app.elements.address.classList.remove( 'default' );
+
     },
 
     initialize : () => {
@@ -1467,7 +1457,11 @@ let app = {
 
         if ( country !== '' ) {
 
-          app.search.fill( country );
+          if ( !app.elements.address.classList.contains( 'default' ) ) {
+
+            app.search.fill( country );
+
+          }
 
           // Runs this code only once, after origin country is identified
           app.search.initialized = true;
@@ -1585,11 +1579,11 @@ let app = {
 
   initialize : function() {
 
-    app.three.initialize();
-    app.events.initialize();
     app.parameters.initialize();
+    app.events.initialize();
     app.orientation.initialize();
     app.geolocation.initialize();
+    app.three.initialize();
 
   }
 
