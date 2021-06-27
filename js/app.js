@@ -1238,7 +1238,7 @@ let app = {
 
         // Uses delay as a way to wait for the app to calculate new origin country
 
-      }, 1000 );
+      }, 250 );
 
       app.parameters.update();
       app.drag.reset();
