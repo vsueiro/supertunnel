@@ -469,7 +469,10 @@ let app = {
           // Resets handle control
           app.drag.reset();
 
-        } else { // Enables third-person view
+        }
+
+        // Enables third-person view
+        else {
 
           // Keeps Earth still
           app.three.earth.rotation.y    = THREE.Math.degToRad( 0 );
@@ -495,13 +498,43 @@ let app = {
 
       coordinates : () => {
 
-        // Rotates sphere so the user location coincides with the tunnel beginning
-        app.three.sphere.rotation.x = THREE.Math.degToRad( app.data.user.latitude );
-        app.three.sphere.rotation.z = THREE.Math.degToRad( app.data.user.longitude );
+        // Enables first-person view
+        if ( app.options.firstPerson ) {
 
-        // Rotates countries so the user location coincides with the tunnel beginning
-        app.three.land.rotation.x = THREE.Math.degToRad( -90 + app.data.user.latitude );
-        app.three.land.rotation.y = THREE.Math.degToRad( 180 + ( app.data.user.longitude * -1 ) );
+          // Rotates Earth to match origin latitude and longitude
+
+          // Rotates sphere so the user location coincides with the tunnel beginning
+          app.three.sphere.rotation.x = THREE.Math.degToRad( app.data.user.latitude );
+          app.three.sphere.rotation.z = THREE.Math.degToRad( app.data.user.longitude );
+
+          // Rotates countries so the user location coincides with the tunnel beginning
+          app.three.land.rotation.x = THREE.Math.degToRad( -90 + app.data.user.latitude );
+          app.three.land.rotation.y = THREE.Math.degToRad( 180 + ( app.data.user.longitude * -1 ) );
+
+          // Resets Tunnel rotation
+          app.three.tunnel.rotation.x = THREE.Math.degToRad( 0 );
+
+        }
+
+        // Enables third-person view
+        else {
+
+          // Rotates Earth to match origin longitude
+
+          // Rotates sphere so the user location coincides with the tunnel beginning
+          app.three.sphere.rotation.z = THREE.Math.degToRad( app.data.user.longitude );
+
+          // Rotates countries so the user location coincides with the tunnel beginning
+          app.three.land.rotation.y = THREE.Math.degToRad( 180 + ( app.data.user.longitude * -1 ) );
+
+          // Rotates Tunnel to match origin latitude
+          app.three.tunnel.rotation.x = THREE.Math.degToRad( app.data.user.latitude * -1 );
+
+          // Resets Earth latitude rotation
+          app.three.sphere.rotation.x = THREE.Math.degToRad( 0 );
+          app.three.land.rotation.x = THREE.Math.degToRad( -90 );
+
+        }
 
       },
 
