@@ -133,7 +133,7 @@ let app = {
         // Rotates around end, not center
         geometry.translate( 0, -app.data.earth.radius.crust, 0);
 
-        let material = new THREE.LineBasicMaterial( { color: 0x00ffff } );
+        let material = new THREE.LineBasicMaterial();
 
         app.three.chord = new THREE.Line( geometry, material );
 
@@ -141,7 +141,7 @@ let app = {
         app.three.chord.position.y = app.data.earth.radius.crust;
 
         // Hides chord
-        // app.three.chord.visible = false;
+        app.three.chord.visible = false;
 
       },
 
@@ -162,26 +162,24 @@ let app = {
         // https://unpkg.com/three-geojson-geometry@1.1.4/example/graticules/index.html
 
         let geometry = new THREE.SphereGeometry(
-          app.data.earth.radius.crust * .99,
-          16,
-          16
+          app.data.earth.radius.crust /* .995 */,
+          32,
+          32
         );
 
         // Rotates sphere so default location is at latitude 0 and longitude 0
         geometry.rotateX( THREE.Math.degToRad( -90 ) );
         geometry.rotateZ( THREE.Math.degToRad(  90 ) );
 
-        let material = new THREE.MeshBasicMaterial( {
-          color : app.color( 'neutral-25' ),
-          wireframe: true,
-          opacity : .25,
-          transparent : true
-        } );
+        let material = new THREE.MeshBasicMaterial();
 
         // Allows raycaster to detect collision on both sides of the object
         material.side = THREE.DoubleSide;
 
         app.three.sphere = new THREE.Mesh( geometry, material );
+
+        // Hides sphere (only use it for collision checks)
+        app.three.sphere.visible = false;
 
       },
 
@@ -730,6 +728,10 @@ let app = {
 
           // Stores distance
           app.element.dataset.distance = intersection.distance;
+
+          // Shortens tunnel length to match distance
+          let reduction = intersection.distance / ( app.data.earth.radius.crust * 2 );
+          app.three.cylinder.scale.set( 1, reduction, 1 );
 
         } else {
 
