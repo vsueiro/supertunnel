@@ -87,6 +87,10 @@ let app = {
     earth          : undefined, // Group
     sphere         : undefined,
 
+    stars          : undefined, // Group (of instances)
+
+    universe       : undefined, // Group
+
     create : {
 
       cylinder : () => {
@@ -317,6 +321,85 @@ let app = {
 
       },
 
+      stars : () => {
+
+        let material = new THREE.MeshBasicMaterial({
+          color: app.color( 'neutral-25' )
+        } );
+
+        let geometry = new THREE.SphereGeometry(
+          app.data.earth.radius.crust * 0.01
+        );
+
+        let amount = 10000;
+        let innerRadius = app.data.earth.radius.crust * 6;
+        let outerRadius = app.data.earth.radius.crust * 12;
+
+        // Creates instance
+        app.three.stars = new THREE.InstancedMesh( geometry, material, amount );
+
+        // Checks if a given point is inside a sphere
+        let insideCircle = function( coordinates, radius ) {
+
+          let sum = 0;
+
+          sum += Math.pow( coordinates.x, 2 );
+          sum += Math.pow( coordinates.y, 2 );
+          sum += Math.pow( coordinates.z, 2 );
+
+          let boolean = sum < Math.pow( radius, 2 );
+
+          return boolean;
+
+        }
+
+        let randomPosition = function( max ) {
+
+          let value = ( Math.random() * max * 2 ) - max;
+
+          return parseInt( value );
+
+        }
+
+        let getCoordinates = function() {
+
+          let coordinates = {
+            x : randomPosition( outerRadius ),
+            y : randomPosition( outerRadius ),
+            z : randomPosition( outerRadius ),
+          }
+
+          if ( insideCircle( coordinates, outerRadius ) && !insideCircle( coordinates, innerRadius ) ) {
+
+            return coordinates
+
+          } else {
+
+            return getCoordinates()
+
+          }
+
+        }
+
+        // Positions each star at a randon location
+        for ( let i = 0; i < amount; i++ ) {
+
+          let matrix = new THREE.Matrix4();
+
+          let coordinates = getCoordinates();
+
+          matrix.makeTranslation(
+            coordinates.x,
+            coordinates.y,
+            coordinates.z,
+          )
+
+          app.three.stars.setMatrixAt( i, matrix );
+
+        }
+
+      },
+
       universe : () => {
 
         app.three.universe = new THREE.Group();
@@ -324,6 +407,7 @@ let app = {
         app.three.universe.add(
           app.three.tunnel,
           app.three.earth,
+          app.three.stars,
         );
 
         // Rotates all elements so Earth poles are on the Y axis
@@ -409,6 +493,9 @@ let app = {
       // Creates Earth group
       app.three.create.sphere();
       app.three.create.earth();
+
+      // Creates Stars group (of instances)
+      app.three.create.stars();
 
       // Creates Universe group
       app.three.create.universe();
