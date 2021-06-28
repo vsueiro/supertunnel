@@ -751,6 +751,145 @@ let app = {
 
   },
 
+  search : {
+
+    api : 'https://nominatim.openstreetmap.org/search.php',
+
+    query : {
+
+      q      : '',
+      limit  : 1,
+      format : 'jsonv2'
+
+    },
+
+    parameters  : '',
+    url         : '',
+    initialized : false,
+    result      : undefined,
+
+    success : () => {
+
+      let lat = app.search.result.lat;
+      let lon = app.search.result.lon;
+
+      // Stores coordinates
+      app.data.user.latitude  = parseFloat( lat );
+      app.data.user.longitude = parseFloat( lon );
+
+      // Resets drag handle position
+      app.drag.reset();
+
+      // Updates label with newly received coordinates
+      app.labels.update.coordinates();
+
+      app.element.dataset.search = 'searched';
+
+    },
+
+    error : () => {
+
+      alert( 'Unable to find address' );
+      app.element.dataset.search = 'unsearched';
+
+    },
+
+    handle : function( response ) {
+
+      // Checks if there was at lease one match
+      if ( response.length > 0 ) {
+
+        // Stores first result
+        app.search.result = response[ 0 ];
+        app.search.success();
+
+      } else {
+
+        app.search.error()
+
+      }
+
+    },
+
+    request : ( address ) => {
+
+      if ( address ) {
+
+        app.element.dataset.search = 'searching';
+
+        app.search.query.q    = address;
+        app.search.parameters = new URLSearchParams( app.search.query ).toString();
+        app.search.url        = app.search.api + '?' + app.search.parameters;
+
+        // Requests search results from API
+        fetch( app.search.url )
+         .then( response => response.json() )
+         .then( response => app.search.handle( response ) )
+
+      }
+
+    },
+
+    submit : () => {
+
+      // Removes leading and trailing whitespace on input
+      app.elements.address.value = app.elements.address.value.trim();
+      app.search.request( app.elements.address.value );
+
+    },
+
+    clear : () => {
+
+      app.elements.address.value = '';
+      app.element.dataset.search = 'unsearched';
+
+      // Removes class default, so value can be replaced by fill function
+      app.elements.address.classList.remove( 'default' );
+
+    },
+
+    fill : ( value ) => {
+
+      app.elements.address.value = value
+      app.element.dataset.search = 'searched';
+
+    },
+
+    validate : () => {
+
+      // Removes success state
+      app.element.dataset.search = 'unsearched';
+
+      // Removes class default, so value can be replaced by fill function
+      app.elements.address.classList.remove( 'default' );
+
+    },
+
+    initialize : () => {
+
+      if ( !app.search.initialized ) {
+
+        let country = app.element.dataset.origin;
+
+        if ( country !== '' ) {
+
+          if ( !app.elements.address.classList.contains( 'default' ) ) {
+
+            app.search.fill( country );
+
+          }
+
+          // Runs this code only once, after origin country is identified
+          app.search.initialized = true;
+
+        }
+
+      }
+
+    }
+
+  },
+
   drag : {
 
     grabbing  : false, // Flag is true while grabbing handle
@@ -997,16 +1136,43 @@ let app = {
 
     },
 
+    form : () => {
+
+      // Finds user’s location automatically when button is clicked
+      app.elements.findButton.forEach( button =>
+        button.addEventListener( 'click', app.geolocation.request )
+      );
+
+      // Find user’s location by searching for an address
+      app.elements.form.addEventListener( 'submit', () => {
+
+        event.preventDefault();
+        app.search.submit();
+
+      } );
+
+      // Removes success state of search if it is changed
+      app.elements.address.addEventListener(  'change', app.search.validate );
+      app.elements.address.addEventListener(  'input',  app.search.validate );
+
+    },
+
+    motion : () => {
+
+      app.elements.trackButton.addEventListener( 'click', app.orientation.request );
+
+    },
+
     initialize : () => {
 
       // Enables drag on handle to control tunnel angles on desktop
       app.events.drag();
 
-      // Tracks phone’s motion when clicked
-      app.elements.trackButton.addEventListener( 'click', app.orientation.request );
+      // Handles location form
+      app.events.form();
 
-      // Finds user’s location when button is clicked
-      app.elements.findButton.forEach( button => button.addEventListener( 'click', app.geolocation.request ) );
+      // Tracks phone’s motion when button is clicked
+      app.events.motion();
 
     }
 
