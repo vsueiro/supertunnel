@@ -466,6 +466,9 @@ let app = {
           app.three.camera.position.set( 0, 0, app.data.earth.radius.crust * 3 );
           app.three.camera.lookAt( new THREE.Vector3( 0, 0, 0 ) );
 
+          // Resets handle control
+          app.drag.reset();
+
         } else { // Enables third-person view
 
           // Keeps Earth still
