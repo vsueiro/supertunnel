@@ -151,12 +151,38 @@
 
           },
 
+          chord : () => {
+
+            // Creates line from one side of Earth to the other
+            let points = [
+              new THREE.Vector3( 0,  app.data.earth.radius.crust, 0 ),
+              new THREE.Vector3( 0, -app.data.earth.radius.crust, 0 )
+            ];
+
+            let geometry = new THREE.BufferGeometry().setFromPoints( points );
+
+            // Rotates around end, not center
+            geometry.translate( 0, -app.data.earth.radius.crust, 0);
+
+            let material = new THREE.LineBasicMaterial( { color: 0x00ffff } );
+
+            app.three.chord = new THREE.Line( geometry, material );
+
+            // Moves the beggining of the cylinder from Earth’s center to the surface, at latitude 0 and longitude 0
+            app.three.chord.position.y = app.data.earth.radius.crust;
+
+            // Hides chord
+            // app.three.chord.visible = false;
+
+          },
+
           tunnel : () => {
 
             app.three.tunnel = new THREE.Group();
 
             app.three.tunnel.add(
-              app.three.cylinder
+              app.three.cylinder,
+              app.three.chord,
             );
 
           },
@@ -167,7 +193,7 @@
             // https://unpkg.com/three-geojson-geometry@1.1.4/example/graticules/index.html
 
             // Applies satellite texture for debugging
-            let texture = new THREE.TextureLoader().load( 'https://vsueiro.com/tunnel-simulator/assets/texture.jpg' );
+            // let texture = new THREE.TextureLoader().load( 'https://vsueiro.com/tunnel-simulator/assets/texture.jpg' );
 
             let geometry = new THREE.SphereGeometry(
               app.data.earth.radius.crust * 0.99,
@@ -180,11 +206,10 @@
             geometry.rotateZ( THREE.Math.degToRad(  90 ) );
 
             let material = new THREE.MeshBasicMaterial( {
-              color : 'gray',
-              // wireframe: true,
-              opacity : 1,
-              transparent : true,
-              map : texture
+              color : 'white',
+              wireframe: true,
+              opacity : .25,
+              transparent : true
             } );
 
             // Allows raycaster to detect collision on both sides of the object
@@ -397,6 +422,7 @@
 
           // Creates Tunnel group
           app.three.create.cylinder();
+          app.three.create.chord();
           app.three.create.tunnel();
 
           // Creates Land group
@@ -455,14 +481,15 @@
 
               // Rotates Earth to always match real-world North
               app.three.earth.rotation.y    = THREE.Math.degToRad( app.data.orientation.alpha * -1 );
-              app.three.earth.rotation.y    = THREE.Math.degToRad( 45 );
 
               // Rotates tunnel only on two axes
               app.three.cylinder.rotation.x = THREE.Math.degToRad( app.data.orientation.beta  );
-              app.three.tunnel.rotation.y   = THREE.Math.degToRad( 0 );
               app.three.cylinder.rotation.z = THREE.Math.degToRad( app.data.orientation.gamma );
+              app.three.chord.rotation.x    = THREE.Math.degToRad( app.data.orientation.beta  );
+              app.three.chord.rotation.z    = THREE.Math.degToRad( app.data.orientation.gamma );
+              app.three.tunnel.rotation.y   = THREE.Math.degToRad( 0 );
 
-              // Deactivates camera controls
+              // // Deactivates camera controls
               app.three.controls.enabled = false;
 
               // Resets camera position
