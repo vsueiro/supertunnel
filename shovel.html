@@ -33,10 +33,13 @@
   </head>
   <body>
 
-    <div class="app"></div>
+    <div class="app" data-geolocation="unlocated"></div>
 
     <canvas class="canvas"></canvas>
+
+    <button class="find">Get my location</button>
     <button class="track">Enable motion sensor</button>
+
     <pre></pre>
 
     <!-- https://unpkg.com/browse/three@0.124.0/build/three.min.js -->
@@ -66,6 +69,7 @@
 
         canvas : document.querySelector( '.canvas' ),
         trackButton : document.querySelector( '.track' ),
+        findButton  : document.querySelectorAll( '.find' ),
 
       },
 
@@ -83,15 +87,15 @@
           }
         },
 
-        // user : {
-        //   latitude : 0,
-        //   longitude : 0
-        // },
-
         user : {
-          latitude : -33,
-          longitude : -71
+          latitude : 0,
+          longitude : 0
         },
+
+        // user : {
+        //   latitude : -33,
+        //   longitude : -71
+        // },
 
         // user : {
         //   latitude : -23.5475,
@@ -742,12 +746,55 @@
 
       },
 
+      geolocation : {
+
+        success : ( position ) => {
+
+          app.element.dataset.geolocation = 'located';
+
+          app.data.user.latitude  = position.coords.latitude;
+          app.data.user.longitude = position.coords.longitude;
+
+        },
+
+        error : () => {
+
+          app.element.dataset.geolocation = 'unlocated';
+
+          window.alert( 'Unable to find your location.' );
+
+        },
+
+        request : () => {
+
+          app.element.dataset.geolocation = 'locating';
+
+          if ( navigator.geolocation ) {
+
+            navigator.geolocation.getCurrentPosition(
+              app.geolocation.success,
+              app.geolocation.error
+            );
+
+          } else {
+
+            app.geolocation.error();
+
+          }
+
+        }
+
+      },
+
       events : {
 
         initialize : () => {
 
           // Tracks phone’s orientation when clicked
           app.elements.trackButton.addEventListener( 'click', app.orientation.request );
+
+          // Finds user’s location when button is clicked
+          app.elements.findButton.forEach( button => button.addEventListener( 'click', app.geolocation.request ) );
 
         }
 
