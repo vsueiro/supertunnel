@@ -718,6 +718,8 @@ let app = {
       app.data.user.latitude  = position.coords.latitude;
       app.data.user.longitude = position.coords.longitude;
 
+      app.labels.update.coordinates();
+
     },
 
     error : () => {
@@ -1014,7 +1016,7 @@ let app = {
 
     app.three.initialize();
     app.events.initialize();
-    app.labels.initialize();
+    app.events.initialize();
 
   }
 
