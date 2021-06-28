@@ -33,6 +33,8 @@
   </head>
   <body>
 
+    <div class="app"></div>
+
     <canvas class="canvas"></canvas>
     <button class="track">Enable motion sensor</button>
     <pre></pre>
@@ -216,7 +218,7 @@
             let material = new THREE.MeshBasicMaterial( {
               color : 'white',
               wireframe: true,
-              opacity : .25,
+              opacity : .1,
               transparent : true
             } );
 
@@ -587,7 +589,6 @@
 
                 // Sets this country as origin
                 app.element.dataset.origin = match.object.name;
-                console.log( 'Origin: ' +  );
 
               }
 
@@ -598,10 +599,7 @@
 
               }
 
-
             }
-
-            console.log( '------' );
 
           }
 
