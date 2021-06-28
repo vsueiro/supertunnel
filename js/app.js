@@ -86,6 +86,7 @@ let app = {
 
     earth          : undefined, // Group
     sphere         : undefined,
+    graticule      : undefined,
 
     stars          : undefined, // Group (of instances)
 
@@ -180,6 +181,55 @@ let app = {
 
         // Hides sphere (only use it for collision checks)
         app.three.sphere.visible = false;
+
+      },
+
+      graticule : () => {
+
+        // Creates longitude and latitude lines
+
+        let radius = app.data.earth.radius.crust * .99;
+        let widthSegments = 32
+        let heightSegments = 16
+        let color = 'yellow'
+
+        let material = new THREE.LineBasicMaterial({
+          color: 'white'
+        })
+
+        let createArc = (radius, segments, full) => {
+          var geom = new THREE.CircleGeometry(radius, segments, Math.PI / 2, full ? Math.PI * 2 : Math.PI);
+          geom.vertices.shift();
+          if (full) geom.vertices.push(geom.vertices[0].clone());
+          return geom;
+        }
+
+        app.three.graticule = new THREE.Group();
+
+        // width segments
+        var arcGeom = createArc(radius, heightSegments, false);
+        var widthSector = Math.PI * 2 / widthSegments;
+        for (var ws = 0; ws < widthSegments; ws++) {
+          var arcGeomTmp = arcGeom.clone();
+          arcGeomTmp.rotateY(widthSector * ws);
+          var arcLine = new THREE.Line(arcGeomTmp, material);
+          app.three.graticule.add(arcLine);
+        }
+
+        //height segments
+        var heightSector = Math.PI / heightSegments;
+        for (var hs = 1; hs < heightSegments; hs++) {
+          var hRadius = Math.sin(hs * heightSector) * radius;
+          var height = Math.cos(hs * heightSector) * radius;
+          var arcHeightGeom = createArc(hRadius, widthSegments, true);
+          arcHeightGeom.rotateX(Math.PI / 2);
+          arcHeightGeom.translate(0, height, 0);
+          var arcHeightLine = new THREE.Line(arcHeightGeom, material);
+          app.three.graticule.add(arcHeightLine);
+        }
+
+        // Rotates sphere so default location is at latitude 0 and longitude 0
+        app.three.graticule.rotation.x = THREE.Math.degToRad( -90 );
 
       },
 
@@ -314,6 +364,7 @@ let app = {
 
         app.three.earth.add(
           app.three.sphere,
+          app.three.graticule,
           app.three.land
         );
 
@@ -490,6 +541,7 @@ let app = {
 
       // Creates Earth group
       app.three.create.sphere();
+      app.three.create.graticule();
       app.three.create.earth();
 
       // Creates Stars group (of instances)
@@ -706,8 +758,6 @@ let app = {
 
             // Sets this country as destination
             app.element.dataset.destination = match.object.name;
-
-            console.log( match )
 
             // Highlights country
             match.object.material[ 0 ].color.set( app.color( 'accent-50'  ) );
