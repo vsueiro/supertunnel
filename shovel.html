@@ -58,6 +58,8 @@
 
       },
 
+      element : document.querySelector( '.app' ),
+
       elements : {
 
         canvas : document.querySelector( '.canvas' ),
@@ -85,9 +87,14 @@
         // },
 
         user : {
-          latitude : -23.5475,
-          longitude : -46.63611
+          latitude : -33,
+          longitude : -71
         },
+
+        // user : {
+        //   latitude : -23.5475,
+        //   longitude : -46.63611
+        // },
 
         load : () => {
 
@@ -111,6 +118,7 @@
         camera         : undefined,
         scene          : undefined,
         controls       : undefined,
+        raycaster      : undefined,
 
         tunnel         : undefined, // Group
         cylinder       : undefined,
@@ -342,8 +350,6 @@
 
             }
 
-            console.log( app.three.land );
-
           },
 
           earth : () => {
@@ -414,6 +420,13 @@
               app.three.universe
             );
 
+          },
+
+          raycaster : () => {
+
+            // Creates line to be used for collision check with countries
+            app.three.raycaster = new THREE.Raycaster();
+
           }
 
         },
@@ -441,6 +454,7 @@
           app.three.create.camera();
           app.three.create.controls();
           app.three.create.scene();
+          app.three.create.raycaster();
 
           // Debugs axes
           app.three.scene.add( new THREE.AxesHelper( 1000 ) );
@@ -523,6 +537,72 @@
             app.three.land.rotation.x = THREE.Math.degToRad( -90 + app.data.user.latitude );
             app.three.land.rotation.y = THREE.Math.degToRad( 180 + ( app.data.user.longitude * -1 ) );
 
+          },
+
+          raycaster : () => {
+
+            // Gets position & direction of chord (center of tunnel)
+            let chordPosition = app.three.chord.geometry.getAttribute( 'position' );
+
+            // Converts local position to world position
+            let vertexOrigin = new THREE.Vector3();
+            vertexOrigin.fromBufferAttribute( chordPosition, 0 );
+
+            let vertexDestination = new THREE.Vector3();
+            vertexDestination.fromBufferAttribute( chordPosition, 1 );
+
+            let worldOrigin      = app.three.chord.localToWorld( vertexOrigin );
+            let worldDestination = app.three.chord.localToWorld( vertexDestination );
+            let chordDirection   = worldDestination.sub(worldOrigin).normalize();
+
+            // Makes raycaster match the position and angle of the tunnel
+            app.three.raycaster.set( worldOrigin, chordDirection );
+
+          },
+
+          collision : () => {
+
+            let matches = [];
+
+            // Checks collision of chord (tunnel center) with every country
+            for ( let country of app.three.land.children ) {
+
+              let intersections = app.three.raycaster.intersectObject( country );
+
+              // If ray instersects with anything
+              if ( intersections.length > 0 ) {
+
+                for ( let intersection of intersections )
+                  matches.push( intersection )
+
+              }
+
+            }
+
+            // Identifies origin and destination countries
+
+            for ( let match of matches ) {
+
+              if ( match.distance < 100 ) {
+
+                // Sets this country as origin
+                app.element.dataset.origin = match.object.name;
+                console.log( 'Origin: ' +  );
+
+              }
+
+              if ( match.distance > 1000 ) {
+
+                // Sets this country as destination
+                app.element.dataset.destination = match.object.name;
+
+              }
+
+
+            }
+
+            console.log( '------' );
+
           }
 
         },
@@ -537,6 +617,12 @@
 
           // Rotates Earth or Tunnel to match origin latitude and longitude
           app.three.update.coordinates();
+
+          // Updates raycaster position to match chord’s
+          app.three.update.raycaster();
+
+          // Identifies origin country and destination country
+          app.three.update.collision();
 
           // Makes camera orbit
           app.three.controls.update();
@@ -583,16 +669,18 @@
           let pre = document.querySelector( 'pre' )
 
           pre.textContent = ''
-          pre.textContent += 'north:    ' + north.toFixed(2) + '\n';
+
+          pre.textContent += 'origin:      ' + ( app.element.dataset.origin      || '' ) + '\n';
+          pre.textContent += 'destination: ' + ( app.element.dataset.destination || '' ) + '\n';
           pre.textContent += '\n';
-          pre.textContent += 'alpha:    ' + event.alpha.toFixed(2) + '\n';
-          pre.textContent += 'beta:     ' + event.beta.toFixed(2)  + '\n';
-          pre.textContent += 'gamma:    ' + event.gamma.toFixed(2) + '\n';
+          pre.textContent += 'north:       ' + north.toFixed(2) + '\n';
+          pre.textContent += 'alpha:       ' + event.alpha.toFixed(2) + '\n';
+          pre.textContent += 'beta:        ' + event.beta.toFixed(2)  + '\n';
+          pre.textContent += 'gamma:       ' + event.gamma.toFixed(2) + '\n';
           pre.textContent += '\n';
-          pre.textContent += 'absolute: ' + event.absolute;
+          pre.textContent += 'absolute:    ' + event.absolute;
           pre.textContent += '\n';
-          pre.textContent += 'webkitCompassHeading:  ' + event.webkitCompassHeading + '\n';
-          pre.textContent += 'webkitCompassAccuracy: ' + event.webkitCompassAccuracy + '\n';
+          pre.textContent += 'compass:     ' + event.webkitCompassHeading + '\n';
 
           // Updates values to be used by render method
           app.data.orientation.alpha = north;
