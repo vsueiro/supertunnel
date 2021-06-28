@@ -672,6 +672,10 @@ let app = {
         // Checks collision of chord (tunnel center) with every country
         for ( let country of app.three.land.children ) {
 
+          // Resets country highlight
+          country.material[ 0 ].color.set( app.color( 'neutral-50' ) );
+          country.material[ 1 ].color.set( app.color( 'neutral-75' ) );
+
           let intersections = app.three.raycaster.intersectObject( country );
 
           // If ray instersects with anything
@@ -704,6 +708,12 @@ let app = {
 
             // Sets this country as destination
             app.element.dataset.destination = match.object.name;
+
+            console.log( match )
+
+            // Highlights country
+            match.object.material[ 0 ].color.set( app.color( 'accent-50'  ) );
+            match.object.material[ 1 ].color.set( app.color( 'accent-100' ) );
 
           }
 
