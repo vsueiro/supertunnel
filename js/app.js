@@ -688,7 +688,7 @@ let app = {
       { // Countries
 
         // Gets countries geometries
-        fetch( './assets/countries.json' )
+        fetch( './assets/countries-lo.json' )
          .then( response => response.json() )
          .then( json => app.three.create.countries( json ) )
 
@@ -1406,7 +1406,7 @@ let app = {
         app.search.parameters = new URLSearchParams( app.search.query ).toString();
         app.search.url        = app.search.api + '?' + app.search.parameters;
 
-        // Gets countries geometries
+        // Requests search results from API
         fetch( app.search.url )
          .then( response => response.json() )
          .then( list => app.search.results( list ) )
