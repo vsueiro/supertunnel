@@ -187,8 +187,11 @@ let app = {
 
         // Decreases radius to prevent overlap with countries
         let radius = app.data.earth.radius.crust * .99;
-        let widthSegments = 36;
+
+        // Creates one line at every 10 degrees mark
+        let widthSegments  = 36 * 2;
         let heightSegments = 36;
+
         let material = new THREE.LineBasicMaterial( {
           color: app.color( 'neutral-25' ),
           opacity: 0.33,
