@@ -888,6 +888,7 @@ let app = {
         app.drag.value.x = ( app.drag.position.current.percentage.left - 50 ) / 50 * app.drag.range;
         app.drag.value.y = ( app.drag.position.current.percentage.top - 50 ) / 50 * -app.drag.range;
 
+        // Updates angle label with new values
         app.labels.update.direction();
 
       }
@@ -913,7 +914,6 @@ let app = {
 
       // Updates angle label with original values
       app.labels.update.direction();
-      // app.three.labels.angle.textContent = '0°S, 0°W';
 
     }
 
@@ -921,9 +921,33 @@ let app = {
 
   labels : {
 
-    direction : document.querySelector( '.label-direction' ),
+    coordinates : document.querySelector( '.label-coordinates' ),
+    direction   : document.querySelector( '.label-direction'   ),
 
     update : {
+
+      coordinates : () => {
+
+        let lat = app.data.user.latitude;
+        let lon = app.data.user.longitude;
+
+        // Creates human-readable string from coordinates
+        let label = '';
+
+        if ( lat >= 0 )
+          label += Math.round( lat ) + '°N, ';
+        else
+          label += Math.round( lat * -1 ) + '°S, ';
+
+        if ( lon >= 0 )
+          label += Math.round( lon ) + '°E';
+        else
+          label += Math.round( lon * -1 ) + '°W';
+
+        // Updates coordinates label with new values
+        app.labels.coordinates.textContent = label;
+
+      },
 
       direction : () => {
 
@@ -944,6 +968,13 @@ let app = {
         app.labels.direction.textContent = label;
 
       }
+
+    },
+
+    initialize : () => {
+
+      app.labels.update.coordinates();
+      app.labels.update.direction();
 
     }
 
@@ -983,6 +1014,7 @@ let app = {
 
     app.three.initialize();
     app.events.initialize();
+    app.labels.initialize();
 
   }
 
