@@ -634,6 +634,11 @@ let app = {
           // Stores distance
           app.element.dataset.distance = intersection.distance;
 
+        } else {
+
+          // Clears distance from data
+          app.element.dataset.distance = '';
+
         }
 
         if ( !found.origin ) {
@@ -688,6 +693,7 @@ let app = {
 
       // Updates destination label
       app.labels.update.destination();
+      app.labels.update.distance();
 
       // Enables recursion (this function calls itself to draw frames of 3D animation)
       requestAnimationFrame( app.three.render );
@@ -1110,6 +1116,7 @@ let app = {
     coordinates : document.querySelector( '.label-coordinates' ),
     direction   : document.querySelector( '.label-direction'   ),
     destination : document.querySelector( '.label-destination' ),
+    distance    : document.querySelector( '.label-distance'    ),
 
     update : {
 
@@ -1166,6 +1173,25 @@ let app = {
 
         }
 
+      },
+
+      distance : () => {
+
+        let value;
+
+        value = app.element.dataset.distance;
+        value = parseFloat( value );
+
+        // Rounds number up until the hundreds (e.g., 12.345 -> 12.300)
+        value = value / 100;
+        value = Math.round( value );
+        value = value * 100
+
+        value = value.toLocaleString( 'en-US' )
+        value = value + ' km'
+
+        app.labels.distance.textContent = value;
+
       }
 
     },
@@ -1181,6 +1207,17 @@ let app = {
         label.position.set( 0, app.data.earth.radius.crust * -2, 0 );
         app.three.cylinder.add( label );
 
+      },
+
+      distance : () => {
+
+        // Creates 2D object
+        let label = new THREE.CSS2DObject( app.labels.distance );
+
+        // Attach object to middle of cylinder
+        label.position.set( 0, app.data.earth.radius.crust * -1, 0 );
+        app.three.cylinder.add( label );
+
       }
 
     },
@@ -1189,6 +1226,7 @@ let app = {
 
       // Visually attaches 2D labels to 3D elements
       app.labels.attach.destination();
+      app.labels.attach.distance();
 
       app.labels.update.coordinates();
       app.labels.update.direction();
