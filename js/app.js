@@ -10,9 +10,16 @@ let app = {
 
   elements : {
 
-    canvas : document.querySelector( '.canvas' ),
-    trackButton : document.querySelector( '.track' ),
-    findButton  : document.querySelectorAll( '.find' ),
+    findButton      : document.querySelectorAll( '.find'                   ),
+    nextButton      : document.querySelectorAll( '.next'                   ),
+    trackButton     : document.querySelector(    '.track'                  ),
+    background      : document.querySelector(    '.background'             ),
+    canvas          : document.querySelector(    '.canvas'                 ),
+    form            : document.querySelector(    'form'                    ),
+    address         : document.querySelector(    'input[name="address"]'   ),
+    compassNeedle   : document.querySelector(    '.needle'                 ),
+    area            : document.querySelector(    '.draggable-area'         ),
+    handle          : document.querySelector(    '.draggable-handle'       ),
 
   },
 
@@ -83,8 +90,8 @@ let app = {
       cylinder : () => {
 
         let geometry = new THREE.CylinderGeometry(
-          app.data.earth.radius.crust / 20,
-          app.data.earth.radius.crust / 20,
+          app.data.earth.radius.crust / 40,
+          app.data.earth.radius.crust / 40,
           app.data.earth.radius.crust * 2,
           6,
           32
@@ -445,7 +452,7 @@ let app = {
           // Rotates Earth to always match real-world North
           app.three.earth.rotation.y    = THREE.Math.degToRad( app.data.orientation.alpha * -1 );
 
-          // Rotates tunnel only on two axes
+          // Rotates tunnel on two axes (based on device motion)
           app.three.cylinder.rotation.x = THREE.Math.degToRad( app.data.orientation.beta  );
           app.three.cylinder.rotation.z = THREE.Math.degToRad( app.data.orientation.gamma );
           app.three.chord.rotation.x    = THREE.Math.degToRad( app.data.orientation.beta  );
@@ -464,10 +471,17 @@ let app = {
           // Keeps Earth still
           app.three.earth.rotation.y    = THREE.Math.degToRad( 0 );
 
-          // Rotates tunnel on all axes
-          app.three.cylinder.rotation.x = THREE.Math.degToRad( app.data.orientation.beta  );
-          app.three.tunnel.rotation.y   = THREE.Math.degToRad( app.data.orientation.alpha );
-          app.three.cylinder.rotation.z = THREE.Math.degToRad( app.data.orientation.gamma );
+          // Rotates tunnel on two axes (based on drag control)
+          app.three.cylinder.rotation.x = THREE.Math.degToRad( app.drag.value.y );
+          app.three.cylinder.rotation.z = THREE.Math.degToRad( app.drag.value.x );
+          app.three.chord.rotation.x    = THREE.Math.degToRad( app.drag.value.y );
+          app.three.chord.rotation.z    = THREE.Math.degToRad( app.drag.value.x );
+          app.three.tunnel.rotation.y   = THREE.Math.degToRad( 0 );
+
+          // Rotates tunnel on all axes (based on device motion)
+          // app.three.cylinder.rotation.x = THREE.Math.degToRad( app.data.orientation.beta  );
+          // app.three.tunnel.rotation.y   = THREE.Math.degToRad( app.data.orientation.alpha );
+          // app.three.cylinder.rotation.z = THREE.Math.degToRad( app.data.orientation.gamma );
 
           // Activates camera controls
           app.three.controls.enabled = true;
@@ -599,7 +613,7 @@ let app = {
       app.three.controls.update();
 
       // Updates text labels on screen
-      app.labels.update();
+      // app.labels.update();
 
       app.three.renderer.render(
         app.three.scene,
@@ -732,15 +746,184 @@ let app = {
 
   },
 
-  labels : {
+  drag : {
 
-    update : () => {
+    grabbing  : false, // Flag is true while grabbing handle
+    range     : 60,    // In unsigned decimal degress
+    tolerance : .05,   // 5% tolerance until handle snaps to the center of the chart
 
-      let output = document.querySelector( '.output' );
+    value : {
 
-      // 'A tunnel in this direction would lead'
+      x : 0, // Float from -90 to 90
+      y : 0, // Float from -90 to 90
 
-      // output.textContent =
+    },
+
+    position : {
+
+      initial : {
+
+        x    : undefined, // Cursor position (in pixels) relative to viewport
+        y    : undefined, // Cursor position (in pixels) relative to viewport
+        left : undefined, // Distance (in pixels) relative to parent
+        top  : undefined, // Distance (in pixels) relative to parent
+
+      },
+
+      offset : {
+
+        x    : undefined, // Distance (in pixels) relative to initial position
+        y    : undefined, // Distance (in pixels) relative to initial position
+
+      },
+
+      current : {
+
+        x    : undefined, // Cursor position (in pixels) relative to viewport
+        y    : undefined, // Cursor position (in pixels) relative to viewport
+        left : undefined, // Distance (in pixels) relative to parent
+        top  : undefined, // Distance (in pixels) relative to parent
+
+        percentage : {
+          left : undefined, // Distance (in percentage) relative to parent
+          top  : undefined, // Distance (in percentage) relative to parent
+        }
+
+      },
+
+    },
+
+    start : () => {
+
+      if ( event.target === app.elements.handle ) {
+
+        app.drag.grabbing = true;
+        app.element.dataset.grabbing = true;
+
+        // Gets initial position of mouse pointer or finger
+        if ( event.type === 'touchstart' ) {
+
+          app.drag.position.initial.x = event.touches[ 0 ].clientX;
+          app.drag.position.initial.y = event.touches[ 0 ].clientY;
+
+        } else {
+
+          app.drag.position.initial.x = event.clientX;
+          app.drag.position.initial.y = event.clientY;
+
+        }
+
+        app.drag.position.initial.left = app.elements.handle.offsetLeft;
+        app.drag.position.initial.top  = app.elements.handle.offsetTop;
+
+      }
+
+    },
+
+    move : () => {
+
+      if ( app.drag.grabbing ) {
+
+        // Gets current position of mouse pointer or finger
+        if ( event.type === 'touchmove' ) {
+
+          app.drag.position.current.x = event.touches[ 0 ].clientX;
+          app.drag.position.current.y = event.touches[ 0 ].clientY;
+
+        } else {
+
+          app.drag.position.current.x = event.clientX;
+          app.drag.position.current.y = event.clientY;
+
+        }
+
+        // Calculates offset (in pixels)
+        app.drag.position.offset.x = app.drag.position.current.x - app.drag.position.initial.x;
+        app.drag.position.offset.y = app.drag.position.current.y - app.drag.position.initial.y;
+
+        // Calculates left and top distances (in pixels) related to parent
+        app.drag.position.current.left = app.drag.position.initial.left + app.drag.position.offset.x;
+        app.drag.position.current.top  = app.drag.position.initial.top  + app.drag.position.offset.y;
+
+        // Constrains values
+        if ( app.drag.position.current.left < 0 ) {
+          app.drag.position.current.left = 0
+        }
+
+        if ( app.drag.position.current.left > app.elements.area.offsetWidth ) {
+          app.drag.position.current.left = app.elements.area.offsetWidth
+        }
+
+        if ( app.drag.position.current.top < 0 ) {
+          app.drag.position.current.top = 0
+        }
+
+        if ( app.drag.position.current.top > app.elements.area.offsetHeight ) {
+          app.drag.position.current.top = app.elements.area.offsetHeight
+        }
+
+        // Snaps to the center if it’s within a close range (-5% to 5%)
+        if (
+          app.drag.position.current.left > app.elements.area.offsetWidth * ( .5 - app.drag.tolerance ) &&
+          app.drag.position.current.left < app.elements.area.offsetWidth * ( .5 + app.drag.tolerance ) &&
+          app.drag.position.current.top > app.elements.area.offsetHeight * ( .5 - app.drag.tolerance ) &&
+          app.drag.position.current.top < app.elements.area.offsetHeight * ( .5 + app.drag.tolerance )
+        ) {
+          app.drag.position.current.left = app.elements.area.offsetWidth * .5
+          app.drag.position.current.top = app.elements.area.offsetHeight * .5
+        }
+
+        // Calculates left and top distances (in percentage) related to parent
+        app.drag.position.current.percentage.left = 100 * app.drag.position.current.left / app.elements.area.offsetWidth;
+        app.drag.position.current.percentage.top  = 100 * app.drag.position.current.top  / app.elements.area.offsetHeight;
+
+        // Sets top and left distances (in percentage)
+        app.elements.handle.style.left = app.drag.position.current.percentage.left + '%';
+        app.elements.handle.style.top  = app.drag.position.current.percentage.top  + '%';
+
+        // Calculates values as if each axis was a divergent range input (from -N to +N)
+        app.drag.value.x = ( app.drag.position.current.percentage.left - 50 ) / 50 * app.drag.range;
+        app.drag.value.y = ( app.drag.position.current.percentage.top - 50 ) / 50 * -app.drag.range;
+
+        // Creates human-readable string from angles
+        let label = '';
+
+        if ( app.drag.value.y > 0 )
+          label += Math.round( app.drag.value.y ) + '°N, ';
+        else
+          label += Math.round( app.drag.value.y * -1 ) + '°S, ';
+
+        if ( app.drag.value.x > 0 )
+          label += Math.round( app.drag.value.x ) + '°E';
+        else
+          label += Math.round( app.drag.value.x * -1 ) + '°W';
+
+        // Updates angle label with new values
+        // app.three.labels.angle.textContent = label;
+
+      }
+
+    },
+
+    end : () => {
+
+      app.drag.grabbing = false;
+      app.element.dataset.grabbing = false;
+
+    },
+
+    reset : () => {
+
+      // Sets top and left distances (in percentage)
+      app.elements.handle.style.left = '50%';
+      app.elements.handle.style.top  = '50%';
+
+      // Calculates values as if each axis was a divergent range input (from -N to +N)
+      app.drag.value.x = 0;
+      app.drag.value.y = 0;
+
+      // Updates angle label with original values
+      // app.three.labels.angle.textContent = '0°S, 0°W';
 
     }
 
@@ -748,9 +931,25 @@ let app = {
 
   events : {
 
+    drag : () => {
+
+      window.addEventListener( 'touchstart', app.drag.start, false);
+      window.addEventListener( 'touchmove',  app.drag.move,  false);
+      window.addEventListener( 'touchend',   app.drag.end,   false);
+
+      window.addEventListener( 'mousedown',  app.drag.start, false);
+      window.addEventListener( 'mousemove',  app.drag.move,  false);
+      window.addEventListener( 'mouseup',    app.drag.end,   false);
+      window.addEventListener( 'mouseleave', app.drag.end,   false);
+
+    },
+
     initialize : () => {
 
-      // Tracks phone’s orientation when clicked
+      // Enables drag on handle to control tunnel angles on desktop
+      app.events.drag();
+
+      // Tracks phone’s motion when clicked
       app.elements.trackButton.addEventListener( 'click', app.orientation.request );
 
       // Finds user’s location when button is clicked
