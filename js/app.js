@@ -2,7 +2,7 @@ let app = {
 
   options : {
 
-    firstPerson : true
+    firstPerson : false,
 
   },
 
@@ -51,6 +51,15 @@ let app = {
 
   },
 
+  color : ( name ) => {
+
+    // Gets color from CSS variable
+    let style = getComputedStyle( document.documentElement );
+    let value = style.getPropertyValue( '--' + name ).trim();
+    return value
+
+  },
+
   three : {
 
     renderer       : undefined,
@@ -85,7 +94,7 @@ let app = {
         geometry.translate( 0, -app.data.earth.radius.crust, 0);
 
         let material = new THREE.MeshBasicMaterial( {
-            color: 0xff0000,
+            color: app.color( 'accent-100' ),
             wireframe: true,
             opacity: 1,
             transparent: true
@@ -153,9 +162,9 @@ let app = {
         geometry.rotateZ( THREE.Math.degToRad(  90 ) );
 
         let material = new THREE.MeshBasicMaterial( {
-          color : 'white',
+          color : app.color( 'neutral-25' ),
           wireframe: true,
-          opacity : .1,
+          opacity : .25,
           transparent : true
         } );
 
@@ -271,15 +280,14 @@ let app = {
           let materials = [
 
             // Internal-facing color
-            new THREE.MeshBasicMaterial( { color: 0x666666 } ),
+            new THREE.MeshBasicMaterial( { color: app.color( 'neutral-50' ) } ),
 
             // External-facing color
-            new THREE.MeshBasicMaterial( { color: 0xcccccc } ),
+            new THREE.MeshBasicMaterial( { color: app.color( 'neutral-75' ) } ),
 
           ];
 
-
-
+          // Applies each material on one side of the surface
           materials[ 0 ].side = THREE.BackSide;
           materials[ 1 ].side = THREE.FrontSide;
 
