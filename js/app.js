@@ -38,8 +38,8 @@ let app = {
     },
 
     user : {
-      latitude : 0,
-      longitude : 0
+      latitude  : -33.4489,
+      longitude : -70.6693,
     },
 
     load : () => {
@@ -74,6 +74,8 @@ let app = {
     scene          : undefined,
     controls       : undefined,
     raycaster      : undefined,
+
+    renderer2D     : undefined,
 
     tunnel         : undefined, // Group
     cylinder       : undefined,
@@ -145,7 +147,7 @@ let app = {
 
         app.three.tunnel.add(
           app.three.cylinder,
-          app.three.chord,
+          app.three.chord
         );
 
       },
@@ -155,11 +157,8 @@ let app = {
         // Could be replaced by this for asthethic reasons:
         // https://unpkg.com/three-geojson-geometry@1.1.4/example/graticules/index.html
 
-        // Applies satellite texture for debugging
-        // let texture = new THREE.TextureLoader().load( 'https://vsueiro.com/tunnel-simulator/assets/texture.jpg' );
-
         let geometry = new THREE.SphereGeometry(
-          app.data.earth.radius.crust * 0.99,
+          app.data.earth.radius.crust * .99,
           16,
           16
         );
@@ -187,11 +186,10 @@ let app = {
         // Creates Land group
         app.three.land = new THREE.Group();
 
-        // Increases country scale
         app.three.land.scale.set(
           app.data.earth.radius.crust,
           app.data.earth.radius.crust,
-          app.data.earth.radius.crust
+          app.data.earth.radius.crust,
         );
 
         // Rotates sphere so default location is at latitude 0 and longitude 0
@@ -344,6 +342,16 @@ let app = {
 
       },
 
+      renderer2D : () => {
+
+        app.three.renderer2D = new THREE.CSS2DRenderer();
+
+        app.elements.background.appendChild(
+          app.three.renderer2D.domElement
+        );
+
+      },
+
       camera : () => {
 
         // Creates camera
@@ -415,6 +423,9 @@ let app = {
       // Debugs axes
       app.three.scene.add( new THREE.AxesHelper( 1000 ) );
 
+      // Creates 2D renderer (to position HTML elements on top of 3D scene)
+      app.three.create.renderer2D();
+
       // Animates 3D elements
       requestAnimationFrame( app.three.render );
 
@@ -429,8 +440,15 @@ let app = {
         // If canvas dimensions are different from window dimensios
         if ( c.width !== c.clientWidth || c.height !== c.clientHeight ) {
 
-          // Resizes canvas
+          // Resizes 3D canvas
           app.three.renderer.setSize(
+            c.clientWidth,
+            c.clientHeight,
+            false
+          );
+
+          // Resizes 2D canvas
+          app.three.renderer2D.setSize(
             c.clientWidth,
             c.clientHeight,
             false
@@ -580,7 +598,6 @@ let app = {
         }
 
         // Identifies origin and destination countries
-
         for ( let match of matches ) {
 
           if ( match.distance < 100 ) {
@@ -600,27 +617,36 @@ let app = {
 
             // Sets this country as destination
             app.element.dataset.destination = match.object.name;
-            app.element.dataset.distance    = match.distance;
 
           }
 
         }
 
+        // Calculates distance until crust on the other side
+        let intersections = app.three.raycaster.intersectObject( app.three.sphere );
+
+        // If ray instersects with anything
+        if ( intersections.length > 0 ) {
+
+          // Gets farthest intersection
+          intersection = intersections[ intersections.length -1 ]
+
+          // Stores distance
+          app.element.dataset.distance = intersection.distance;
+
+        }
+
         if ( !found.origin ) {
 
-          // Calculates distance until crust on the other side
-          let intersections = app.three.raycaster.intersectObject( app.three.sphere );
+          // Clears country from data
+          app.element.dataset.origin = '';
 
-          // If ray instersects with anything
-          if ( intersections.length > 0 ) {
+        }
 
-            // Gets farthest intersection
-            intersection = intersections[ intersections.length -1 ]
+        if ( !found.destination ) {
 
-            // Stores distance
-            app.element.dataset.distance = intersection.distance;
-
-          }
+          // Clears country from data
+          app.element.dataset.destination = '';
 
         }
 
@@ -648,13 +674,20 @@ let app = {
       // Makes camera orbit
       app.three.controls.update();
 
-      // Updates text labels on screen
-      // app.labels.update();
-
+      // Renders 3D elements
       app.three.renderer.render(
         app.three.scene,
         app.three.camera
       );
+
+      // Renders 2D elements
+      app.three.renderer2D.render(
+        app.three.scene,
+        app.three.camera
+      );
+
+      // Updates destination label
+      app.labels.update.destination();
 
       // Enables recursion (this function calls itself to draw frames of 3D animation)
       requestAnimationFrame( app.three.render );
@@ -667,8 +700,7 @@ let app = {
 
     handle : () => {
 
-      // Implements world-based calibration on iOS (alpha is 0 when pointing North), based on:
-      // https://www.w3.org/2008/geolocation/wiki/images/e/e0/Device_Orientation_%27alpha%27_Calibration-_Implementation_Status_and_Challenges.pdf
+      // Implements world-based calibration on iOS (alpha is 0 when pointing North)
 
       let north, offset;
 
@@ -688,26 +720,6 @@ let app = {
           north += 360;
 
       }
-
-
-
-      // Prints values for debugging
-      let pre = document.querySelector( 'pre' )
-
-      pre.textContent = ''
-
-      pre.textContent += 'origin:      ' + ( app.element.dataset.origin      || '' ) + '\n';
-      pre.textContent += 'destination: ' + ( app.element.dataset.destination || '' ) + '\n';
-      pre.textContent += 'distance:    ' + ( app.element.dataset.distance    || '' ) + '\n';
-      pre.textContent += '\n';
-      pre.textContent += 'north:       ' + north.toFixed(2) + '\n';
-      pre.textContent += 'alpha:       ' + event.alpha.toFixed(2) + '\n';
-      pre.textContent += 'beta:        ' + event.beta.toFixed(2)  + '\n';
-      pre.textContent += 'gamma:       ' + event.gamma.toFixed(2) + '\n';
-      pre.textContent += '\n';
-      pre.textContent += 'absolute:    ' + event.absolute;
-      pre.textContent += '\n';
-      pre.textContent += 'compass:     ' + event.webkitCompassHeading + '\n';
 
       // Updates values to be used by render method
       app.data.orientation.alpha = north;
@@ -1097,6 +1109,7 @@ let app = {
 
     coordinates : document.querySelector( '.label-coordinates' ),
     direction   : document.querySelector( '.label-direction'   ),
+    destination : document.querySelector( '.label-destination' ),
 
     update : {
 
@@ -1141,11 +1154,41 @@ let app = {
         // Updates angle label with new values
         app.labels.direction.textContent = label;
 
+      },
+
+      destination : () => {
+
+        // If value is different from label
+        if ( app.element.dataset.destination !== app.labels.destination.textContent ) {
+
+          // Updates label
+          app.labels.destination.textContent = app.element.dataset.destination;
+
+        }
+
+      }
+
+    },
+
+    attach : {
+
+      destination : () => {
+
+        // Creates 2D object
+        let label = new THREE.CSS2DObject( app.labels.destination );
+
+        // Attach object to end of cylinder
+        label.position.set( 0, app.data.earth.radius.crust * -2, 0 );
+        app.three.cylinder.add( label );
+
       }
 
     },
 
     initialize : () => {
+
+      // Visually attaches 2D labels to 3D elements
+      app.labels.attach.destination();
 
       app.labels.update.coordinates();
       app.labels.update.direction();
@@ -1215,7 +1258,7 @@ let app = {
 
     app.three.initialize();
     app.events.initialize();
-    app.events.initialize();
+    app.labels.initialize();
 
   }
 
