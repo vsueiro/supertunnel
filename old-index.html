@@ -3,12 +3,12 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>TunnelSimulator — Shovel Attachment</title>
+    <title>TunnelSimulator</title>
     <link rel="stylesheet" href="css/app.css">
   </head>
   <body>
 
-    <div class="app" data-step="1" data-grabbing="false" data-search="unsearched" data-geolocation="unlocated">
+    <div class="app" data-step="1" data-grabbing="false" data-search="unsearched" data-geolocation="unlocated" data-orientation="unsupported">
 
       <div class="background">
         <canvas class="canvas"></canvas>
@@ -36,7 +36,7 @@
 
         <main>
 
-          <section class="origin">
+          <section>
 
             <header>
               <h2>Origin: <span class="label label-coordinates">0°N, 0°S</span></h2>
@@ -45,11 +45,11 @@
 
             <form>
 
-              <label for="address">Enter your address:</label>
+              <p>Enter your address:</p>
 
               <div class="search-container">
                 <input type="search" name="address" value="Santiago, Chile" class="default" placeholder="City, Country">
-                <button type="submit">
+                <button>
                   <i class="icon-search"></i>
                 </button>
               </div>
@@ -58,49 +58,35 @@
 
               <p>Or enable geolocation:</p>
 
-              <button type="button" class="find">
-                <i class="icon-location"></i>
-                <span>Get my position</span>
-                <span>Locating...</span>
-                <span>Found you</span>
-              </button>
+              <div style="display: none">
+
+                <p>Insert coordinates</p>
+
+                <label for="latitude">
+                  <span>Latitude:</span>
+                  <input type="text" name="latitude" value="0">
+                </label>
+
+                <label for="longitude">
+                  <span>Longitude:</span>
+                  <input type="text" name="longitude" value="0">
+                </label>
+
+                <input type="submit" value="Submit" style="display: none">
+
+                <p>Or</p>
+
+              </div>
 
             </form>
 
+            <button class="find">
+              <span><i class="icon-location"></i> Get my position</span>
+              <span><i class="icon-location"></i> Locating...</span>
+              <span><i class="icon-location"></i> Found you</span>
+            </button>
+
             <p class="tip">Simulate a tunnel through Earth, starting from where you are</p>
-
-          </section>
-
-          <section class="direction">
-
-            <header>
-              <h2>Direction: <span class="label label-angle">0°N, 0°S</span></h2>
-            </header>
-
-            <div class="rose">
-
-              <div class="backlights">
-                <div class="backlight"></div>
-                <div class="backlight"></div>
-                <div class="backlight"></div>
-                <div class="backlight"></div>
-                <div class="backlight"></div>
-              </div>
-
-              <div class="directions">
-
-                <div class="direction"></div>
-                <div class="direction"></div>
-
-                <div class="draggable-area">
-                  <div class="draggable-handle"></div>
-                </div>
-
-              </div>
-
-            </div>
-
-            <p class="tip">Drag handle to dig a virtual tunnel towards that angle</p>
 
           </section>
 
@@ -161,6 +147,50 @@
 
           </ol>
 
+          <section>
+
+            <header>
+              <h2>Direction: <span class="label label-angle">0°N, 0°S</span></h2>
+            </header>
+
+            <div class="rose">
+
+              <div class="backlights">
+                <div class="backlight"></div>
+                <div class="backlight"></div>
+                <div class="backlight"></div>
+                <div class="backlight"></div>
+                <div class="backlight"></div>
+              </div>
+
+              <div class="directions">
+
+                <div class="direction"></div>
+                <div class="direction"></div>
+
+                <div class="draggable-area">
+                  <div class="draggable-handle"></div>
+                </div>
+
+              </div>
+
+            </div>
+
+            <!--
+            <div class="device">
+
+              <div class="drawings">
+                <div class="device-front"></div>
+                <div class="device-side"></div>
+              </div>
+
+            </div>
+            -->
+
+            <p class="tip">Drag handle to dig a virtual tunnel towards that angle</p>
+
+          </section>
+
         </main>
 
         <footer>
@@ -176,6 +206,8 @@
 
     </div>
 
+    <!-- three.js -->
+
     <!-- https://unpkg.com/browse/three@0.124.0/build/three.min.js -->
     <script src="js/three.min.js"></script>
 
@@ -186,6 +218,7 @@
     <script src="js/CSS2DRenderer.js"></script>
 
     <!-- Custom -->
+
     <script src="js/app.js"></script>
 
   </body>
