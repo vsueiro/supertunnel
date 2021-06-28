@@ -888,21 +888,7 @@ let app = {
         app.drag.value.x = ( app.drag.position.current.percentage.left - 50 ) / 50 * app.drag.range;
         app.drag.value.y = ( app.drag.position.current.percentage.top - 50 ) / 50 * -app.drag.range;
 
-        // Creates human-readable string from angles
-        let label = '';
-
-        if ( app.drag.value.y > 0 )
-          label += Math.round( app.drag.value.y ) + '°N, ';
-        else
-          label += Math.round( app.drag.value.y * -1 ) + '°S, ';
-
-        if ( app.drag.value.x > 0 )
-          label += Math.round( app.drag.value.x ) + '°E';
-        else
-          label += Math.round( app.drag.value.x * -1 ) + '°W';
-
-        // Updates angle label with new values
-        // app.three.labels.angle.textContent = label;
+        app.labels.update.direction();
 
       }
 
@@ -926,7 +912,38 @@ let app = {
       app.drag.value.y = 0;
 
       // Updates angle label with original values
+      app.labels.update.direction();
       // app.three.labels.angle.textContent = '0°S, 0°W';
+
+    }
+
+  },
+
+  labels : {
+
+    direction : document.querySelector( '.label-direction' ),
+
+    update : {
+
+      direction : () => {
+
+        // Creates human-readable string from angles
+        let label = '';
+
+        if ( app.drag.value.y >= 0 )
+          label += Math.round( app.drag.value.y ) + '°N, ';
+        else
+          label += Math.round( app.drag.value.y * -1 ) + '°S, ';
+
+        if ( app.drag.value.x >= 0 )
+          label += Math.round( app.drag.value.x ) + '°E';
+        else
+          label += Math.round( app.drag.value.x * -1 ) + '°W';
+
+        // Updates angle label with new values
+        app.labels.direction.textContent = label;
+
+      }
 
     }
 
