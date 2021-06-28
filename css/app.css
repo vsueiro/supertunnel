@@ -393,8 +393,10 @@ main section.direction {
   display: flex;
 }
 
-.direction::before,
-.direction::after {
+.north-south::before,
+.north-south::after,
+.east-west::before,
+.east-west::after {
   position: absolute;
   display: flex;
   justify-content: center;
@@ -408,28 +410,28 @@ main section.direction {
   height: calc( var(--basis) * 4.8 );
 }
 
-.direction:nth-of-type(1)::before {
+.north-south::before {
   content: 'N';
   top: 0;
   left: 50%;
   margin-left: calc( var(--basis) * -2.4 );
 }
-.direction:nth-of-type(1)::after {
+.north-south::after {
   content: 'S';
   bottom: 0;
   left: 50%;
   margin-left: calc( var(--basis) * -2.4 );
 }
-.direction:nth-of-type(2)::before {
-  content: 'W';
-  top: 50%;
-  left: 0;
-  margin-top: calc( var(--basis) * -2.4 );
-}
-.direction:nth-of-type(2)::after {
+.east-west::before {
   content: 'E';
   top: 50%;
   right: 0;
+  margin-top: calc( var(--basis) * -2.4 );
+}
+.east-west::after {
+  content: 'W';
+  top: 50%;
+  left: 0;
   margin-top: calc( var(--basis) * -2.4 );
 }
 
