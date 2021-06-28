@@ -1115,6 +1115,7 @@ let app = {
 
     coordinates : document.querySelector( '.label-coordinates' ),
     direction   : document.querySelector( '.label-direction'   ),
+    origin      : document.querySelector( '.label-origin'      ),
     destination : document.querySelector( '.label-destination' ),
     distance    : document.querySelector( '.label-distance'    ),
 
@@ -1163,6 +1164,10 @@ let app = {
 
       },
 
+      origin : () => {
+
+      },
+
       destination : () => {
 
         // If value is different from label
@@ -1198,6 +1203,17 @@ let app = {
 
     attach : {
 
+      origin : () => {
+
+        // Creates 2D object
+        let label = new THREE.CSS2DObject( app.labels.origin );
+
+        // Attach object to beginning of cylinder
+        label.position.set( 0, 0, 0 );
+        app.three.cylinder.add( label );
+
+      },
+
       destination : () => {
 
         // Creates 2D object
@@ -1225,6 +1241,7 @@ let app = {
     initialize : () => {
 
       // Visually attaches 2D labels to 3D elements
+      app.labels.attach.origin();
       app.labels.attach.destination();
       app.labels.attach.distance();
 

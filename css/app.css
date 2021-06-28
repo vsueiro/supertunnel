@@ -808,14 +808,14 @@ input[type="search"] + button:not(:hover) {
   display: flex;
 }
 
-.app[data-step="3"] .marker-origin,
+.app[data-step="3"] .label-origin,
 .app[data-step="3"] .label-distance {
   opacity: 0;
 }
 
-/* Markers & labels */
+/* Labels */
 
-.marker-origin {
+.label-origin {
   width: calc( var(--basis) * 4.8 );
   height: calc( var(--basis) * 4.8 );
   border: calc( var(--basis) * .2 ) solid;
@@ -926,7 +926,7 @@ input[type="search"] + button:not(:hover) {
     font-size: calc( var(--basis) * 2.4 );
   }
 
-  .marker-origin {
+  .label-origin {
     width: calc( var(--basis) * 2.4 );
     height: calc( var(--basis) * 2.4 );
   }
