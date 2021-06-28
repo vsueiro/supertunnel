@@ -79,9 +79,28 @@
           }
         },
 
+        // user : {
+        //   latitude : 0,
+        //   longitude : 0
+        // },
+
         user : {
           latitude : -23.5475,
           longitude : -46.63611
+        },
+
+        load : () => {
+
+          // Gets countries geometries
+          fetch( './assets/countries-lo.json' )
+            .then( response => response.json() )
+            .then( json => {
+
+              app.data.countries = json;
+              app.initialize();
+
+            } );
+
         }
 
       },
@@ -96,6 +115,9 @@
         tunnel         : undefined, // Group
         cylinder       : undefined,
         chord          : undefined,
+
+        land           : undefined, // Group
+        countries      : undefined,
 
         earth          : undefined, // Group
         sphere         : undefined,
@@ -141,6 +163,9 @@
 
           sphere : () => {
 
+            // Could be replaced by this for asthethic reasons:
+            // https://unpkg.com/three-geojson-geometry@1.1.4/example/graticules/index.html
+
             // Applies satellite texture for debugging
             let texture = new THREE.TextureLoader().load( 'https://vsueiro.com/tunnel-simulator/assets/texture.jpg' );
 
@@ -156,7 +181,7 @@
 
             let material = new THREE.MeshBasicMaterial( {
               color : 'gray',
-              wireframe: true,
+              // wireframe: true,
               opacity : 1,
               transparent : true,
               map : texture
@@ -169,12 +194,140 @@
 
           },
 
+          land : () => {
+
+            // Creates Land group
+            app.three.land = new THREE.Group();
+
+            // Increases country scale
+            app.three.land.scale.set(
+              app.data.earth.radius.crust,
+              app.data.earth.radius.crust,
+              app.data.earth.radius.crust
+            );
+
+            // Rotates sphere so default location is at latitude 0 and longitude 0
+            app.three.land.rotation.x = THREE.Math.degToRad( -90 );
+            app.three.land.rotation.y = THREE.Math.degToRad( 180 );
+
+          },
+
+          map3DGeometry : function( data ) {
+
+            THREE.Geometry.call (this);
+
+            // data.vertices = [lat, lon, ...]
+            // data.polygons = [[poly indices, hole i-s, ...], ...]
+            // data.triangles = [tri i-s, ...]
+
+            let i, uvs = [];
+            for (i = 0; i < data.vertices.length; i += 2) {
+              let lon = data.vertices[i];
+              let lat = data.vertices[i + 1];
+
+              // Colatitude
+              let phi = +(90 - lat) * 0.01745329252;
+
+              // Azimuthal angle
+              let the = +(180 - lon) * 0.01745329252;
+
+              // Translates into XYZ coordinates
+              let wx = Math.sin (the) * Math.sin (phi) * -1;
+              let wz = Math.cos (the) * Math.sin (phi);
+              let wy = Math.cos (phi);
+
+              // Equirectangular projection
+              let wu = 0.25 + lon / 360.0;
+              let wv = 0.5 + lat / 180.0;
+
+              this.vertices.push (new THREE.Vector3 (wx, wy, wz));
+
+              uvs.push (new THREE.Vector2 (wu, wv));
+            }
+
+            let n = this.vertices.length;
+
+            for (i = 0; i < n; i++) {
+              let v = this.vertices[i];
+              this.vertices.push (v.clone ().multiplyScalar (0));
+            }
+
+            for (i = 0; i < data.triangles.length; i += 3) {
+              let a = data.triangles[i];
+              let b = data.triangles[i + 1];
+              let c = data.triangles[i + 2];
+
+              this.faces.push( new THREE.Face3( a, b, c, [ this.vertices[a], this.vertices[b], this.vertices[c] ] ) );
+              this.faceVertexUvs[ 0 ].push( [ uvs[ a ], uvs[ b ], uvs[ c ] ]);
+            }
+
+            this.computeFaceNormals ();
+
+            this.boundingSphere = new THREE.Sphere( new THREE.Vector3 (), 1 );
+
+          },
+
+          countries : ( json ) => {
+
+            // Uses data and logic based on this repository:
+            // https://github.com/makc/makc.github.io/tree/master/three.js/map2globe
+
+            app.three.create.map3DGeometry.prototype = Object.create( THREE.Geometry.prototype );
+
+            let countries = app.data.countries;
+
+            for ( let name in countries ) {
+
+              let geometry = new app.three.create.map3DGeometry( countries[ name ] );
+
+              // Duplicates every face of the geometry
+              let faces = [];
+
+              for ( let face of geometry.faces ) {
+
+                let newFace = face.clone();
+                newFace.materialIndex = 1;
+                faces.push( newFace );
+
+              }
+
+              // Adds the newly cloned face to array of original faces
+              for ( let face of faces )
+                geometry.faces.push( face );
+
+              // Creates list of two materials
+              let materials = [
+
+                // Internal-facing color
+                new THREE.MeshBasicMaterial( { color: 0x0000ff } ),
+
+                // External-facing color
+                new THREE.MeshBasicMaterial( { color: 0x00ff00 } ),
+
+              ];
+
+              materials[ 0 ].side = THREE.BackSide;
+              materials[ 1 ].side = THREE.FrontSide;
+
+              // Groups all countries within the `land` group
+              app.three.land.add( countries[ name ].mesh = new THREE.Mesh( geometry, materials ) );
+
+              // Assigns country name to mesh (to be retrieved by raycaster collision)
+              countries[ name ].mesh.name = name;
+
+            }
+
+            console.log( app.three.land );
+
+          },
+
           earth : () => {
 
             app.three.earth = new THREE.Group();
 
             app.three.earth.add(
-              app.three.sphere
+              app.three.sphere,
+              app.three.land
             );
 
           },
@@ -185,7 +338,7 @@
 
             app.three.universe.add(
               app.three.tunnel,
-              app.three.earth
+              app.three.earth,
             );
 
             // Rotates all elements so Earth poles are on the Y axis
@@ -246,7 +399,11 @@
           app.three.create.cylinder();
           app.three.create.tunnel();
 
-          // Creaates Earth group
+          // Creates Land group
+          app.three.create.land();
+          app.three.create.countries();
+
+          // Creates Earth group
           app.three.create.sphere();
           app.three.create.earth();
 
@@ -298,6 +455,7 @@
 
               // Rotates Earth to always match real-world North
               app.three.earth.rotation.y    = THREE.Math.degToRad( app.data.orientation.alpha * -1 );
+              app.three.earth.rotation.y    = THREE.Math.degToRad( 45 );
 
               // Rotates tunnel only on two axes
               app.three.cylinder.rotation.x = THREE.Math.degToRad( app.data.orientation.beta  );
@@ -334,38 +492,9 @@
             app.three.sphere.rotation.x = THREE.Math.degToRad( app.data.user.latitude );
             app.three.sphere.rotation.z = THREE.Math.degToRad( app.data.user.longitude );
 
-            // Rotates sphere so default location is at latitude 0 and longitude 0
-            // app.three.sphere.rotation.x = THREE.Math.degToRad( -90 );
-            // app.three.sphere.rotation.y = THREE.Math.degToRad( -90 );
-
-            /*
-            // Rotates crust so default location is at latitude and longitude 0
-            app.three.crust.rotation.y = THREE.Math.degToRad( -90 );
-
-            // Rotates countries so default location is at latitude and longitude 0
-            if ( app.three.land ) {
-              app.three.land.rotation.y = THREE.Math.degToRad( -180 );
-
-            }
-
-            // Rotates crust & countries so it looks like the pivot point is the user location
-            if ( app.data.user.latitude && app.data.user.longitude ) {
-
-              // Crust
-              app.three.crust.rotation.x = THREE.Math.degToRad( app.data.user.latitude );
-              app.three.crust.rotation.y = THREE.Math.degToRad( -90 - app.data.user.longitude );
-
-              // Countries
-              if ( app.three.land ) {
-                app.three.land.rotation.y = THREE.Math.degToRad( -180 - app.data.user.longitude );
-              }
-
-            }
-
-            // Rotates Earth (group) to counter-act previous rotation so OrbitControls work better
-            app.three.earth.rotation.x = THREE.Math.degToRad( - app.data.user.latitude );
-
-            */
+            // Rotates countries so the user location coincides with the tunnel beginning
+            app.three.land.rotation.x = THREE.Math.degToRad( -90 + app.data.user.latitude );
+            app.three.land.rotation.y = THREE.Math.degToRad( 180 + ( app.data.user.longitude * -1 ) );
 
           }
 
@@ -491,7 +620,7 @@
 
     }
 
-    app.initialize();
+    app.data.load();
 
     </script>
 
