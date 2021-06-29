@@ -672,8 +672,9 @@ input[type="search"] + button:not(:hover) {
   animation-play-state: paused;
 }
 
-.app[data-search="searched"] .step:nth-child(3) {
-  border-color: var(--success-100);
+.app[data-search="searched"] .step:nth-child(3),
+.app[data-search="located"] .step:nth-child(3) {
+  border-color: var(--success-100)
 }
 
 .app[data-search="searched"] .search-container,
