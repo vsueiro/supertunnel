@@ -1014,6 +1014,7 @@ let app = {
       app.data.user.longitude = position.coords.longitude;
 
       app.labels.update.coordinates();
+      app.search.clear();
 
     },
 
