@@ -692,6 +692,9 @@ let app = {
           // Rotates Earth to always match real-world North
           app.three.earth.rotation.y    = THREE.Math.degToRad( app.data.orientation.alpha * -1 );
 
+          // Rotates stars so they behave just like Earth
+          app.three.stars.rotation.y    = THREE.Math.degToRad( app.data.orientation.alpha * -1 );
+
           // Rotates tunnel on two axes (based on device motion)
           app.three.cylinder.rotation.x = THREE.Math.degToRad( app.data.orientation.beta  );
           app.three.cylinder.rotation.z = THREE.Math.degToRad( app.data.orientation.gamma );
@@ -716,6 +719,9 @@ let app = {
 
           // Keeps Earth still
           app.three.earth.rotation.y    = THREE.Math.degToRad( 0 );
+
+          // Rests stars rotation
+          app.three.stars.rotation.y    = THREE.Math.degToRad( 0 );
 
           // Rotates tunnel on two axes (based on drag control)
           app.three.cylinder.rotation.x = THREE.Math.degToRad( app.drag.value.y );
