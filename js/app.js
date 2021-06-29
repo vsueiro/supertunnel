@@ -1016,13 +1016,14 @@ let app = {
       app.labels.update.coordinates();
       app.search.clear();
 
+      app.steps.set( 3, 2400 );
+
     },
 
     error : () => {
 
       app.element.dataset.geolocation = 'unlocated';
-
-      window.alert( 'Unable to find your location.' );
+      app.steps.set( 2 );
 
     },
 

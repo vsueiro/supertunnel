@@ -528,7 +528,8 @@ form {
   height: calc( 100% - calc( var(--basis) * 4.8 ) );
 }
 
-form > * {
+form > *,
+.search-container {
   display: flex;
   justify-content: flex-start;
   align-items: center;
@@ -724,6 +725,12 @@ input[type="search"] + button:not(:hover) {
   width: 100%;
   padding: calc( var(--basis) * 1.2 );
   margin-bottom: calc( var(--basis) * .4 );
+}
+
+.steps .search-container {
+  flex-direction: row;
+  margin-bottom: 0;
+  padding-right: 0;
 }
 
 .note {
