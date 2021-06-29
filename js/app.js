@@ -3,6 +3,7 @@ let app = {
   options : {
 
     mode : 'third-person',
+    hd  : true,
 
   },
 
@@ -522,9 +523,9 @@ let app = {
         // Creates camera
         app.three.camera = new THREE.PerspectiveCamera( 50, 1, .1, app.data.earth.radius.crust * 30 );
 
-        // // Positions it away from Earth (3x its radiues)
+        // Positions it away from Earth (3x its radius)
         // app.three.camera.position.z = app.data.earth.radius.crust * 3;
-        //
+
         // // Tilts it slightly so the Equator does not look like a flat horizontal line
         // app.three.camera.position.y = app.data.earth.radius.crust / 3 ;
 
@@ -604,7 +605,7 @@ let app = {
       app.three.create.raycaster();
 
       // Sets camera to initial position
-      app.three.update.camera();
+      app.three.update.camera( 'reset' );
 
       // Debugs axes
       // app.three.scene.add( new THREE.AxesHelper( 1000 ) );
@@ -623,13 +624,19 @@ let app = {
 
         let c = app.elements.canvas;
 
+        let px = 1;
+
+        // Renders more pixels for HD-DPI displays
+        if ( app.options.hd )
+          px = window.devicePixelRatio;
+
         // If canvas dimensions are different from window dimensios
-        if ( c.width !== c.clientWidth || c.height !== c.clientHeight ) {
+        if ( c.width !== c.clientWidth * px || c.height !== c.clientHeight * px ) {
 
           // Resizes 3D canvas
           app.three.renderer.setSize(
-            c.clientWidth,
-            c.clientHeight,
+            Math.floor( c.clientWidth  * px ),
+            Math.floor( c.clientHeight * px ),
             false
           );
 
@@ -639,6 +646,8 @@ let app = {
             c.clientHeight,
             false
           );
+
+          // Scales universe to better fit screen dimension
 
           app.three.update.camera();
 
@@ -650,28 +659,29 @@ let app = {
 
         let c = app.elements.canvas;
 
-        // Moves camera closer or further away to adjust Earth’s dimensions on screen
-        let distance = app.data.earth.radius.crust * 3;
-        let min      = app.data.earth.radius.crust * 3;
-        let max      = app.data.earth.radius.crust * 4.5;
-
-        distance = distance * 1280 / c.clientWidth;
-
-        if ( distance > max )
-          distance = max;
-
-        if ( distance < min )
-          distance = min;
-
-        app.three.camera.position.z = distance;
+        // // Moves camera closer or further away to adjust Earth’s dimensions on screen
+        // let distance = app.data.earth.radius.crust * 3;
+        // let min      = app.data.earth.radius.crust * 3;
+        // let max      = app.data.earth.radius.crust * 4.5;
+        //
+        // distance = distance * 1280 / c.clientWidth;
+        //
+        // if ( distance > max )
+        //   distance = max;
+        //
+        // if ( distance < min )
+        //   distance = min;
 
         if ( reset ) {
 
-          // Sets z rotation to the default position
+          // Positions camera away from Earth (3x its radius)
+          app.three.camera.position.z = app.data.earth.radius.crust * 3;
+
+          // Sets x rotation to the default position
           app.three.camera.position.x = 0
 
           // Tilts it slightly so the Equator does not look like a flat horizontal line
-          app.three.camera.position.y = app.data.earth.radius.crust / 3 ;
+          app.three.camera.position.y = app.data.earth.radius.crust / 3;
 
           // Forces camera to look at the center of the scene
           app.three.camera.lookAt( 0, 0, 0 );
