@@ -1016,7 +1016,7 @@ let app = {
       app.labels.update.coordinates();
       app.search.clear();
 
-      app.steps.set( 3, 2400 );
+      app.steps.set( 3 );
 
     },
 
@@ -1081,7 +1081,7 @@ let app = {
       app.labels.update.coordinates();
 
       // Goes to “found you” step on mobile navigation
-      app.steps.next();
+      app.steps.set( 3 );
 
       app.element.dataset.search = 'searched';
 
