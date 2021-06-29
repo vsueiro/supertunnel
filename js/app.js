@@ -614,7 +614,7 @@ let app = {
       app.three.create.raycaster();
 
       // Debugs axes
-      app.three.scene.add( new THREE.AxesHelper( 1000 ) );
+      // app.three.scene.add( new THREE.AxesHelper( 1000 ) );
 
       // Creates 2D renderer (to position HTML elements on top of 3D scene)
       app.three.create.renderer2D();
