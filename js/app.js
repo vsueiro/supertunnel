@@ -1497,6 +1497,25 @@ let app = {
 
   },
 
+  steps : {
+
+    set : ( number, delay = 0 ) => {
+
+      setTimeout( () => {
+        app.element.dataset.step = number;
+      }, delay )
+
+    },
+
+    next : ( delay = 0 ) => {
+
+      let current = parseInt( app.element.dataset.step );
+      app.steps.set( current + 1, delay );
+
+    }
+
+  },
+
   events : {
 
     drag : () => {
