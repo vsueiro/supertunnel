@@ -1,6 +1,10 @@
 let app = {
 
-  title : 'TunnelSimulator',
+  options : {
+
+    firstPerson : false,
+
+  },
 
   element : document.querySelector( '.app' ),
 
@@ -13,157 +17,53 @@ let app = {
     canvas          : document.querySelector(    '.canvas'                 ),
     form            : document.querySelector(    'form'                    ),
     address         : document.querySelector(    'input[name="address"]'   ),
-    latitude        : document.querySelector(    'input[name="latitude"]'  ),
-    longitude       : document.querySelector(    'input[name="longitude"]' ),
     compassNeedle   : document.querySelector(    '.needle'                 ),
     area            : document.querySelector(    '.draggable-area'         ),
     handle          : document.querySelector(    '.draggable-handle'       ),
 
   },
 
-  color : function( name ) {
+  data : {
+
+    orientation : {
+      alpha : 0,
+      beta  : 0,
+      gamma : 0,
+    },
+
+    earth : {
+      radius : {
+        crust : 6371
+      }
+    },
+
+    user : {
+      latitude  : -33.4489,
+      longitude : -70.6693,
+    },
+
+    load : () => {
+
+      // Gets countries geometries
+      fetch( './assets/countries-lo.json' )
+        .then( response => response.json() )
+        .then( json => {
+
+          app.data.countries = json;
+          app.initialize();
+
+        } );
+
+    }
+
+  },
+
+  color : ( name ) => {
 
     // Gets color from CSS variable
     let style = getComputedStyle( document.documentElement );
     let value = style.getPropertyValue( '--' + name ).trim();
     return value
-
-  },
-
-  options : {
-
-    orientationControl : false,
-
-  },
-
-  parameters : {
-
-    update : function() {
-
-      // Constructs URLSearchParams object instance from current URL query string
-      let query = new URLSearchParams( window.location.search );
-
-      // Sets new or modify existing parameter values
-      query.set( 'latitude' , app.data.user.latitude );
-      query.set( 'longitude', app.data.user.longitude );
-
-      // Replaces current query string with new one
-      window.history.replaceState(
-        null,
-        null,
-        '?' + query.toString()
-      );
-
-    },
-
-    initialize : function() {
-
-      let parameters = new URLSearchParams( window.location.search );
-
-      if ( parameters.has( 'latitude' ) ) {
-
-        let lat = app.validates.coordinates( parameters.get( 'latitude' ), 90 )
-
-        app.elements.latitude.value = lat;
-        app.data.user.latitude  = lat;
-
-      }
-
-      if ( parameters.has( 'longitude' ) ) {
-
-        let lon = app.validates.coordinates( parameters.get( 'longitude' ), 180 )
-
-        app.elements.longitude.value = lon;
-        app.data.user.longitude = lon;
-
-      }
-
-      if ( parameters.has( 'latitude' ) || parameters.has( 'longitude' ) )
-        app.search.clear();
-
-      app.geolocation.updateLabel();
-
-    }
-
-  },
-
-  validates : {
-
-    json : function ( string ) {
-
-      try {
-        JSON.parse( string );
-      } catch ( e ) {
-        return false;
-      }
-
-      // TODO: Check if it contains all desired properties before returning true
-
-      return true;
-
-    },
-
-    coordinates : function ( string, max ) {
-
-      // Removes all characters except numbers, minus sign and dot
-      let coordinate = string.replace( /[^0-9.\-]/g, '');
-
-      if ( max !== undefined ) {
-
-        coordinate = parseFloat( coordinate );
-
-        // Constrain within -90 to 90 (latitude) or -180 to 180 (longitude)
-        if ( coordinate > max )
-          coordinate = max;
-
-        if ( coordinate < -max )
-          coordinate = -max;
-
-        if ( isNaN( coordinate ) )
-          coordinate = 0;
-
-          coordinate = coordinate.toFixed( 4 );
-
-      }
-
-      return coordinate;
-
-    }
-
-  },
-
-  data : {
-
-    earth : {
-
-      tilt : 23.4365, // In decimal degrees
-
-      radius : { // In km
-        crust : 6371,
-        core : {
-          inner : 1216,
-          outer : 3486,
-        }
-      }
-
-    },
-
-    orientation : {
-
-      initialOffset   : undefined, // Used to calibrate alpha to face North
-
-      alpha           : undefined,
-      beta            : undefined,
-      gamma           : undefined,
-
-    },
-
-    user : {                // In decimal degrees
-      latitude  : -33.4489, // south is negative
-      longitude : -70.6693  // west is negative
-    },
-
-    seconds : 0
 
   },
 
@@ -174,389 +74,236 @@ let app = {
     scene          : undefined,
     controls       : undefined,
     raycaster      : undefined,
-    mouse          : undefined,
 
     renderer2D     : undefined,
-    labels         : {
-      distance     : {
-        element    : undefined,
-        object     : undefined
-      },
-      destination  : {
-        element    : undefined,
-        object     : undefined
-      },
-      origin       : document.querySelector( '.label-origin' ),
-      coordinates  : document.querySelector( '.label-coordinates' ),
-      angle        : document.querySelector( '.label-angle' ),
-    },
-    markers        : {
-      origin       : {
-        element    : undefined,
-        object     : undefined
-      }
-    },
 
-    earth          : undefined, // group
-    land           : undefined, // group
-
-    stars          : undefined,
-    crust          : undefined,
-    tunnel         : undefined,
-    tunnelGeometry : undefined,
+    tunnel         : undefined, // Group
+    cylinder       : undefined,
     chord          : undefined,
-    core           : {
-      inner        : undefined,
-      outer        : undefined
-    },
 
-    resize : function() {
+    land           : undefined, // Group
+    countries      : undefined,
 
-      let c = app.elements.canvas;
+    earth          : undefined, // Group
+    sphere         : undefined,
+    graticule      : undefined,
 
-      // If canvas dimensions are different from window dimensios
-      if ( c.width !== c.clientWidth || c.height !== c.clientHeight ) {
+    stars          : undefined, // Group (of instances)
 
-        // Resizes
-        app.three.renderer.setSize(
-          c.clientWidth,
-          c.clientHeight,
-          false
-        );
-
-        app.three.renderer2D.setSize(
-          c.clientWidth,
-          c.clientHeight,
-          false
-        );
-
-        // Updates camera accordingly
-        app.three.camera.aspect = c.clientWidth / c.clientHeight;
-        app.three.camera.updateProjectionMatrix();
-
-        // Moves camera closer or further away to adjust Earth’s dimensions on screen
-
-        let distance = app.data.earth.radius.crust * 3;
-        let min      = app.data.earth.radius.crust * 3;
-        let max      = app.data.earth.radius.crust * 4.5;
-
-        if ( app.three.camera.aspect > 4/3 ) {
-
-          // Handles landscape viewports (wider than 4:3)
-          console.log( 'Handles landscape viewports (wider than 4:3)' );
-
-          distance = distance * 1280 / c.clientWidth;
-          if ( distance > max ) { distance = max }
-          if ( distance < min ) { distance = min }
-
-          app.three.camera.position.z = distance
-
-        } else if ( app.three.camera.aspect >= 3/4 ) {
-
-          // Handles square-ish viewports (from 3:4 to 4:3)
-          console.log( 'Handles square-ish viewports (from 3:4 to 4:3)' );
-
-          distance = distance * 1280 / c.clientWidth;
-          if ( distance > max ) { distance = max }
-          if ( distance < min ) { distance = min }
-
-          app.three.camera.position.z = distance
-
-        } else {
-
-          // Handles portrait viewports (narrower than 3:4)
-          console.log( 'Handles portrait viewports (narrower than 3:4)' );
-
-          distance = distance * 1280 / c.clientWidth;
-          if ( distance > max ) { distance = max }
-          if ( distance < min ) { distance = min }
-
-          app.three.camera.position.z = distance
-
-        }
-
-      }
-
-    },
-
-    render : function( time ) {
-
-      // Makes canvas responsive
-      app.three.resize();
-
-      // Handles different steps
-      switch ( app.element.dataset.step ) {
-        case '1':
-          app.three.controls.autoRotate = true;
-          break;
-        case '2':
-          app.three.controls.autoRotate = true;
-          break;
-        case '3':
-          app.three.controls.autoRotate = false;
-          break;
-        case '4':
-          app.three.controls.autoRotate = false;
-          break;
-        case '5':
-          app.three.controls.autoRotate = false;
-          break;
-      }
-
-      // Creates a simple time counter (since the animation started)
-      app.data.seconds = time * .001;
-
-      // Initializes values to be updated according to mouse sensor
-      // let northsouth = 0; // +90 to -90
-      // let eastwest   = 0; // +90 to -90
-
-      // Makes tunnel face straight down, into the core
-      app.three.tunnel.rotation.x = THREE.Math.degToRad( 90 + 0 );
-      app.three.chord.rotation.x = THREE.Math.degToRad( 90 + 0 );
-
-      if ( app.options.orientationControl ) {
-
-        // Controls using phone orientation sensor
-
-        let alpha = app.data.orientation.alpha;
-        let beta  = app.data.orientation.beta;
-        let gamma = app.data.orientation.gamma;
-
-        // Moves tunnel according to shovel inclination
-
-        if ( app.orientation.landscape() ) {
-
-          // Handles landscape orientation
-
-        } else {
-
-          // Handles portrait orientation
-
-        }
-
-        // Rotates compass needle
-        app.elements.compassNeedle.style.transform  = 'rotate(' + alpha + 'deg)';
-
-        // Makes tunnel roll (affects direction if paired with z rotation)
-        app.three.tunnel.rotation.y = THREE.Math.degToRad( 90 + alpha );
-        app.three.chord.rotation.y  = THREE.Math.degToRad( 90 + alpha);
-
-        app.three.tunnel.rotation.z = THREE.Math.degToRad( beta );
-        app.three.chord.rotation.z  = THREE.Math.degToRad( beta );
-
-      } else {
-
-        // Controls using draggable handle
-
-        // Enables mouse control over tunnel direction
-        let northsouth = app.drag.value.y;
-        let eastwest   = app.drag.value.x;
-
-        // Moves tunnel according to mouse-simulated inclination
-        app.three.tunnel.rotation.x = THREE.Math.degToRad( 90 + northsouth );
-        app.three.chord.rotation.x = THREE.Math.degToRad( 90 + northsouth );
-
-        app.three.tunnel.rotation.z = THREE.Math.degToRad( eastwest );
-        app.three.chord.rotation.z = THREE.Math.degToRad( eastwest );
-
-      }
-
-      // Rotates crust so default location is at latitude and longitude 0
-      app.three.crust.rotation.y = THREE.Math.degToRad( -90 );
-
-      // Rotates countries so default location is at latitude and longitude 0
-      if ( app.three.land ) {
-        app.three.land.rotation.y = THREE.Math.degToRad( -180 );
-
-      }
-
-      // Rotates crust & countries so it looks like the pivot point is the user location
-      if ( app.data.user.latitude && app.data.user.longitude ) {
-
-        // Crust
-        app.three.crust.rotation.x = THREE.Math.degToRad( app.data.user.latitude );
-        app.three.crust.rotation.y = THREE.Math.degToRad( -90 - app.data.user.longitude );
-
-        // Countries
-        if ( app.three.land ) {
-          app.three.land.rotation.y = THREE.Math.degToRad( -180 - app.data.user.longitude );
-        }
-
-      }
-
-      // Rotates Earth (group) to counter-act previous rotation so OrbitControls work better
-      app.three.earth.rotation.x = THREE.Math.degToRad( - app.data.user.latitude );
-
-      // Gets position & direction of chord (center of tunnel)
-      let chordPosition = app.three.chord.geometry.getAttribute( 'position' );
-
-      let vertexOrigin = new THREE.Vector3();
-      vertexOrigin.fromBufferAttribute( chordPosition, 0 );
-
-      let vertexDestination = new THREE.Vector3();
-      vertexDestination.fromBufferAttribute( chordPosition, 1 );
-
-      let worldOrigin = app.three.chord.localToWorld( vertexOrigin );
-      let worldDestination = app.three.chord.localToWorld( vertexDestination );
-      let chordDirection = worldDestination.sub(worldOrigin).normalize();
-
-      // Makes raycaster match the position and angle of the tunnel
-      app.three.raycaster.set( worldOrigin, chordDirection );
-
-      // Checks collision of chord (tunnel center) with every country
-      if ( app.three.land ) {
-
-        // Creates flag variable
-        let found = false;
-        let foundOrigin = false;
-
-        // Calculates objects intersecting the picking ray
-        for ( let country of app.three.land.children ) {
-
-          // Reset country highlight
-          country.material[0].color.set( app.color( 'neutral-50' ) );
-          country.material[1].color.set( app.color( 'neutral-75' ) );
-
-          let intersections = app.three.raycaster.intersectObject( country );
-
-          // If ray instersects with anything
-          if ( intersections.length > 0 ) {
-
-            // Get farthest intersections (ignore intersection at user location)
-            let intersection = intersections[ intersections.length - 1 ];
-
-            let country = intersection.object.name;
-            let distance = intersection.distance;
-
-            // Checks intersection close to user location
-            if ( distance < 100 ) {
-
-              foundOrigin = true;
-
-              app.element.dataset.origin = country;
-              app.three.labels.origin.textContent = country;
-              app.search.initialize();
-
-            }
-
-            // Requires tunnel to be at least 1000 km long
-            if ( distance > 1000 ) {
-
-              // Sets flag to true
-              found = true;
-
-              // Sets country label
-              app.three.labels.destination.element.textContent = country;
-
-              // Sets distance label
-              app.three.labels.distance.element.textContent = (parseInt( distance / 100 ) * 100).toLocaleString('en-US') + ' km'
-
-              // Stores data to be sent to device
-              app.element.dataset.destination = country;
-              app.element.dataset.destinationType = 'land';
-              app.element.dataset.distance = parseInt( distance );
-
-              // Shortens tunnel length to match distance until country
-              let reduction = distance / ( app.data.earth.radius.crust * 2 );
-              app.three.tunnel.scale.set( 1, reduction, 1 );
-
-              // Highlights country
-              intersection.object.material[0].color.set( app.color( 'accent-50' ) );
-              intersection.object.material[1].color.set( app.color( 'accent-100' ) );
-
-            }
-
-          }
-
-        }
-
-        if ( !found ) {
-
-          // Clears country label
-          app.three.labels.destination.element.textContent = '';
-
-          // Removes country from data to be sent to device
-          app.element.dataset.destination = '';
-
-          // Shortens tunnel length to match distance until other side of Earth
-          let intersections = app.three.raycaster.intersectObject( app.three.crust );
-
-          // Gets farthest intersections (ignore intersection at user location)
-          if ( intersections.length > 0 ) {
-
-            let intersection = intersections[ intersections.length - 1 ];
-            let distance = intersection.distance;
-
-            // Requires tunnel to be at least 1000 km long
-            if ( distance > 1000 ) {
-
-              let reduction = distance / ( app.data.earth.radius.crust * 2 );
-              app.three.tunnel.scale.set( 1, reduction, 1 );
-
-              // Sets distance label
-              app.three.labels.distance.element.textContent = (parseInt( distance / 100 ) * 100).toLocaleString('en-US') + ' km'
-
-            } else {
-
-              // Clears distance label
-              app.three.labels.distance.element.textContent = ''
-
-            }
-
-            app.element.dataset.destinationType = 'water';
-            app.element.dataset.distance = -1;
-
-          } else {
-
-            // Means tunnel is not inside Earth
-
-            // Shrinks tunnel completely (so it disappears)
-            // app.three.tunnel.scale.set( 0, 0, 0 );
-
-            // Clears distance label
-            app.three.labels.distance.element.textContent = ''
-
-            app.element.dataset.destinationType = 'air';
-            app.element.dataset.distance = -1;
-
-          }
-
-        }
-
-        if ( !foundOrigin ) {
-
-          app.element.dataset.origin = '';
-          app.three.labels.origin.textContent = '';
-
-        }
-
-      }
-
-      // Makes camera orbit
-      app.three.controls.update();
-
-      app.three.renderer.render(
-        app.three.scene,
-        app.three.camera
-      );
-      app.three.renderer2D.render(
-        app.three.scene,
-        app.three.camera
-      );
-
-      // Enables recursion (this function calls itself to draw frames of 3D animation)
-      requestAnimationFrame( app.three.render );
-
-    },
-
-    normalizeMouse : function( event ) {
-
-      app.three.mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-	    app.three.mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
-
-    },
+    universe       : undefined, // Group
 
     create : {
+
+      cylinder : () => {
+
+        let geometry = new THREE.CylinderGeometry(
+          app.data.earth.radius.crust / 40,
+          app.data.earth.radius.crust / 40,
+          app.data.earth.radius.crust * 2,
+          6,
+          32
+        );
+
+        // Rotates around end, not center
+        geometry.translate( 0, -app.data.earth.radius.crust, 0);
+
+        let material = new THREE.MeshBasicMaterial( {
+            color: app.color( 'accent-100' ),
+            wireframe: true,
+            opacity: 1,
+            transparent: true
+        } );
+
+        app.three.cylinder = new THREE.Mesh( geometry, material );
+
+        // Moves the beggining of the cylinder from Earth’s center to the surface, at latitude 0 and longitude 0
+        app.three.cylinder.position.y = app.data.earth.radius.crust;
+
+      },
+
+      chord : () => {
+
+        // Creates line from one side of Earth to the other
+        let points = [
+          new THREE.Vector3( 0,  app.data.earth.radius.crust, 0 ),
+          new THREE.Vector3( 0, -app.data.earth.radius.crust, 0 )
+        ];
+
+        let geometry = new THREE.BufferGeometry().setFromPoints( points );
+
+        // Rotates around end, not center
+        geometry.translate( 0, -app.data.earth.radius.crust, 0);
+
+        let material = new THREE.LineBasicMaterial();
+
+        app.three.chord = new THREE.Line( geometry, material );
+
+        // Moves the beggining of the cylinder from Earth’s center to the surface, at latitude 0 and longitude 0
+        app.three.chord.position.y = app.data.earth.radius.crust;
+
+        // Hides chord
+        app.three.chord.visible = false;
+
+      },
+
+      tunnel : () => {
+
+        app.three.tunnel = new THREE.Group();
+
+        app.three.tunnel.add(
+          app.three.cylinder,
+          app.three.chord
+        );
+
+      },
+
+      sphere : () => {
+
+        let geometry = new THREE.SphereGeometry(
+          app.data.earth.radius.crust,
+          36,
+          36
+        );
+
+        // Rotates sphere so default location is at latitude 0 and longitude 0
+        geometry.rotateX( THREE.Math.degToRad( -90 ) );
+        geometry.rotateZ( THREE.Math.degToRad(  90 ) );
+
+        let material = new THREE.MeshBasicMaterial();
+
+        // Allows raycaster to detect collision on both sides of the object
+        material.side = THREE.DoubleSide;
+
+        app.three.sphere = new THREE.Mesh( geometry, material );
+
+        // Hides sphere (only use it for collision checks)
+        app.three.sphere.visible = false;
+
+      },
+
+      graticule : () => {
+
+        // Creates longitude and latitude lines
+
+        // Decreases radius to prevent overlap with countries
+        let radius = app.data.earth.radius.crust * .99;
+
+        // Creates one line at every 10 degrees mark
+        let widthSegments  = 36 * 2;
+        let heightSegments = 36;
+
+        let subtle = new THREE.LineBasicMaterial( {
+          color: app.color( 'neutral-25' ),
+          opacity: 0.25,
+          transparent: true
+        } );
+
+        let strong = new THREE.LineBasicMaterial( {
+          color: app.color( 'neutral-25' ),
+          opacity: 1,
+          transparent: true
+        } );
+
+        let createArc = ( radius, segments, full ) => {
+
+          let geometry = new THREE.CircleGeometry(
+            radius,
+            segments,
+            Math.PI / 2,
+            full ? Math.PI * 2 : Math.PI
+          );
+
+          geometry.vertices.shift();
+
+          if ( full )
+            geometry.vertices.push( geometry.vertices[ 0 ].clone() );
+
+          return geometry;
+
+        }
+
+        app.three.graticule = new THREE.Group();
+
+        // Creates width segments
+        let arcGeometry = createArc( radius, heightSegments, false );
+        let widthSector = Math.PI * 2 / widthSegments;
+
+        for ( let i = 0; i < widthSegments; i++ ) {
+
+          // Draws only half of the segments (so they have twice the resolution with half the visual clutter)
+
+          // Checks if index is even
+          if ( i % 2 == 0 ) {
+
+            let arcGeometryClone = arcGeometry.clone();
+            arcGeometryClone.rotateY( widthSector * i - ( Math.PI / 2 ) );
+
+            let arcLine = new THREE.Line(
+              arcGeometryClone,
+
+              // Increses contrast of main lines
+              ( i == 0 || i == widthSegments / 2 ? strong : subtle )
+
+            );
+
+            app.three.graticule.add( arcLine );
+
+          }
+
+        }
+
+        // Creates height segments
+        let heightSector = Math.PI / heightSegments;
+
+        for ( let i = 1; i < heightSegments; i++ ) {
+
+          // Draws only half of the segments (so they have twice the resolution with half the visual clutter)
+
+          // Checks if index is even
+          if ( i % 2 == 0 ) {
+
+            let heightRadius = Math.sin( i * heightSector ) * radius;
+            let height       = Math.cos( i * heightSector ) * radius;
+
+            let arcHeightGeometry = createArc( heightRadius, widthSegments, true );
+            arcHeightGeometry.rotateX( Math.PI / 2 );
+            arcHeightGeometry.translate( 0, height, 0 );
+
+            let arcHeightLine = new THREE.Line(
+              arcHeightGeometry,
+
+              // Increses contrast of main lines
+              ( i == heightSegments * .5 ? strong : subtle )
+
+            );
+
+            app.three.graticule.add( arcHeightLine );
+
+          }
+
+        }
+
+        // Rotates sphere so default location is at latitude 0 and longitude 0
+        app.three.graticule.rotation.x = THREE.Math.degToRad( -90 );
+
+      },
+
+      land : () => {
+
+        // Creates Land group
+        app.three.land = new THREE.Group();
+
+        app.three.land.scale.set(
+          app.data.earth.radius.crust,
+          app.data.earth.radius.crust,
+          app.data.earth.radius.crust,
+        );
+
+        // Rotates sphere so default location is at latitude 0 and longitude 0
+        app.three.land.rotation.x = THREE.Math.degToRad( -90 );
+        app.three.land.rotation.y = THREE.Math.degToRad( 180 );
+
+      },
 
       map3DGeometry : function( data ) {
 
@@ -613,27 +360,21 @@ let app = {
 
       },
 
-      countries : function( json ) {
+      countries : ( json ) => {
 
-        app.data.countries = json
+        // Uses data and logic based on this repository:
+        // https://github.com/makc/makc.github.io/tree/master/three.js/map2globe
 
         app.three.create.map3DGeometry.prototype = Object.create( THREE.Geometry.prototype );
 
-        app.three.land = new THREE.Group();
-        app.three.land.scale.set(
-          app.data.earth.radius.crust,
-          app.data.earth.radius.crust,
-          app.data.earth.radius.crust
-        );
-
-        let countries = app.data.countries
+        let countries = app.data.countries;
 
         for ( let name in countries ) {
 
           let geometry = new app.three.create.map3DGeometry( countries[ name ] );
 
           // Duplicates every face of the geometry
-          let faces = []
+          let faces = [];
 
           for ( let face of geometry.faces ) {
 
@@ -644,139 +385,51 @@ let app = {
           }
 
           // Adds the newly cloned face to array of original faces
-          for ( let face of faces ) {
-
+          for ( let face of faces )
             geometry.faces.push( face );
-
-          }
 
           // Creates list of two materials
           let materials = [
 
             // Internal-facing color
-            new THREE.MeshBasicMaterial( { color: app.color( 'accent-50' ) } ),
+            new THREE.MeshBasicMaterial( { color: app.color( 'neutral-50' ) } ),
 
             // External-facing color
             new THREE.MeshBasicMaterial( { color: app.color( 'neutral-75' ) } ),
 
           ];
 
-          materials[0].side = THREE.BackSide;
-          materials[1].side = THREE.FrontSide;
+          // Applies each material on one side of the surface
+          materials[ 0 ].side = THREE.BackSide;
+          materials[ 1 ].side = THREE.FrontSide;
 
           // Groups all countries within the `land` group
           app.three.land.add( countries[ name ].mesh = new THREE.Mesh( geometry, materials ) );
 
           // Assigns country name to mesh (to be retrieved by raycaster collision)
-          countries[name].mesh.name = name;
+          countries[ name ].mesh.name = name;
+
         }
 
-        app.three.scene.add( app.three.land );
+      },
 
-      }
-
-    },
-
-    initialize : function() {
-
-      // Initializes raycaster (a line used to test collisions)
-      app.three.raycaster = new THREE.Raycaster();
-
-      // Initializes variable to house mouse position
-      app.three.mouse     = new THREE.Vector2();
-
-      { // Countries
-
-        // Gets countries geometries
-        fetch( './assets/countries-lo.json' )
-         .then( response => response.json() )
-         .then( json => app.three.create.countries( json ) )
-
-      }
-
-      { // Crust
-
-        let material = new THREE.MeshBasicMaterial({
-          color: app.color( 'neutral-25' ),
-          wireframe: true,
-          opacity: 0.25,
-          transparent: true
-        });
-        material.side = THREE.DoubleSide;
-
-        // Show satellite texture for debugging
-        // material.map = THREE.ImageUtils.loadTexture('../assets/texture.jpg')
-
-        let geometry = new THREE.SphereGeometry(
-          app.data.earth.radius.crust * 0.99,
-          16,
-          16
-        );
-
-        app.three.crust = new THREE.Mesh( geometry, material );
-
-      }
-
-      { // Tunnel
-
-        let material = new THREE.MeshBasicMaterial({
-          color: app.color( 'accent-100' ),
-          wireframe: true,
-          opacity: 1,
-          transparent: true
-        });
-
-        app.three.tunnelGeometry = new THREE.CylinderGeometry(
-          app.data.earth.radius.crust / 40,
-          app.data.earth.radius.crust / 40,
-          app.data.earth.radius.crust * 2,
-          6,
-          32,
-          true
-        );
-
-        // Rotates around end, not center
-        app.three.tunnelGeometry.translate( 0, -app.data.earth.radius.crust, 0);
-
-        app.three.tunnel = new THREE.Mesh( app.three.tunnelGeometry, material );
-        app.three.tunnel.position.z = app.data.earth.radius.crust;
-
-      }
-
-      { // Chord
-
-        let material = new THREE.LineBasicMaterial( { color: 0x0000ff } );
-
-        let points = [
-          new THREE.Vector3( 0,  app.data.earth.radius.crust, 0 ),
-          new THREE.Vector3( 0, -app.data.earth.radius.crust, 0 )
-        ];
-
-        let geometry = new THREE.BufferGeometry().setFromPoints( points );
-        geometry.translate( 0, -app.data.earth.radius.crust, 0);
-
-        app.three.chord = new THREE.Line( geometry, material );
-        app.three.chord.position.z = app.data.earth.radius.crust;
-        app.three.chord.visible = false;
-
-      }
-
-      { // Earth (group)
+      earth : () => {
 
         app.three.earth = new THREE.Group();
+
         app.three.earth.add(
-          app.three.crust,
-          app.three.tunnel,
-          app.three.chord
+          app.three.sphere,
+          app.three.graticule,
+          app.three.land
         );
 
-      }
+      },
 
-      { // Stars (instances)
+      stars : () => {
 
         let material = new THREE.MeshBasicMaterial({
           color: app.color( 'neutral-25' )
-        });
+        } );
 
         let geometry = new THREE.SphereGeometry(
           app.data.earth.radius.crust * 0.01
@@ -789,6 +442,7 @@ let app = {
         // Creates instance
         app.three.stars = new THREE.InstancedMesh( geometry, material, amount );
 
+        // Checks if a given point is inside a sphere
         let insideCircle = function( coordinates, radius ) {
 
           let sum = 0;
@@ -831,6 +485,7 @@ let app = {
 
         }
 
+        // Positions each star at a randon location
         for ( let i = 0; i < amount; i++ ) {
 
           let matrix = new THREE.Matrix4();
@@ -847,85 +502,684 @@ let app = {
 
         }
 
+      },
+
+      universe : () => {
+
+        app.three.universe = new THREE.Group();
+
+        app.three.universe.add(
+          app.three.tunnel,
+          app.three.earth,
+          app.three.stars,
+        );
+
+        // Rotates all elements so Earth poles are on the Y axis
+        app.three.universe.rotation.x = THREE.Math.degToRad( 90 );
+
+      },
+
+      renderer : () => {
+
+        // Creates renderer with transparent background
+        app.three.renderer = new THREE.WebGLRenderer( {
+          canvas : app.elements.canvas,
+          alpha : true,
+          logarithmicDepthBuffer: true // prevents z fighting
+        } );
+
+      },
+
+      renderer2D : () => {
+
+        app.three.renderer2D = new THREE.CSS2DRenderer();
+
+        app.elements.background.appendChild(
+          app.three.renderer2D.domElement
+        );
+
+      },
+
+      camera : () => {
+
+        // Creates camera
+        app.three.camera = new THREE.PerspectiveCamera( 50, 1, .1, app.data.earth.radius.crust * 30 );
+
+        // Positions it away from Earth (3x its radiues)
+        app.three.camera.position.z = app.data.earth.radius.crust * 3;
+
+        // Tilts it slightly so the Equator does not look like a flat horizontal line
+        app.three.camera.position.y = app.data.earth.radius.crust / 3 ;
+
+      },
+
+      controls : () => {
+
+        // Makes camera move with mouse
+        app.three.controls = new THREE.OrbitControls(
+          app.three.camera,
+          app.elements.canvas
+        );
+
+        // Makes camera move automatically
+        app.three.controls.autoRotate      = true;
+
+        // Makes 1 orbit in 240 seconds
+        app.three.controls.autoRotateSpeed =   2; // 1 orbit in 30 seconds
+        app.three.controls.autoRotateSpeed = .25; // 1 orbit in 240 seconds
+
+        // Moves with inertia
+        app.three.controls.enableDamping = true;
+
+        // Disables pan and zoom
+        app.three.controls.enablePan     = false;
+        app.three.controls.enableZoom    = false;
+
+      },
+
+      scene : () => {
+
+        // Creates scene
+        app.three.scene = new THREE.Scene();
+
+        app.three.scene.add(
+          app.three.universe
+        );
+
+      },
+
+      raycaster : () => {
+
+        // Creates line to be used for collision check with countries
+        app.three.raycaster = new THREE.Raycaster();
+
       }
 
-      // Begins renderer with transparent background
-      app.three.renderer = new THREE.WebGLRenderer({
-        canvas : app.elements.canvas,
-        alpha : true,
-        logarithmicDepthBuffer: true // prevents z fighting
-      });
+    },
 
-      // Creates camera
-      app.three.camera = new THREE.PerspectiveCamera( 50, 1, .1, app.data.earth.radius.crust * 30 );
-      app.three.camera.position.z = app.data.earth.radius.crust * 3;
+    initialize : () => {
 
-      // Makes camera move with mouse
-      app.three.controls = new THREE.OrbitControls(
-        app.three.camera,
-        app.elements.canvas
-      );
+      // Creates Tunnel group
+      app.three.create.cylinder();
+      app.three.create.chord();
+      app.three.create.tunnel();
 
-      // Makes camera move automatically and with inertia
-      app.three.controls.autoRotate      = true;
-      app.three.controls.autoRotateSpeed =   2; // 1 orbit in 30 seconds
-      app.three.controls.autoRotateSpeed = .25; // 1 orbit in 240 seconds
-      app.three.controls.enableDamping   = true;
-      app.three.controls.enableZoom      = false;
-      app.three.controls.enablePan       = false;
+      // Creates Land group
+      app.three.create.land();
+      app.three.create.countries();
 
-      // Creates labels
+      // Creates Earth group
+      app.three.create.sphere();
+      app.three.create.graticule();
+      app.three.create.earth();
 
-      { // Distance label
+      // Creates Stars group (of instances)
+      app.three.create.stars();
 
-        app.three.labels.distance.element = document.createElement( 'div' );
-        app.three.labels.distance.element.classList.add( 'label', 'label-distance' );
+      // Creates Universe group
+      app.three.create.universe();
 
-        app.three.labels.distance.object = new THREE.CSS2DObject( app.three.labels.distance.element );
-        app.three.labels.distance.object.position.set( 0, app.data.earth.radius.crust * -1, 0 );
-        app.three.tunnel.add( app.three.labels.distance.object );
-
-      }
-
-      { // Destination label
-
-        app.three.labels.destination.element = document.createElement( 'div' );
-  			app.three.labels.destination.element.classList.add( 'label', 'label-destination' );
-
-  			app.three.labels.destination.object = new THREE.CSS2DObject( app.three.labels.destination.element );
-  			app.three.labels.destination.object.position.set( 0, app.data.earth.radius.crust * -2, 0 );
-  			app.three.tunnel.add( app.three.labels.destination.object );
-
-      }
-
-      { // Origin Marker
-
-        app.three.markers.origin.element = document.createElement( 'div' );
-        app.three.markers.origin.element.classList.add( 'marker', 'marker-origin' );
-
-        app.three.markers.origin.object = new THREE.CSS2DObject( app.three.markers.origin.element );
-        app.three.markers.origin.object.position.set( 0, 0, 0 );
-        app.three.tunnel.add( app.three.markers.origin.object );
-
-      }
-
-      // Creates 2D renderer (to position HTML elements on top of 3D scene)
-      app.three.renderer2D = new THREE.CSS2DRenderer();
-			app.three.renderer2D.setSize( window.innerWidth, window.innerHeight );
-
-			app.elements.background.appendChild( app.three.renderer2D.domElement );
-
-      // Creates scene
-      app.three.scene = new THREE.Scene();
-      app.three.scene.add( app.three.stars );
-      app.three.scene.add( app.three.earth );
+      // Creates standard objects
+      app.three.create.renderer();
+      app.three.create.camera();
+      app.three.create.controls();
+      app.three.create.scene();
+      app.three.create.raycaster();
 
       // Debugs axes
-      // let axesHelper = new THREE.AxesHelper( 1000 );
-      // app.three.scene.add( axesHelper );
+      // app.three.scene.add( new THREE.AxesHelper( 1000 ) );
 
-      // Animate 3D elements
+      // Creates 2D renderer (to position HTML elements on top of 3D scene)
+      app.three.create.renderer2D();
+
+      // Animates 3D elements
       requestAnimationFrame( app.three.render );
+
+    },
+
+    update : {
+
+      dimensions : () => {
+
+        let c = app.elements.canvas;
+
+        // If canvas dimensions are different from window dimensios
+        if ( c.width !== c.clientWidth || c.height !== c.clientHeight ) {
+
+          // Resizes 3D canvas
+          app.three.renderer.setSize(
+            c.clientWidth,
+            c.clientHeight,
+            false
+          );
+
+          // Resizes 2D canvas
+          app.three.renderer2D.setSize(
+            c.clientWidth,
+            c.clientHeight,
+            false
+          );
+
+          // Moves camera closer or further away to adjust Earth’s dimensions on screen
+
+          let distance = app.data.earth.radius.crust * 3;
+          let min      = app.data.earth.radius.crust * 3;
+          let max      = app.data.earth.radius.crust * 4.5;
+
+          distance = distance * 1280 / c.clientWidth;
+
+          if ( distance > max )
+            distance = max;
+
+          if ( distance < min )
+            distance = min;
+
+          app.three.camera.position.z = distance;
+
+          // Updates camera accordingly
+          app.three.camera.aspect = c.clientWidth / c.clientHeight;
+          app.three.camera.updateProjectionMatrix();
+
+        }
+
+      },
+
+      tunnel : () => {
+
+        // Enables first-person view
+        if ( app.options.firstPerson ) {
+
+          // Rotates Earth to always match real-world North
+          app.three.earth.rotation.y    = THREE.Math.degToRad( app.data.orientation.alpha * -1 );
+
+          // Rotates tunnel on two axes (based on device motion)
+          app.three.cylinder.rotation.x = THREE.Math.degToRad( app.data.orientation.beta  );
+          app.three.cylinder.rotation.z = THREE.Math.degToRad( app.data.orientation.gamma );
+          app.three.chord.rotation.x    = THREE.Math.degToRad( app.data.orientation.beta  );
+          app.three.chord.rotation.z    = THREE.Math.degToRad( app.data.orientation.gamma );
+          app.three.tunnel.rotation.y   = THREE.Math.degToRad( 0 );
+
+          // // Deactivates camera controls
+          app.three.controls.enabled = false;
+
+          // Resets camera position
+          app.three.camera.position.set( 0, 0, app.data.earth.radius.crust * 3 );
+          app.three.camera.lookAt( new THREE.Vector3( 0, 0, 0 ) );
+
+          // Resets handle control
+          app.drag.reset();
+
+        }
+
+        // Enables third-person view
+        else {
+
+          // Keeps Earth still
+          app.three.earth.rotation.y    = THREE.Math.degToRad( 0 );
+
+          // Rotates tunnel on two axes (based on drag control)
+          app.three.cylinder.rotation.x = THREE.Math.degToRad( app.drag.value.y );
+          app.three.cylinder.rotation.z = THREE.Math.degToRad( app.drag.value.x );
+          app.three.chord.rotation.x    = THREE.Math.degToRad( app.drag.value.y );
+          app.three.chord.rotation.z    = THREE.Math.degToRad( app.drag.value.x );
+          app.three.tunnel.rotation.y   = THREE.Math.degToRad( 0 );
+
+          // Rotates tunnel on all axes (based on device motion)
+          // app.three.cylinder.rotation.x = THREE.Math.degToRad( app.data.orientation.beta  );
+          // app.three.tunnel.rotation.y   = THREE.Math.degToRad( app.data.orientation.alpha );
+          // app.three.cylinder.rotation.z = THREE.Math.degToRad( app.data.orientation.gamma );
+
+          // Activates camera controls
+          app.three.controls.enabled = true;
+
+        }
+
+      },
+
+      coordinates : () => {
+
+        // Enables first-person view
+        if ( app.options.firstPerson ) {
+
+          // Rotates Earth to match origin latitude and longitude
+
+          // Rotates sphere so the user location coincides with the tunnel beginning
+          app.three.sphere.rotation.x = THREE.Math.degToRad( app.data.user.latitude );
+          app.three.sphere.rotation.z = THREE.Math.degToRad( app.data.user.longitude );
+
+          // Rotates graticule so the user location coincides with the tunnel beginning
+          app.three.graticule.rotation.x = THREE.Math.degToRad( -90 + app.data.user.latitude );
+          app.three.graticule.rotation.y = THREE.Math.degToRad( app.data.user.longitude * -1 );
+
+          // Rotates countries so the user location coincides with the tunnel beginning
+          app.three.land.rotation.x = THREE.Math.degToRad( -90 + app.data.user.latitude );
+          app.three.land.rotation.y = THREE.Math.degToRad( 180 + ( app.data.user.longitude * -1 ) );
+
+          // Resets Tunnel rotation
+          app.three.tunnel.rotation.x = THREE.Math.degToRad( 0 );
+
+        }
+
+        // Enables third-person view
+        else {
+
+          // Rotates Earth to match origin longitude
+
+          // Rotates sphere so the user location coincides with the tunnel beginning
+          app.three.sphere.rotation.z = THREE.Math.degToRad( app.data.user.longitude );
+
+          // Rotates graticule so the user location coincides with the tunnel beginning
+          app.three.graticule.rotation.y = THREE.Math.degToRad( app.data.user.longitude * -1 );
+
+          // Rotates countries so the user location coincides with the tunnel beginning
+          app.three.land.rotation.y = THREE.Math.degToRad( 180 + ( app.data.user.longitude * -1 ) );
+
+          // Rotates Tunnel to match origin latitude
+          app.three.tunnel.rotation.x = THREE.Math.degToRad( app.data.user.latitude * -1 );
+
+          // Resets Earth latitude rotation
+          app.three.sphere.rotation.x = THREE.Math.degToRad( 0 );
+          app.three.land.rotation.x = THREE.Math.degToRad( -90 );
+
+          // Resets graticule
+          app.three.graticule.rotation.x = THREE.Math.degToRad( -90 );
+
+        }
+
+      },
+
+      raycaster : () => {
+
+        // Gets position & direction of chord (center of tunnel)
+        let chordPosition = app.three.chord.geometry.getAttribute( 'position' );
+
+        // Converts local position to world position
+        let vertexOrigin = new THREE.Vector3();
+        vertexOrigin.fromBufferAttribute( chordPosition, 0 );
+
+        let vertexDestination = new THREE.Vector3();
+        vertexDestination.fromBufferAttribute( chordPosition, 1 );
+
+        let worldOrigin      = app.three.chord.localToWorld( vertexOrigin );
+        let worldDestination = app.three.chord.localToWorld( vertexDestination );
+        let chordDirection   = worldDestination.sub(worldOrigin).normalize();
+
+        // Makes raycaster match the position and angle of the tunnel
+        app.three.raycaster.set( worldOrigin, chordDirection );
+
+      },
+
+      collision : () => {
+
+        let matches = [];
+        let found = {};
+
+        // Checks collision of chord (tunnel center) with every country
+        for ( let country of app.three.land.children ) {
+
+          // Resets country highlight
+          country.material[ 0 ].color.set( app.color( 'neutral-50' ) );
+          country.material[ 1 ].color.set( app.color( 'neutral-75' ) );
+
+          let intersections = app.three.raycaster.intersectObject( country );
+
+          // If ray instersects with anything
+          if ( intersections.length > 0 ) {
+
+            for ( let intersection of intersections )
+              matches.push( intersection )
+
+          }
+
+        }
+
+        // Identifies origin and destination countries
+        for ( let match of matches ) {
+
+          if ( match.distance < 100 ) {
+
+            // Found origin
+            found.origin = true;
+
+            // Sets this country as origin
+            app.element.dataset.origin = match.object.name;
+
+          }
+
+          if ( match.distance > 1000 ) {
+
+            // Found destination
+            found.destination = true;
+
+            // Sets this country as destination
+            app.element.dataset.destination = match.object.name;
+
+            // Highlights country
+            match.object.material[ 0 ].color.set( app.color( 'accent-50'  ) );
+            match.object.material[ 1 ].color.set( app.color( 'accent-100' ) );
+
+          }
+
+        }
+
+        // Calculates distance until crust on the other side
+        let intersections = app.three.raycaster.intersectObject( app.three.sphere );
+
+        // If ray instersects with anything
+        if ( intersections.length > 0 ) {
+
+          // Gets farthest intersection
+          intersection = intersections[ intersections.length -1 ]
+
+          // Stores distance
+          app.element.dataset.distance = intersection.distance;
+
+          // Shortens tunnel length to match distance
+          let reduction = intersection.distance / ( app.data.earth.radius.crust * 2 );
+          app.three.cylinder.scale.set( 1, reduction, 1 );
+
+        } else {
+
+          // Clears distance from data
+          app.element.dataset.distance = '';
+
+        }
+
+        if ( !found.origin ) {
+
+          // Clears country from data
+          app.element.dataset.origin = '';
+
+        }
+
+        if ( !found.destination ) {
+
+          // Clears country from data
+          app.element.dataset.destination = '';
+
+        }
+
+      }
+
+    },
+
+    render : ( time ) => {
+
+      // Makes canvas responsive
+      app.three.update.dimensions();
+
+      // Controls tunnel using motion sensor
+      app.three.update.tunnel();
+
+      // Rotates Earth or Tunnel to match origin latitude and longitude
+      app.three.update.coordinates();
+
+      // Updates raycaster position to match chord’s
+      app.three.update.raycaster();
+
+      // Identifies origin country and destination country
+      app.three.update.collision();
+
+      // Makes camera orbit
+      app.three.controls.update();
+
+      // Renders 3D elements
+      app.three.renderer.render(
+        app.three.scene,
+        app.three.camera
+      );
+
+      // Renders 2D elements
+      app.three.renderer2D.render(
+        app.three.scene,
+        app.three.camera
+      );
+
+      // Updates destination label
+      app.labels.update.destination();
+      app.labels.update.distance();
+
+      // Enables recursion (this function calls itself to draw frames of 3D animation)
+      requestAnimationFrame( app.three.render );
+
+    },
+
+  },
+
+  orientation : {
+
+    handle : () => {
+
+      // Implements world-based calibration on iOS (alpha is 0 when pointing North)
+
+      let north, offset;
+
+      // If alpha is absolute (0 points North)
+      if ( event.absolute === true ) {
+
+        // Uses incoming value
+        north = event.alpha;
+
+      } else { // If alpha is relative
+
+        // Calibrates alpha to make it North-based
+        offset = event.webkitCompassHeading || 0;
+        north  = 360 - offset;
+
+        if ( north < 0 )
+          north += 360;
+
+      }
+
+      // Updates values to be used by render method
+      app.data.orientation.alpha = north;
+      app.data.orientation.beta  = event.beta;
+      app.data.orientation.gamma = event.gamma * -1;
+
+    },
+
+    request : () => {
+
+      // Requests permission for iOS 13+ devices
+      if ( DeviceMotionEvent && typeof DeviceMotionEvent.requestPermission === 'function' ) {
+
+        DeviceMotionEvent.requestPermission()
+        .then( response => {
+
+          if ( response == 'granted' ) {
+
+            // Enables orientationControl
+            // app.options.orientationControl = true;
+            // app.steps.next()
+
+            window.addEventListener( 'deviceorientation', app.orientation.handle );
+
+          }
+
+        } );
+
+      }
+
+    }
+
+  },
+
+  geolocation : {
+
+    success : ( position ) => {
+
+      app.element.dataset.geolocation = 'located';
+
+      app.data.user.latitude  = position.coords.latitude;
+      app.data.user.longitude = position.coords.longitude;
+
+      app.labels.update.coordinates();
+
+    },
+
+    error : () => {
+
+      app.element.dataset.geolocation = 'unlocated';
+
+      window.alert( 'Unable to find your location.' );
+
+    },
+
+    request : () => {
+
+      app.element.dataset.geolocation = 'locating';
+
+      if ( navigator.geolocation ) {
+
+        navigator.geolocation.getCurrentPosition(
+          app.geolocation.success,
+          app.geolocation.error
+        );
+
+      } else {
+
+        app.geolocation.error();
+
+      }
+
+    }
+
+  },
+
+  search : {
+
+    api : 'https://nominatim.openstreetmap.org/search.php',
+
+    query : {
+
+      q      : '',
+      limit  : 1,
+      format : 'jsonv2'
+
+    },
+
+    parameters  : '',
+    url         : '',
+    initialized : false,
+    result      : undefined,
+
+    success : () => {
+
+      let lat = app.search.result.lat;
+      let lon = app.search.result.lon;
+
+      // Stores coordinates
+      app.data.user.latitude  = parseFloat( lat );
+      app.data.user.longitude = parseFloat( lon );
+
+      // Resets drag handle position
+      app.drag.reset();
+
+      // Updates label with newly received coordinates
+      app.labels.update.coordinates();
+
+      app.element.dataset.search = 'searched';
+
+    },
+
+    error : () => {
+
+      alert( 'Unable to find address' );
+      app.element.dataset.search = 'unsearched';
+
+    },
+
+    handle : function( response ) {
+
+      // Checks if there was at lease one match
+      if ( response.length > 0 ) {
+
+        // Stores first result
+        app.search.result = response[ 0 ];
+        app.search.success();
+
+      } else {
+
+        app.search.error()
+
+      }
+
+    },
+
+    request : ( address ) => {
+
+      if ( address ) {
+
+        app.element.dataset.search = 'searching';
+
+        app.search.query.q    = address;
+        app.search.parameters = new URLSearchParams( app.search.query ).toString();
+        app.search.url        = app.search.api + '?' + app.search.parameters;
+
+        // Requests search results from API
+        fetch( app.search.url )
+         .then( response => response.json() )
+         .then( response => app.search.handle( response ) )
+
+      }
+
+    },
+
+    submit : () => {
+
+      // Removes leading and trailing whitespace on input
+      app.elements.address.value = app.elements.address.value.trim();
+      app.search.request( app.elements.address.value );
+
+    },
+
+    clear : () => {
+
+      app.elements.address.value = '';
+      app.element.dataset.search = 'unsearched';
+
+      // Removes class default, so value can be replaced by fill function
+      app.elements.address.classList.remove( 'default' );
+
+    },
+
+    fill : ( value ) => {
+
+      app.elements.address.value = value
+      app.element.dataset.search = 'searched';
+
+    },
+
+    validate : () => {
+
+      // Removes success state
+      app.element.dataset.search = 'unsearched';
+
+      // Removes class default, so value can be replaced by fill function
+      app.elements.address.classList.remove( 'default' );
+
+    },
+
+    initialize : () => {
+
+      if ( !app.search.initialized ) {
+
+        let country = app.element.dataset.origin;
+
+        if ( country !== '' ) {
+
+          if ( !app.elements.address.classList.contains( 'default' ) ) {
+
+            app.search.fill( country );
+
+          }
+
+          // Runs this code only once, after origin country is identified
+          app.search.initialized = true;
+
+        }
+
+      }
 
     }
 
@@ -933,10 +1187,9 @@ let app = {
 
   drag : {
 
-    grabbing : false,
-
-    range : 60,
-    tolerance : .05, // 5% tolerance until handle snaps to the center of the chart
+    grabbing  : false, // Flag is true while grabbing handle
+    range     : 60,    // In unsigned decimal degress
+    tolerance : .05,   // 5% tolerance until handle snaps to the center of the chart
 
     value : {
 
@@ -979,7 +1232,7 @@ let app = {
 
     },
 
-    start : function() {
+    start : () => {
 
       if ( event.target === app.elements.handle ) {
 
@@ -1006,7 +1259,7 @@ let app = {
 
     },
 
-    move : function() {
+    move : () => {
 
       if ( app.drag.grabbing ) {
 
@@ -1071,34 +1324,14 @@ let app = {
         app.drag.value.x = ( app.drag.position.current.percentage.left - 50 ) / 50 * app.drag.range;
         app.drag.value.y = ( app.drag.position.current.percentage.top - 50 ) / 50 * -app.drag.range;
 
-        // Creates human-readable string from angles
-        let label = '';
-
-        if ( app.drag.value.y > 0 )
-          label += Math.round( app.drag.value.y ) + '°N, ';
-        else
-          label += Math.round( app.drag.value.y * -1 ) + '°S, ';
-
-        if ( app.drag.value.x > 0 )
-          label += Math.round( app.drag.value.x ) + '°E';
-        else
-          label += Math.round( app.drag.value.x * -1 ) + '°W';
-
         // Updates angle label with new values
-        app.three.labels.angle.textContent = label;
+        app.labels.update.direction();
 
       }
 
     },
 
-    leave : function() {
-
-      app.drag.grabbing = false;
-      app.element.dataset.grabbing = false;
-
-    },
-
-    end : function() {
+    end : () => {
 
       app.drag.grabbing = false;
       app.element.dataset.grabbing = false;
@@ -1116,359 +1349,148 @@ let app = {
       app.drag.value.y = 0;
 
       // Updates angle label with original values
-      app.three.labels.angle.textContent = '0°S, 0°W';
+      app.labels.update.direction();
 
     }
 
   },
 
-  orientation : {
+  labels : {
 
-    landscape : function() {
+    coordinates : document.querySelector( '.label-coordinates' ),
+    direction   : document.querySelector( '.label-direction'   ),
+    origin      : document.querySelector( '.label-origin'      ),
+    destination : document.querySelector( '.label-destination' ),
+    distance    : document.querySelector( '.label-distance'    ),
 
-      // Checks if window width is larger than its height (i.e., landscape mode)
-      return window.innerHeight < window.innerWidth;
+    update : {
 
-    },
+      coordinates : () => {
 
-    handle : function( event ) {
+        let lat = app.data.user.latitude;
+        let lon = app.data.user.longitude;
 
-      // Implements world-based calibration on iOS (alpha is 0 when pointing North), based on:
-      // https://www.w3.org/2008/geolocation/wiki/images/e/e0/Device_Orientation_%27alpha%27_Calibration-_Implementation_Status_and_Challenges.pdf
+        // Creates human-readable string from coordinates
+        let label = '';
 
-      // TODO: This works, but not always (quality reading?)
+        if ( lat >= 0 )
+          label += Math.round( lat ) + '°N, ';
+        else
+          label += Math.round( lat * -1 ) + '°S, ';
 
-      if ( app.data.orientation.initialOffset === undefined && event.absolute !== true )
-        app.data.orientation.initialOffset = event.webkitCompassHeading || 0;
+        if ( lon >= 0 )
+          label += Math.round( lon ) + '°E';
+        else
+          label += Math.round( lon * -1 ) + '°W';
 
-      let alpha = event.alpha;
+        // Updates coordinates label with new values
+        app.labels.coordinates.textContent = label;
 
-      // Calibrates alpha to make it North-based
-      if ( event.absolute !== true )
-        alpha = alpha - app.data.orientation.initialOffset;
+      },
 
-      if ( alpha < 0 )
-        alpha +=360;
+      direction : () => {
 
-      // Updates values to be used on render function
-      app.data.orientation.alpha = alpha;
-      app.data.orientation.beta  = event.beta;
-      app.data.orientation.gamma = event.gamma;
+        // Creates human-readable string from angles
+        let label = '';
 
-    },
+        if ( app.drag.value.y >= 0 )
+          label += Math.round( app.drag.value.y ) + '°N, ';
+        else
+          label += Math.round( app.drag.value.y * -1 ) + '°S, ';
 
-    request : function() {
+        if ( app.drag.value.x >= 0 )
+          label += Math.round( app.drag.value.x ) + '°E';
+        else
+          label += Math.round( app.drag.value.x * -1 ) + '°W';
 
-      // Requests permission for iOS 13+ devices
-      if ( DeviceMotionEvent && typeof DeviceMotionEvent.requestPermission === 'function' ) {
+        // Updates angle label with new values
+        app.labels.direction.textContent = label;
 
-        DeviceMotionEvent.requestPermission()
-        .then( response => {
+      },
 
-          if ( response == 'granted' ) {
+      origin : () => {
 
-            // Enables orientationControl
-            app.options.orientationControl = true;
-            app.steps.next()
+      },
 
-            window.addEventListener( 'deviceorientation', app.orientation.handle );
+      destination : () => {
 
-          }
+        // If value is different from label
+        if ( app.element.dataset.destination !== app.labels.destination.textContent ) {
 
-        } );
-
-      }
-
-    },
-
-    initialize : function() {
-
-      // Checks if device supports retrieving device orientation values (uses https://sensor-js.xyz)
-      if ( DeviceMotionEvent && typeof DeviceMotionEvent.requestPermission === 'function' ) {
-
-        app.element.dataset.orientation = 'supported';
-
-      }
-
-    }
-
-  },
-
-  geolocation : {
-
-    updateLabel : () => {
-
-      let lat = app.data.user.latitude;
-      let lon = app.data.user.longitude;
-
-      // Creates human-readable string from coordinates
-      let label = '';
-
-      if ( lat > 0 )
-        label += Math.round( lat ) + '°N, ';
-      else
-        label += Math.round( lat * -1 ) + '°S, ';
-
-      if ( lon > 0 )
-        label += Math.round( lon ) + '°E';
-      else
-        label += Math.round( lon * -1 ) + '°W';
-
-      // Updates coordinates label with new values
-      app.three.labels.coordinates.textContent = label;
-
-    },
-
-    found : function( position ) {
-
-      app.data.user.latitude = position.coords.latitude.toFixed( 4 );
-      app.data.user.longitude = position.coords.longitude.toFixed( 4 );
-
-      // Updates manual input values to match the retrieved coordinates
-      app.elements.latitude.value = app.data.user.latitude;
-      app.elements.longitude.value = app.data.user.longitude;
-
-      app.element.dataset.geolocation = 'located';
-
-      setTimeout( () => {
-
-        // Makes origin country be filled in search input
-        app.search.initialized = false;
-        app.element.dataset.origin = '';
-
-        // Uses delay as a way to wait for the app to calculate new origin country
-
-      }, 250 );
-
-      app.parameters.update();
-      app.drag.reset();
-
-      // Changes step with a 1s delay
-      setTimeout( app.steps.next, 2400 );
-
-    },
-
-    error : function() {
-
-      app.element.dataset.geolocation = 'unlocated';
-
-      window.alert(
-
-        'Unable to find your location. ' +
-        'Please type in your address.'
-
-      );
-
-    },
-
-    find : function() {
-
-      app.element.dataset.geolocation = 'locating';
-
-      if ( navigator.geolocation ) {
-
-        navigator.geolocation.getCurrentPosition(
-          app.geolocation.found,
-          app.geolocation.error
-        );
-
-      } else {
-
-        app.geolocation.error();
-
-      }
-
-    },
-
-    submit : () => {
-
-      let lat = app.elements.latitude.value;
-      let lon = app.elements.longitude.value;
-
-      // Validades coordinates
-      lat = app.validates.coordinates( lat, 90 );
-      lon = app.validates.coordinates( lon, 180 );
-
-      app.elements.latitude.value  = lat;
-      app.elements.longitude.value = lon;
-
-      app.data.user.latitude  = lat;
-      app.data.user.longitude = lon;
-
-      app.parameters.update();
-      app.geolocation.updateLabel();
-
-      app.element.dataset.geolocation = 'unlocated';
-
-    },
-
-    validate : () => {
-
-      let lat = app.elements.latitude.value;
-      let lon = app.elements.longitude.value;
-
-      // Validades coordinates
-      lat = app.validates.coordinates( lat );
-      lon = app.validates.coordinates( lon );
-
-      app.elements.latitude.value  = lat;
-      app.elements.longitude.value = lon;
-
-    },
-
-    initialize : () => {
-
-      // Updates manual input values to match the initial coordinates
-      app.elements.latitude.value  = app.data.user.latitude;
-      app.elements.longitude.value = app.data.user.longitude;
-
-    }
-
-  },
-
-  steps : {
-
-    next : () => {
-
-      app.element.dataset.step = parseInt( app.element.dataset.step ) + 1
-
-    }
-
-  },
-
-  search : {
-
-    api : 'https://nominatim.openstreetmap.org/search.php',
-
-    query : {
-
-      q : '',
-      limit : 1,
-      format : 'jsonv2'
-
-    },
-
-    parameters  : '',
-    url         : '',
-    initialized : false,
-
-    success : () => {
-
-      let lat = app.search.result.lat;
-      let lon = app.search.result.lon;
-
-      app.data.user.latitude  = parseFloat( lat ).toFixed( 4 );
-      app.data.user.longitude = parseFloat( lon ).toFixed( 4 );
-
-      // Updates manual input values to match the retrieved coordinates
-      app.elements.latitude.value  = app.data.user.latitude;
-      app.elements.longitude.value = app.data.user.longitude;
-
-      app.element.dataset.search = 'searched';
-
-      app.geolocation.submit();
-      app.drag.reset();
-
-    },
-
-    error : () => {
-
-      alert( 'Unable to find address' );
-      app.element.dataset.search = 'unsearched';
-
-    },
-
-    result : undefined,
-
-    results : function( list ) {
-
-      if ( list.length > 0 ) {
-
-        // Stores first result
-        app.search.result = list[ 0 ];
-        app.search.success();
-
-      } else {
-
-        app.search.error()
-
-      }
-
-    },
-
-    get : ( address ) => {
-
-      if ( address ) {
-
-        app.element.dataset.search = 'searching';
-
-        app.search.query.q    = address;
-        app.search.parameters = new URLSearchParams( app.search.query ).toString();
-        app.search.url        = app.search.api + '?' + app.search.parameters;
-
-        // Requests search results from API
-        fetch( app.search.url )
-         .then( response => response.json() )
-         .then( list => app.search.results( list ) )
-
-      }
-
-    },
-
-    submit : () => {
-
-      let address = app.elements.address.value.trim();
-      app.search.get( address )
-
-    },
-
-    clear : () => {
-
-      app.elements.address.value = '';
-      app.element.dataset.search = 'unsearched';
-
-      // Removes class default, so value can be replaced by fill function
-      app.elements.address.classList.remove( 'default' );
-
-    },
-
-    fill : ( value ) => {
-
-      app.elements.address.value = value
-      app.element.dataset.search = 'searched';
-
-    },
-
-    validate : () => {
-
-      // Removes success state
-      app.element.dataset.search = 'unsearched';
-
-      // Removes class default, so value can be replaced by fill function
-      app.elements.address.classList.remove( 'default' );
-
-    },
-
-    initialize : () => {
-
-      if ( !app.search.initialized ) {
-
-        let country = app.element.dataset.origin;
-
-        if ( country !== '' ) {
-
-          if ( !app.elements.address.classList.contains( 'default' ) ) {
-
-            app.search.fill( country );
-
-          }
-
-          // Runs this code only once, after origin country is identified
-          app.search.initialized = true;
+          // Updates label
+          app.labels.destination.textContent = app.element.dataset.destination;
 
         }
 
+      },
+
+      distance : () => {
+
+        let value;
+
+        value = app.element.dataset.distance;
+        value = parseFloat( value );
+
+        // Rounds number up until the hundreds (e.g., 12.345 -> 12.300)
+        value = value / 100;
+        value = Math.round( value );
+        value = value * 100
+
+        value = value.toLocaleString( 'en-US' )
+        value = value + ' km'
+
+        app.labels.distance.textContent = value;
+
       }
+
+    },
+
+    attach : {
+
+      origin : () => {
+
+        // Creates 2D object
+        let label = new THREE.CSS2DObject( app.labels.origin );
+
+        // Attach object to beginning of cylinder
+        label.position.set( 0, 0, 0 );
+        app.three.cylinder.add( label );
+
+      },
+
+      destination : () => {
+
+        // Creates 2D object
+        let label = new THREE.CSS2DObject( app.labels.destination );
+
+        // Attach object to end of cylinder
+        label.position.set( 0, app.data.earth.radius.crust * -2, 0 );
+        app.three.cylinder.add( label );
+
+      },
+
+      distance : () => {
+
+        // Creates 2D object
+        let label = new THREE.CSS2DObject( app.labels.distance );
+
+        // Attach object to middle of cylinder
+        label.position.set( 0, app.data.earth.radius.crust * -1, 0 );
+        app.three.cylinder.add( label );
+
+      }
+
+    },
+
+    initialize : () => {
+
+      // Visually attaches 2D labels to 3D elements
+      app.labels.attach.origin();
+      app.labels.attach.destination();
+      app.labels.attach.distance();
+
+      app.labels.update.coordinates();
+      app.labels.update.direction();
 
     }
 
@@ -1476,43 +1498,8 @@ let app = {
 
   events : {
 
-    initialize : function() {
+    drag : () => {
 
-      // Tracks phone’s orientation when clicked
-      app.elements.trackButton.addEventListener( 'click', app.orientation.request );
-
-      // Finds user’s location when button is clicked
-      app.elements.findButton.forEach( button =>
-        button.addEventListener( 'click', app.geolocation.find )
-      );
-
-      // Goes to next step (mobile navigation)
-      app.elements.nextButton.forEach( button =>
-        button.addEventListener( 'click', app.steps.next )
-      );
-
-      // Handles location form
-      app.elements.form.addEventListener( 'submit', function() {
-
-        event.preventDefault();
-        app.search.submit();
-
-      }, false );
-
-      // Updates coordinates every time input is changed
-      app.elements.latitude.addEventListener(  'change', app.geolocation.submit );
-      app.elements.latitude.addEventListener(  'blur',   app.geolocation.submit );
-      app.elements.latitude.addEventListener(  'input',  app.geolocation.validate );
-
-      app.elements.longitude.addEventListener( 'change', app.geolocation.submit );
-      app.elements.longitude.addEventListener( 'blur',   app.geolocation.submit );
-      app.elements.longitude.addEventListener( 'input',  app.geolocation.validate );
-
-      // Removes success state of search if it is changes
-      app.elements.address.addEventListener(  'change', app.search.validate );
-      app.elements.address.addEventListener(  'input',  app.search.validate );
-
-      // Enables drag on handle to control tunnel angles on desktop
       window.addEventListener( 'touchstart', app.drag.start, false);
       window.addEventListener( 'touchmove',  app.drag.move,  false);
       window.addEventListener( 'touchend',   app.drag.end,   false);
@@ -1520,74 +1507,60 @@ let app = {
       window.addEventListener( 'mousedown',  app.drag.start, false);
       window.addEventListener( 'mousemove',  app.drag.move,  false);
       window.addEventListener( 'mouseup',    app.drag.end,   false);
-      window.addEventListener( 'mouseleave', app.drag.leave, false);
+      window.addEventListener( 'mouseleave', app.drag.end,   false);
 
-      // Calculates mouse position in normalized device coordinates (-1 to +1)
-      window.addEventListener( 'mousemove', app.three.normalizeMouse, false );
+    },
 
-      // Calculates clicked country
-      window.addEventListener( 'click', function() {
+    form : () => {
 
-        app.three.raycaster.setFromCamera( app.three.mouse, app.three.camera );
+      // Finds user’s location automatically when button is clicked
+      app.elements.findButton.forEach( button =>
+        button.addEventListener( 'click', app.geolocation.request )
+      );
 
-        let matches = [];
-        let closest;
+      // Find user’s location by searching for an address
+      app.elements.form.addEventListener( 'submit', () => {
 
-        if ( app.three.land ) {
-
-          // Calculates countries intersecting the mouse click
-          for ( let country of app.three.land.children ) {
-
-            let intersects = app.three.raycaster.intersectObject( country );
-
-            for ( let i = 0; i < intersects.length; i ++ )
-              matches.push( intersects[i] );
-
-          }
-
-          // Gets country with shortest distance to camera
-          for ( let match of matches ) {
-
-            if ( closest ) {
-
-              if ( match.distance < closest.distance )
-                closest = match;
-
-            } else {
-
-              closest = match;
-
-            }
-
-          }
-
-          // Checks if any country was actually clicked
-          if ( closest ) {
-
-            // Handles clicked country
-            // console.log( closest );
-
-          }
-
-        }
+        event.preventDefault();
+        app.search.submit();
 
       } );
+
+      // Removes success state of search if it is changed
+      app.elements.address.addEventListener(  'change', app.search.validate );
+      app.elements.address.addEventListener(  'input',  app.search.validate );
+
+    },
+
+    motion : () => {
+
+      app.elements.trackButton.addEventListener( 'click', app.orientation.request );
+
+    },
+
+    initialize : () => {
+
+      // Enables drag on handle to control tunnel angles on desktop
+      app.events.drag();
+
+      // Handles location form
+      app.events.form();
+
+      // Tracks phone’s motion when button is clicked
+      app.events.motion();
 
     }
 
   },
 
-  initialize : function() {
+  initialize : () => {
 
-    app.parameters.initialize();
-    app.events.initialize();
-    app.orientation.initialize();
-    app.geolocation.initialize();
     app.three.initialize();
+    app.events.initialize();
+    app.labels.initialize();
 
   }
 
 }
 
-// Starts everything
-app.initialize();
+app.data.load();

@@ -657,6 +657,9 @@
           // Makes camera orbit
           app.three.controls.update();
 
+          // Updates text labels on screen
+          app.labels.update();
+
           app.three.renderer.render(
             app.three.scene,
             app.three.camera
@@ -694,6 +697,8 @@
               north += 360;
 
           }
+
+
 
           // Prints values for debugging
           let pre = document.querySelector( 'pre' )
@@ -781,6 +786,20 @@
             app.geolocation.error();
 
           }
+
+        }
+
+      },
+
+      labels : {
+
+        update : () => {
+
+          let output = document.querySelector( '.output' );
+
+          // 'A tunnel in this direction would lead'
+
+          // output.textContent = 
 
         }
 
