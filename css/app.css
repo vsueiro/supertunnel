@@ -672,11 +672,17 @@ input[type="search"] + button:not(:hover) {
   animation-play-state: paused;
 }
 
-.app[data-search="searched"] .search-container {
+.app[data-search="searched"] .step:nth-child(3) {
+  border-color: var(--success-100);
+}
+
+.app[data-search="searched"] .search-container,
+.next.success {
   background: rgba( var(--success-100-rgb), .25 );
 }
 
-.app[data-search="searched"] input[type="search"] {
+.app[data-search="searched"] input[type="search"],
+.next.success {
   color: var(--success-100);
 }
 

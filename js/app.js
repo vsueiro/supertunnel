@@ -1080,6 +1080,9 @@ let app = {
       // Updates label with newly received coordinates
       app.labels.update.coordinates();
 
+      // Goes to “found you” step on mobile navigation
+      app.steps.next();
+
       app.element.dataset.search = 'searched';
 
     },
@@ -1536,6 +1539,11 @@ let app = {
         address.addEventListener( 'change', app.search.validate );
         address.addEventListener( 'input',  app.search.validate );
       } );
+
+      // Advances to the next step when a next button is clicked
+      app.elements.nextButton.forEach( next =>
+        next.addEventListener( 'click', app.steps.next )
+      )
 
     },
 
