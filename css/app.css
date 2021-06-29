@@ -647,15 +647,6 @@ input[type="search"] + button:not(:hover) {
   color: var(--success-100);
 }
 
-.app[data-geolocation="located"] form input {
-  color: var(--success-100);
-}
-
-.app[data-geolocation="located"] form p:last-child {
-  pointer-events: none;
-  color: transparent;
-}
-
 .app[data-geolocation="located"] .step:nth-child(1) {
   border-color: var(--success-100);
 }
