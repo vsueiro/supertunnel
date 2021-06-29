@@ -692,6 +692,22 @@ input[type="search"] + button:not(:hover) {
   pointer-events: none;
 }
 
+/* Destination is land */
+.app[data-type="land"] {
+
+}
+
+/* Destination is water */
+.app[data-type="water"] {
+
+}
+
+/* Destination is air */
+.app[data-type="air"] {
+
+}
+
+
 /* Steps (for mobile) */
 
 .steps {
@@ -749,21 +765,11 @@ input[type="search"] + button:not(:hover) {
   color: var(--accent-100);
 }
 
-.water,
-.land {
-  display: none;
-}
-
-.app[data-destination-type="water"] .water,
-.app[data-destination-type="land"] .land {
-  display: block;
-}
-
-.water strong {
+strong.water {
   color: var(--success-100);
 }
 
-.land strong {
+strong.land {
   color: var(--accent-100);
 }
 
@@ -822,17 +828,20 @@ input[type="search"] + button:not(:hover) {
 .app[data-step="1"] .step:nth-child(1),
 .app[data-step="2"] .step:nth-child(2),
 .app[data-step="3"] .step:nth-child(3),
-.app[data-step="4"] .step:nth-child(4) {
+.app[data-step="4"] .step:nth-child(4),
+.app[data-step="5"] .step:nth-child(5),
+.app[data-step="6"] .step:nth-child(6),
+.app[data-step="7"] .step:nth-child(7) {
   display: flex;
   opacity: 1;
   pointer-events: all;
   transform: translateY( 0 );
 }
 
-.app[data-step="3"] .label-origin,
+/* .app[data-step="3"] .label-origin,
 .app[data-step="3"] .label-distance {
   opacity: 0;
-}
+} */
 
 /* Labels */
 

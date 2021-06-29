@@ -899,6 +899,20 @@ let app = {
 
         }
 
+        // Calculates type of destination (land, water or air)
+        let type;
+
+        if ( app.element.dataset.distance == '' )
+          type = 'air'
+
+        else if ( app.element.dataset.destination !== '' )
+          type = 'land'
+
+        else
+          type = 'water'
+
+          app.element.dataset.type = type
+
       }
 
     },
@@ -1418,13 +1432,21 @@ let app = {
         value = app.element.dataset.distance;
         value = parseFloat( value );
 
-        // Rounds number up until the hundreds (e.g., 12.345 -> 12.300)
-        value = value / 100;
-        value = Math.round( value );
-        value = value * 100
+        if ( isNaN( value ) ) {
 
-        value = value.toLocaleString( 'en-US' )
-        value = value + ' km'
+          value = ''
+
+        } else {
+
+          // Rounds number up until the hundreds (e.g., 12.345 -> 12.300)
+          value = value / 100;
+          value = Math.round( value );
+          value = value * 100
+
+          value = value.toLocaleString( 'en-US' )
+          value = value + ' km'
+
+        }
 
         app.labels.distance.textContent = value;
 
