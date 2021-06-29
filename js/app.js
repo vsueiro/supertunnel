@@ -646,6 +646,22 @@ let app = {
             false
           );
 
+          // Moves camera closer or further away to adjust Earth’s dimensions on screen
+
+          let distance = app.data.earth.radius.crust * 3;
+          let min      = app.data.earth.radius.crust * 3;
+          let max      = app.data.earth.radius.crust * 4.5;
+
+          distance = distance * 1280 / c.clientWidth;
+
+          if ( distance > max )
+            distance = max;
+
+          if ( distance < min )
+            distance = min;
+
+          app.three.camera.position.z = distance;
+
           // Updates camera accordingly
           app.three.camera.aspect = c.clientWidth / c.clientHeight;
           app.three.camera.updateProjectionMatrix();
