@@ -1459,17 +1459,17 @@ let app = {
 
         if ( isNaN( value ) ) {
 
-          value = ''
+          value = '';
 
         } else {
 
           // Rounds number up until the hundreds (e.g., 12.345 -> 12.300)
           value = value / 100;
           value = Math.round( value );
-          value = value * 100
+          value = value * 100;
 
-          value = value.toLocaleString( 'en-US' )
-          value = value + ' km'
+          value = value.toLocaleString( 'en-US' );
+          value = value + ' km';
 
         }
 
