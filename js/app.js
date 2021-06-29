@@ -1155,17 +1155,6 @@ let app = {
 
     },
 
-    fill : ( value ) => {
-
-      // Fills all search inputs with same value
-      app.elements.address.forEach( address =>
-        address.value = value
-      )
-
-      app.element.dataset.search = 'searched';
-
-    },
-
     validate : () => {
 
       // Removes success state
@@ -1175,29 +1164,6 @@ let app = {
       app.elements.address.forEach( address =>
         address.classList.remove( 'default' )
       )
-
-    },
-
-    initialize : () => {
-
-      if ( !app.search.initialized ) {
-
-        let country = app.element.dataset.origin;
-
-        if ( country !== '' ) {
-
-          if ( !app.elements.address.classList.contains( 'default' ) ) {
-
-            app.search.fill( country );
-
-          }
-
-          // Runs this code only once, after origin country is identified
-          app.search.initialized = true;
-
-        }
-
-      }
 
     }
 
