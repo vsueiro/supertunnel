@@ -716,8 +716,10 @@ let app = {
           // Rotates sphere so the user location coincides with the tunnel beginning
           app.three.sphere.rotation.x = THREE.Math.degToRad( app.data.user.latitude );
           app.three.sphere.rotation.z = THREE.Math.degToRad( app.data.user.longitude );
+
+          // Rotates graticule so the user location coincides with the tunnel beginning
           app.three.graticule.rotation.x = THREE.Math.degToRad( -90 + app.data.user.latitude );
-          app.three.graticule.rotation.y = THREE.Math.degToRad( app.data.user.longitude );
+          app.three.graticule.rotation.y = THREE.Math.degToRad( app.data.user.longitude * -1 );
 
           // Rotates countries so the user location coincides with the tunnel beginning
           app.three.land.rotation.x = THREE.Math.degToRad( -90 + app.data.user.latitude );
@@ -735,6 +737,8 @@ let app = {
 
           // Rotates sphere so the user location coincides with the tunnel beginning
           app.three.sphere.rotation.z = THREE.Math.degToRad( app.data.user.longitude );
+
+          // Rotates graticule so the user location coincides with the tunnel beginning
           app.three.graticule.rotation.y = THREE.Math.degToRad( app.data.user.longitude * -1 );
 
           // Rotates countries so the user location coincides with the tunnel beginning
@@ -746,6 +750,9 @@ let app = {
           // Resets Earth latitude rotation
           app.three.sphere.rotation.x = THREE.Math.degToRad( 0 );
           app.three.land.rotation.x = THREE.Math.degToRad( -90 );
+
+          // Resets graticule
+          app.three.graticule.rotation.x = THREE.Math.degToRad( -90 );
 
         }
 
