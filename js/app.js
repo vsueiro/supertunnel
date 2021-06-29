@@ -192,9 +192,15 @@ let app = {
         let widthSegments  = 36 * 2;
         let heightSegments = 36;
 
-        let material = new THREE.LineBasicMaterial( {
+        let subtle = new THREE.LineBasicMaterial( {
           color: app.color( 'neutral-25' ),
-          opacity: 0.33,
+          opacity: 0.25,
+          transparent: true
+        } );
+
+        let strong = new THREE.LineBasicMaterial( {
+          color: app.color( 'neutral-25' ),
+          opacity: 1,
           transparent: true
         } );
 
@@ -226,13 +232,21 @@ let app = {
 
           // Draws only half of the segments (so they have twice the resolution with half the visual clutter)
 
-          // Checks if index is odd
-          if ( i % 2 != 0 ) {
+          // Checks if index is even
+          if ( i % 2 == 0 ) {
 
             let arcGeometryClone = arcGeometry.clone();
             arcGeometryClone.rotateY( widthSector * i );
 
-            let arcLine = new THREE.Line( arcGeometryClone, material );
+
+            let arcLine = new THREE.Line(
+              arcGeometryClone,
+
+              // Increses contrast of main lines
+              ( i == widthSegments * .25 || i == widthSegments * .75 ? strong : subtle )
+
+            );
+
             app.three.graticule.add( arcLine );
 
           }
@@ -256,7 +270,14 @@ let app = {
             arcHeightGeometry.rotateX( Math.PI / 2 );
             arcHeightGeometry.translate( 0, height, 0 );
 
-            let arcHeightLine = new THREE.Line( arcHeightGeometry, material );
+            let arcHeightLine = new THREE.Line(
+              arcHeightGeometry,
+
+              // Increses contrast of main lines
+              ( i == heightSegments * .5 ? strong : subtle )
+
+            );
+
             app.three.graticule.add( arcHeightLine );
 
           }
