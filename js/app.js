@@ -1489,6 +1489,11 @@ let app = {
 
       setTimeout( () => {
         app.element.dataset.step = number;
+
+        // Automatically advances from “found you” message
+        if ( number === 3 )
+          app.steps.next( 1600 );
+
       }, delay )
 
     },
