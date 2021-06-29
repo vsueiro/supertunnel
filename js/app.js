@@ -878,7 +878,7 @@ let app = {
           intersection = intersections[ intersections.length -1 ]
 
           // Stores distance
-          app.element.dataset.distance = intersection.distance;
+          app.element.dataset.distance = parseInt( intersection.distance );
 
           // Shortens tunnel length to match distance
           let reduction = intersection.distance / ( app.data.earth.radius.crust * 2 );
@@ -1461,7 +1461,7 @@ let app = {
         let value;
 
         value = app.element.dataset.distance;
-        value = parseFloat( value );
+        value = parseInt( value );
 
         if ( isNaN( value ) ) {
 
