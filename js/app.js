@@ -2,7 +2,7 @@ let app = {
 
   options : {
 
-    firstPerson : false,
+    mode : 'third-person',
 
   },
 
@@ -545,11 +545,11 @@ let app = {
         // Creates camera
         app.three.camera = new THREE.PerspectiveCamera( 50, 1, .1, app.data.earth.radius.crust * 30 );
 
-        // Positions it away from Earth (3x its radiues)
-        app.three.camera.position.z = app.data.earth.radius.crust * 3;
-
-        // Tilts it slightly so the Equator does not look like a flat horizontal line
-        app.three.camera.position.y = app.data.earth.radius.crust / 3 ;
+        // // Positions it away from Earth (3x its radiues)
+        // app.three.camera.position.z = app.data.earth.radius.crust * 3;
+        //
+        // // Tilts it slightly so the Equator does not look like a flat horizontal line
+        // app.three.camera.position.y = app.data.earth.radius.crust / 3 ;
 
       },
 
@@ -626,6 +626,9 @@ let app = {
       app.three.create.scene();
       app.three.create.raycaster();
 
+      // Sets camera to initial position
+      app.three.update.camera();
+
       // Debugs axes
       // app.three.scene.add( new THREE.AxesHelper( 1000 ) );
 
@@ -660,34 +663,54 @@ let app = {
             false
           );
 
-          // Moves camera closer or further away to adjust Earth’s dimensions on screen
-
-          let distance = app.data.earth.radius.crust * 3;
-          let min      = app.data.earth.radius.crust * 3;
-          let max      = app.data.earth.radius.crust * 4.5;
-
-          distance = distance * 1280 / c.clientWidth;
-
-          if ( distance > max )
-            distance = max;
-
-          if ( distance < min )
-            distance = min;
-
-          app.three.camera.position.z = distance;
-
-          // Updates camera accordingly
-          app.three.camera.aspect = c.clientWidth / c.clientHeight;
-          app.three.camera.updateProjectionMatrix();
+          app.three.update.camera();
 
         }
+
+      },
+
+      camera : ( reset = false ) => {
+
+        let c = app.elements.canvas;
+
+        // Moves camera closer or further away to adjust Earth’s dimensions on screen
+        let distance = app.data.earth.radius.crust * 3;
+        let min      = app.data.earth.radius.crust * 3;
+        let max      = app.data.earth.radius.crust * 4.5;
+
+        distance = distance * 1280 / c.clientWidth;
+
+        if ( distance > max )
+          distance = max;
+
+        if ( distance < min )
+          distance = min;
+
+        app.three.camera.position.z = distance;
+
+        if ( reset ) {
+
+          // Sets z rotation to the default position
+          app.three.camera.position.x = 0
+
+          // Tilts it slightly so the Equator does not look like a flat horizontal line
+          app.three.camera.position.y = app.data.earth.radius.crust / 3 ;
+
+          // Forces camera to look at the center of the scene
+          app.three.camera.lookAt( 0, 0, 0 );
+
+        }
+
+        // Updates camera accordingly
+        app.three.camera.aspect = c.clientWidth / c.clientHeight;
+        app.three.camera.updateProjectionMatrix();
 
       },
 
       tunnel : () => {
 
         // Enables first-person view
-        if ( app.options.firstPerson ) {
+        if ( app.options.mode == 'first-person' ) {
 
           // Rotates Earth to always match real-world North
           app.three.earth.rotation.y    = THREE.Math.degToRad( app.data.orientation.alpha * -1 );
@@ -702,15 +725,19 @@ let app = {
           app.three.chord.rotation.z    = THREE.Math.degToRad( app.data.orientation.gamma );
           app.three.tunnel.rotation.y   = THREE.Math.degToRad( 0 );
 
-          // // Deactivates camera controls
-          app.three.controls.enabled = false;
-
-          // Resets camera position
-          app.three.camera.position.set( 0, 0, app.data.earth.radius.crust * 3 );
-          app.three.camera.lookAt( new THREE.Vector3( 0, 0, 0 ) );
-
           // Resets handle control
           app.drag.reset();
+
+          // Deactivates camera controls
+          app.three.controls.enabled = false;
+
+          // Checks if mode was switched just now
+          // if ( app.options.mode !== app.options.previousMode ) {
+
+            // Resets camera position
+            app.three.update.camera( 'reset' );
+
+          // }
 
         }
 
@@ -740,12 +767,15 @@ let app = {
 
         }
 
+        // Creates flag to run reset function for the camera only after switching
+        // app.options.previousMode = app.options.mode;
+
       },
 
       coordinates : () => {
 
         // Enables first-person view
-        if ( app.options.firstPerson ) {
+        if ( app.options.mode == 'first-person' ) {
 
           // Rotates Earth to match origin latitude and longitude
 
@@ -1027,14 +1057,14 @@ let app = {
             if ( response == 'granted' ) {
 
               // Activates first-person mode
-              app.options.firstPerson = true;
+              app.options.mode = 'first-person';
 
               window.addEventListener( 'deviceorientation', app.orientation.handle );
-              app.steps.next()
+              app.steps.next();
 
             } else {
 
-              app.orientation.error( 'not granted' )
+              app.orientation.error( 'not granted' );
 
             }
 
@@ -1045,7 +1075,7 @@ let app = {
       // If feature is not supported
       else {
 
-        app.orientation.error( 'not supported' )
+        app.orientation.error( 'not supported' );
 
       }
 
