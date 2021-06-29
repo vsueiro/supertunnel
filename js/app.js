@@ -1020,11 +1020,11 @@ let app = {
 
             if ( response == 'granted' ) {
 
-              // Enables orientationControl
-              // app.options.orientationControl = true;
-              // app.steps.next()
+              // Activates first-person mode
+              app.options.firstPerson = true;
 
               window.addEventListener( 'deviceorientation', app.orientation.handle );
+              app.steps.next()
 
             } else {
 
