@@ -38,8 +38,8 @@ let app = {
     },
 
     user : {
-      latitude  : 0, // -33.4489,
-      longitude : 0, // -70.6693,
+      latitude  : -33.4489,
+      longitude : -70.6693,
     },
 
     load : () => {
@@ -570,7 +570,6 @@ let app = {
 
         // Moves with inertia
         app.three.controls.enableDamping = true;
-        app.three.controls.enableZoom    = false;
 
         // Disables pan and zoom
         app.three.controls.enablePan     = false;
