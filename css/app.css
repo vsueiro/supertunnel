@@ -583,7 +583,7 @@ button span {
   align-items: center;
 }
 
-button i + span {
+button.find span {
   margin-left: calc( var(--basis) * 1.2 )
 }
 
