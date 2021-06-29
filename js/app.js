@@ -12,11 +12,11 @@ let app = {
 
     findButton      : document.querySelectorAll( '.find'                   ),
     nextButton      : document.querySelectorAll( '.next'                   ),
+    form            : document.querySelectorAll( 'form'                    ),
+    address         : document.querySelectorAll( 'input[name="address"]'   ),
     trackButton     : document.querySelector(    '.track'                  ),
     background      : document.querySelector(    '.background'             ),
     canvas          : document.querySelector(    '.canvas'                 ),
-    form            : document.querySelector(    'form'                    ),
-    address         : document.querySelector(    'input[name="address"]'   ),
     compassNeedle   : document.querySelector(    '.needle'                 ),
     area            : document.querySelector(    '.draggable-area'         ),
     handle          : document.querySelector(    '.draggable-handle'       ),
@@ -1127,11 +1127,19 @@ let app = {
 
     },
 
-    submit : () => {
+    submit : ( form ) => {
+
+      // Selects input that is a child of the submitted form (not the other one)
+      let input = form.querySelector( 'input[type="search"]' );
 
       // Removes leading and trailing whitespace on input
-      app.elements.address.value = app.elements.address.value.trim();
-      app.search.request( app.elements.address.value );
+      input.value = input.value.trim();
+      app.search.request( input.value );
+
+      // Fills all search inputs with same value
+      app.elements.address.forEach( address =>
+        address.value = input.value
+      )
 
     },
 
@@ -1140,14 +1148,20 @@ let app = {
       app.elements.address.value = '';
       app.element.dataset.search = 'unsearched';
 
-      // Removes class default, so value can be replaced by fill function
-      app.elements.address.classList.remove( 'default' );
+      // Removes class 'default', so value can be replaced by fill function
+      app.elements.address.forEach( address =>
+        address.classList.remove( 'default' )
+      )
 
     },
 
     fill : ( value ) => {
 
-      app.elements.address.value = value
+      // Fills all search inputs with same value
+      app.elements.address.forEach( address =>
+        address.value = value
+      )
+
       app.element.dataset.search = 'searched';
 
     },
@@ -1157,8 +1171,10 @@ let app = {
       // Removes success state
       app.element.dataset.search = 'unsearched';
 
-      // Removes class default, so value can be replaced by fill function
-      app.elements.address.classList.remove( 'default' );
+      // Removes class 'default', so value can be replaced by fill function
+      app.elements.address.forEach( address =>
+        address.classList.remove( 'default' )
+      )
 
     },
 
@@ -1540,16 +1556,20 @@ let app = {
       );
 
       // Find user’s location by searching for an address
-      app.elements.form.addEventListener( 'submit', () => {
+      app.elements.form.forEach( form =>
+        form.addEventListener( 'submit', () => {
 
-        event.preventDefault();
-        app.search.submit();
+          event.preventDefault();
+          app.search.submit( event.target);
 
-      } );
+        } )
+      );
 
       // Removes success state of search if it is changed
-      app.elements.address.addEventListener(  'change', app.search.validate );
-      app.elements.address.addEventListener(  'input',  app.search.validate );
+      app.elements.address.forEach( address => {
+        address.addEventListener( 'change', app.search.validate );
+        address.addEventListener( 'input',  app.search.validate );
+      } );
 
     },
 

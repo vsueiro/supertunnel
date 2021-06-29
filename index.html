@@ -126,15 +126,17 @@
 
             <li class="step">
               <div>
-                <p>Unable to find your location. Please type in your address:</p>
+                <p>Unable to find your location. <br>Please type in your address:</p>
                 <p class="note">Your data is safe, as it is never stored</p>
               </div>
-              <div class="search-container">
-                <input type="search" name="address" value="" placeholder="City, Country">
-                <button type="submit">
-                  <i class="icon-search"></i>
-                </button>
-              </div>
+              <form>
+                <div class="search-container">
+                  <input type="search" name="address" value="" placeholder="City, Country">
+                  <button type="submit">
+                    <i class="icon-search"></i>
+                  </button>
+                </div>
+              </form>
               <!-- <button class="find">
                 <span>Get my location</span>
                 <span>Locating...</span>
@@ -142,7 +144,11 @@
               </button> -->
             </li>
 
-
+            <li class="step">
+              <button class="find success">
+                <span>Found you</span>
+              </button>
+            </li>
 
             <li class="step">
               <div>
