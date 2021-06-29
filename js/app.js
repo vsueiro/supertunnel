@@ -236,14 +236,13 @@ let app = {
           if ( i % 2 == 0 ) {
 
             let arcGeometryClone = arcGeometry.clone();
-            arcGeometryClone.rotateY( widthSector * i );
-
+            arcGeometryClone.rotateY( widthSector * i - ( Math.PI / 2 ) );
 
             let arcLine = new THREE.Line(
               arcGeometryClone,
 
               // Increses contrast of main lines
-              ( i == widthSegments * .25 || i == widthSegments * .75 ? strong : subtle )
+              ( i == 0 || i == widthSegments / 2 ? strong : subtle )
 
             );
 
