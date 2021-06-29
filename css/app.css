@@ -719,7 +719,10 @@ input[type="search"] + button:not(:hover) {
   border: calc( var(--basis) * .2 ) solid var(--accent-100);
   padding: calc( var(--basis) * .4 );
   margin-top: calc( var(--basis) * 1.2 );
-  display: none;
+  opacity: 0;
+  transform: translateY( calc( var(--basis) * 12.8 ) );
+  pointer-events: none;
+  transition: all .4s ease-in-out;
 }
 
 .step > div {
@@ -821,6 +824,9 @@ input[type="search"] + button:not(:hover) {
 .app[data-step="3"] .step:nth-child(3),
 .app[data-step="4"] .step:nth-child(4) {
   display: flex;
+  opacity: 1;
+  pointer-events: all;
+  transform: translateY( 0 );
 }
 
 .app[data-step="3"] .label-origin,
