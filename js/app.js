@@ -10,16 +10,16 @@ let app = {
 
   elements : {
 
-    background      : document.querySelector(    '.background'             ),
-    canvas          : document.querySelector(    '.canvas'                 ),
-    compassNeedle   : document.querySelector(    '.needle'                 ),
-    area            : document.querySelector(    '.draggable-area'         ),
-    handle          : document.querySelector(    '.draggable-handle'       ),
-    trackButton     : document.querySelector(    '.track'                  ),
-    findButton      : document.querySelectorAll( '.find'                   ),
-    nextButton      : document.querySelectorAll( '.next'                   ),
-    form            : document.querySelectorAll( 'form'                    ),
-    address         : document.querySelectorAll( 'input[name="address"]'   ),
+    background  : document.querySelector(    '.background'             ),
+    canvas      : document.querySelector(    '.canvas'                 ),
+    compass     : document.querySelector(    '.needle'                 ),
+    area        : document.querySelector(    '.draggable-area'         ),
+    handle      : document.querySelector(    '.draggable-handle'       ),
+    trackButton : document.querySelector(    '.track'                  ),
+    findButton  : document.querySelectorAll( '.find'                   ),
+    nextButton  : document.querySelectorAll( '.next'                   ),
+    form        : document.querySelectorAll( 'form'                    ),
+    address     : document.querySelectorAll( 'input[name="address"]'   ),
 
   },
 
@@ -63,34 +63,11 @@ let app = {
     // Gets color from CSS variable
     let style = getComputedStyle( document.documentElement );
     let value = style.getPropertyValue( '--' + name ).trim();
-    return value
+    return value;
 
   },
 
   three : {
-
-    renderer       : undefined,
-    camera         : undefined,
-    scene          : undefined,
-    controls       : undefined,
-    raycaster      : undefined,
-
-    renderer2D     : undefined,
-
-    tunnel         : undefined, // Group
-    cylinder       : undefined,
-    chord          : undefined,
-
-    land           : undefined, // Group
-    countries      : undefined,
-
-    earth          : undefined, // Group
-    sphere         : undefined,
-    graticule      : undefined,
-
-    stars          : undefined, // Group (of instances)
-
-    universe       : undefined, // Group
 
     create : {
 
@@ -1138,11 +1115,6 @@ let app = {
       format : 'jsonv2'
 
     },
-
-    parameters  : '',
-    url         : '',
-    initialized : false,
-    result      : undefined,
 
     success : () => {
 
