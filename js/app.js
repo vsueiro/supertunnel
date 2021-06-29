@@ -556,10 +556,20 @@ let app = {
           app.elements.canvas
         );
 
-        // Makes camera move automatically and with inertia
+        // Makes camera move automatically
+        app.three.controls.autoRotate      = true;
+
+        // Makes 1 orbit in 240 seconds
+        app.three.controls.autoRotateSpeed =   2; // 1 orbit in 30 seconds
+        app.three.controls.autoRotateSpeed = .25; // 1 orbit in 240 seconds
+
+        // Moves with inertia
         app.three.controls.enableDamping = true;
         app.three.controls.enableZoom    = false;
+
+        // Disables pan and zoom
         app.three.controls.enablePan     = false;
+        app.three.controls.enableZoom    = false;
 
       },
 
