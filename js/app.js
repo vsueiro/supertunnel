@@ -695,6 +695,9 @@ let app = {
           // Rotates stars so they behave just like Earth
           app.three.stars.rotation.y    = THREE.Math.degToRad( app.data.orientation.alpha * -1 );
 
+          // Rotates compass needle
+          app.elements.compass.style.transform = 'rotate(' + app.data.orientation.alpha * -1 + 'deg)';
+
           // Rotates tunnel on two axes (based on device motion)
           app.three.cylinder.rotation.x = THREE.Math.degToRad( app.data.orientation.beta  );
           app.three.cylinder.rotation.z = THREE.Math.degToRad( app.data.orientation.gamma );
@@ -708,13 +711,8 @@ let app = {
           // Deactivates camera controls
           app.three.controls.enabled = false;
 
-          // Checks if mode was switched just now
-          // if ( app.options.mode !== app.options.previousMode ) {
-
-            // Resets camera position
-            app.three.update.camera( 'reset' );
-
-          // }
+          // Resets camera position
+          app.three.update.camera( 'reset' );
 
         }
 
@@ -743,9 +741,6 @@ let app = {
           app.three.controls.enabled = true;
 
         }
-
-        // Creates flag to run reset function for the camera only after switching
-        // app.options.previousMode = app.options.mode;
 
       },
 
