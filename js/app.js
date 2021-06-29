@@ -544,7 +544,12 @@ let app = {
 
         // Creates camera
         app.three.camera = new THREE.PerspectiveCamera( 50, 1, .1, app.data.earth.radius.crust * 30 );
+
+        // Positions it away from Earth (3x its radiues)
         app.three.camera.position.z = app.data.earth.radius.crust * 3;
+
+        // Tilts it slightly so the Equator does not look like a flat horizontal line
+        app.three.camera.position.y = app.data.earth.radius.crust / 3 ;
 
       },
 
