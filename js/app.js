@@ -1444,13 +1444,9 @@ let app = {
 
       destination : () => {
 
-        // If value is different from label
-        if ( app.element.dataset.destination !== app.labels.destination.textContent ) {
-
-          // Updates label
+        // Updates label if value is different
+        if ( app.element.dataset.destination !== app.labels.destination.textContent )
           app.labels.destination.textContent = app.element.dataset.destination;
-
-        }
 
       },
 
@@ -1477,7 +1473,9 @@ let app = {
 
         }
 
-        app.labels.distance.textContent = value;
+        // Updates label if value is different
+        if ( value !== app.labels.distance.textContent )
+          app.labels.distance.textContent = value;
 
       }
 
