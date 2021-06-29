@@ -10,16 +10,16 @@ let app = {
 
   elements : {
 
-    findButton      : document.querySelectorAll( '.find'                   ),
-    nextButton      : document.querySelectorAll( '.next'                   ),
-    form            : document.querySelectorAll( 'form'                    ),
-    address         : document.querySelectorAll( 'input[name="address"]'   ),
-    trackButton     : document.querySelector(    '.track'                  ),
     background      : document.querySelector(    '.background'             ),
     canvas          : document.querySelector(    '.canvas'                 ),
     compassNeedle   : document.querySelector(    '.needle'                 ),
     area            : document.querySelector(    '.draggable-area'         ),
     handle          : document.querySelector(    '.draggable-handle'       ),
+    trackButton     : document.querySelector(    '.track'                  ),
+    findButton      : document.querySelectorAll( '.find'                   ),
+    nextButton      : document.querySelectorAll( '.next'                   ),
+    form            : document.querySelectorAll( 'form'                    ),
+    address         : document.querySelectorAll( 'input[name="address"]'   ),
 
   },
 
@@ -992,25 +992,54 @@ let app = {
 
     },
 
+    error : ( type ) => {
+
+      if ( type == 'not supported' ) {
+
+        alert( 'This device does not seem to support motion sensors.' );
+
+        // Could provide alternative interation method here
+
+      }
+
+      else if ( type == 'not granted' ) {
+
+        alert( 'Unable to reach the motion sensors of this device.' );
+
+      }
+
+    },
+
     request : () => {
 
       // Requests permission for iOS 13+ devices
       if ( DeviceMotionEvent && typeof DeviceMotionEvent.requestPermission === 'function' ) {
 
         DeviceMotionEvent.requestPermission()
-        .then( response => {
+          .then( response => {
 
-          if ( response == 'granted' ) {
+            if ( response == 'granted' ) {
 
-            // Enables orientationControl
-            // app.options.orientationControl = true;
-            // app.steps.next()
+              // Enables orientationControl
+              // app.options.orientationControl = true;
+              // app.steps.next()
 
-            window.addEventListener( 'deviceorientation', app.orientation.handle );
+              window.addEventListener( 'deviceorientation', app.orientation.handle );
 
-          }
+            } else {
 
-        } );
+              app.orientation.error( 'not granted' )
+
+            }
+
+          } );
+
+      }
+
+      // If feature is not supported
+      else {
+
+        app.orientation.error( 'not supported' )
 
       }
 

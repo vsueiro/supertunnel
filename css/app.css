@@ -692,21 +692,21 @@ input[type="search"] + button:not(:hover) {
   pointer-events: none;
 }
 
-/* Destination is land */
-.app[data-type="land"] {
-
+.app .step:nth-child(4) > div p {
+  display: none;
 }
 
-/* Destination is water */
-.app[data-type="water"] {
-
+.app[data-type="water"] .step:nth-child(4) > div p:nth-child(1) {
+  display: block;
 }
 
-/* Destination is air */
+.app[data-type="land"] .step:nth-child(4) > div p:nth-child(2) {
+  display: block;
+}
+
 .app[data-type="air"] {
 
 }
-
 
 /* Steps (for mobile) */
 
