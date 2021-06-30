@@ -521,12 +521,12 @@ let app = {
       camera : () => {
 
         // Creates camera
-        app.three.camera = new THREE.PerspectiveCamera( 50, 1, .1, app.data.earth.radius.crust * 30 );
+        app.three.camera = new THREE.PerspectiveCamera( 96, 1, .1, app.data.earth.radius.crust * 30 );
 
         // Positions it away from Earth (3x its radius)
         // app.three.camera.position.z = app.data.earth.radius.crust * 3;
 
-        // // Tilts it slightly so the Equator does not look like a flat horizontal line
+        // Tilts it slightly so the Equator does not look like a flat horizontal line
         // app.three.camera.position.y = app.data.earth.radius.crust / 3 ;
 
       },
@@ -647,8 +647,6 @@ let app = {
             false
           );
 
-          // Scales universe to better fit screen dimension
-
           app.three.update.camera();
 
         }
@@ -659,22 +657,17 @@ let app = {
 
         let c = app.elements.canvas;
 
-        // // Moves camera closer or further away to adjust Earth’s dimensions on screen
-        // let distance = app.data.earth.radius.crust * 3;
-        // let min      = app.data.earth.radius.crust * 3;
-        // let max      = app.data.earth.radius.crust * 4.5;
-        //
-        // distance = distance * 1280 / c.clientWidth;
-        //
-        // if ( distance > max )
-        //   distance = max;
-        //
-        // if ( distance < min )
-        //   distance = min;
+        // Visually “scales” fov to match width and height (diagonal)
+        diagonal = ( fov, aspect ) => {
+          let length = Math.sqrt( 1 + aspect * aspect );
+          return THREE.MathUtils.radToDeg( 2 * Math.atan( Math.tan( THREE.MathUtils.degToRad( fov ) * .5 ) / length ) );
+        }
+
+        app.three.camera.fov = diagonal( 90, app.three.camera.aspect );
 
         if ( reset ) {
 
-          // Positions camera away from Earth (3x its radius)
+          // Positions it away from Earth (3x its radius)
           app.three.camera.position.z = app.data.earth.radius.crust * 3;
 
           // Sets x rotation to the default position
