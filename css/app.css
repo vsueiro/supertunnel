@@ -840,6 +840,12 @@ strong.land {
 
 /* Labels */
 
+.label {
+  text-align: center;
+  max-width: 50%;
+  line-height: 1.25;
+}
+
 .label-origin {
   width: calc( var(--basis) * 4.8 );
   height: calc( var(--basis) * 4.8 );
