@@ -80,6 +80,8 @@ body {
   font-family: sans-serif;
   color: white;
   overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
 }
 
 a {
