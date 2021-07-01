@@ -658,13 +658,20 @@ let app = {
 
         let c = app.elements.canvas;
 
-        // Visually “scales” fov to match width and height (diagonal)
+        // Defines basis field of view for camera
+        let fov = 90
+
+        // Decreases field of view on mobile (makes everything appear a bit bigger)
+        if ( window.innerWidth <= 1024 )
+          fov = 80
+
+        // Visually “scales” fov to match both width and height (diagonal)
         diagonal = ( fov, aspect ) => {
           let length = Math.sqrt( 1 + aspect * aspect );
           return THREE.MathUtils.radToDeg( 2 * Math.atan( Math.tan( THREE.MathUtils.degToRad( fov ) * .5 ) / length ) );
         }
 
-        app.three.camera.fov = diagonal( 90, app.three.camera.aspect );
+        app.three.camera.fov = diagonal( fov, app.three.camera.aspect );
 
         if ( reset ) {
 
