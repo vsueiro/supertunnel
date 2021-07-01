@@ -700,7 +700,7 @@ let app = {
           app.three.stars.rotation.y    = THREE.Math.degToRad( app.data.orientation.alpha * -1 );
 
           // Rotates compass needle
-          app.elements.compass.style.transform = 'rotate(' + app.data.orientation.alpha * -1 + 'deg)';
+          app.elements.compass.style.transform = 'rotate(' + app.data.orientation.alpha + 'deg)';
 
           // Rotates tunnel on two axes (based on device motion)
           app.three.cylinder.rotation.x = THREE.Math.degToRad( app.data.orientation.beta  );
