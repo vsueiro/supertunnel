@@ -79,17 +79,18 @@ let app = {
           app.data.earth.radius.crust / 40,
           app.data.earth.radius.crust * 2,
           6,
-          32
+          32,
+          false
         );
 
         // Rotates around end, not center
         geometry.translate( 0, -app.data.earth.radius.crust, 0);
 
         let material = new THREE.MeshBasicMaterial( {
-            color: app.color( 'accent-100' ),
-            wireframe: true,
-            opacity: 1,
-            transparent: true
+          color: app.color( 'accent-100' ),
+          wireframe: true,
+          opacity: 1,
+          transparent: true
         } );
 
         app.three.cylinder = new THREE.Mesh( geometry, material );
