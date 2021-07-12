@@ -673,6 +673,11 @@ let app = {
 
         app.three.camera.fov = diagonal( fov, app.three.camera.aspect );
 
+        console.log( 'Viewport is ' + window.innerWidth + 'x' + window.innerHeight )
+        console.log( 'Initial fov is ' + fov )
+        console.log( 'Calculated fov is ' + diagonal( fov, app.three.camera.aspect ) )
+        console.log( '---' )
+
         if ( reset ) {
 
           // Positions it away from Earth (3x its radius)
