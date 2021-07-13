@@ -646,6 +646,7 @@ input[type="search"] + button:not(:hover) {
 .steps {
   position: relative;
   width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
   align-self: flex-end;
@@ -758,6 +759,17 @@ strong.land {
   100% { visibility: hidden  }
 }
 
+.step:nth-child(6) {
+  top: 0;
+  background: transparent;
+  border: none;
+}
+
+.step:nth-child(6) > div {
+  height: 100%;
+  justify-content: flex-end;
+}
+
 /* Labels */
 
 .label {
@@ -809,6 +821,20 @@ strong.land {
 
 .label-destination:empty::after {
   display: none;
+}
+
+.foreground .label-destination {
+  position: absolute;
+	height: initial;
+	margin: 0;
+  top: 50%;
+	left: 0;
+	width: 100%;
+  transform: translateY( -50% );
+}
+
+.foreground .label-destination::after {
+	display: none;
 }
 
 .label-distance {
@@ -914,8 +940,7 @@ strong.land {
 .app[data-step="3"] .step:nth-child(3),
 .app[data-step="4"] .step:nth-child(4),
 .app[data-step="5"] .step:nth-child(5),
-.app[data-step="6"] .step:nth-child(6),
-.app[data-step="7"] .step:nth-child(7) {
+.app[data-step="6"] .step:nth-child(6) {
   display: flex;
   opacity: 1;
   pointer-events: all;
@@ -937,6 +962,10 @@ strong.land {
 
 .app[data-mode="first-person"] .background .label-destination,
 .app[data-mode="first-person"] .background .label-distance {
+  display: none;
+}
+
+.app[data-mode="first-person"] .foreground header {
   display: none;
 }
 
