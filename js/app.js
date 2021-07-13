@@ -546,6 +546,7 @@ let app = {
         // Makes 1 orbit in 240 seconds
         app.three.controls.autoRotateSpeed =   2; // 1 orbit in 30 seconds
         app.three.controls.autoRotateSpeed = .25; // 1 orbit in 240 seconds
+        app.three.controls.autoRotateSpeed =  .5; // 1 orbit in 120 seconds
 
         // Moves with inertia
         app.three.controls.enableDamping = true;
