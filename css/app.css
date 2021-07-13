@@ -649,6 +649,10 @@ input[type="search"] + button:not(:hover) {
   display: flex;
 }
 
+.app[data-geolocation="located"] .find span:nth-of-type(3) {
+  display: flex;
+}
+
 .app[data-geolocation="locating"] button.find {
   pointer-events: none;
   background: rgba( var(--accent-100-rgb), .2 );
