@@ -704,11 +704,16 @@ let app = {
         let c = app.elements.canvas;
 
         // Defines basis field of view for camera
-        let fov = 90
+        let fov = 90;
 
-        // Decreases field of view on mobile (makes everything appear a bit bigger)
-        // if ( window.innerWidth <= 1024 )
-        //  fov = 80
+        // Calculates scene increase for mobile version on first-person mode
+        if ( window.innerWidth <= 1024 && app.element.dataset.mode === 'first-person' ) {
+
+          // Decreases field of view on mobile (makes everything appear a bit bigger)
+          if ( window.innerWidth <= 1024 )
+            fov = 70;
+
+        }
 
         // Visually “scales” fov to match both width and height (diagonal)
         diagonal = ( fov, aspect ) => {
