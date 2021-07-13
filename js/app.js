@@ -618,6 +618,11 @@ let app = {
       // Animates 3D elements
       requestAnimationFrame( app.three.render );
 
+      // Removes loading state
+      setTimeout( () => {
+        app.element.dataset.loading = false;
+      }, 800 )
+
     },
 
     update : {

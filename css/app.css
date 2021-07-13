@@ -104,6 +104,12 @@ a {
   left: 0;
 }
 
+.background,
+.foreground {
+  opacity: 0;
+  transition: opacity .6s linear;
+}
+
 .foreground,
 .foreground header,
 .foreground main,
@@ -653,6 +659,11 @@ input[type="search"] + button:not(:hover) {
   pointer-events: none;
   background: rgba( var(--success-100-rgb), .25 );
   color: var(--success-100);
+}
+
+.app[data-loading="false"] .background,
+.app[data-loading="false"] .foreground {
+  opacity: 1;
 }
 
 .app[data-search="searching"] .loader,
