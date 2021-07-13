@@ -669,8 +669,6 @@ let app = {
         // Updates CSS variable to change canvas height
         app.elements.root.style.setProperty( '--excess-height', excess + '%' );
 
-
-
         // Resize canvas drawing dimensions to match new dimension
 
         let c = app.elements.canvas;
@@ -706,12 +704,24 @@ let app = {
         // Defines basis field of view for camera
         let fov = 90;
 
-        // Calculates scene increase for mobile version on first-person mode
-        if ( window.innerWidth <= 1024 && app.element.dataset.mode === 'first-person' ) {
+        // Checks if first-person mode is on
+        if ( app.element.dataset.mode === 'first-person' ) {
 
-          // Decreases field of view on mobile (makes everything appear a bit bigger)
-          if ( window.innerWidth <= 1024 )
-            fov = 70;
+          // Checks if mobile version is on
+          if ( window.innerWidth <= 1024) {
+
+            // Decreases basis field of view on mobile (makes everything appear a bit bigger)
+            fov = 60;
+
+          }
+
+          // Hides globe graticule
+          app.three.graticule.visible = false;
+
+        } else {
+
+          // Displays globe graticule
+          app.three.graticule.visible = true;
 
         }
 
