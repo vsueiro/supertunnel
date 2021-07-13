@@ -1,12 +1,5 @@
 let app = {
 
-  options : {
-
-    mode : 'third-person',
-    hd  : true,
-
-  },
-
   element : document.querySelector( '.app' ),
 
   elements : {
@@ -682,12 +675,8 @@ let app = {
 
         let c = app.elements.canvas;
 
-        // Defines default pixel ratio
-        let px = 1;
-
         // Renders more pixels for HD-DPI displays
-        if ( app.options.hd )
-          px = window.devicePixelRatio;
+        let px = window.devicePixelRatio;
 
         // If canvas dimensions are different from window dimensios
         if ( c.width !== c.clientWidth * px || c.height !== c.clientHeight * px ) {
@@ -754,7 +743,7 @@ let app = {
       tunnel : () => {
 
         // Enables first-person view
-        if ( app.options.mode == 'first-person' ) {
+        if ( app.element.dataset.mode == 'first-person' ) {
 
           // Rotates Earth to always match real-world North
           app.three.earth.rotation.y    = THREE.Math.degToRad( app.data.orientation.alpha * -1 );
@@ -814,7 +803,7 @@ let app = {
       coordinates : () => {
 
         // Enables first-person view
-        if ( app.options.mode == 'first-person' ) {
+        if ( app.element.dataset.mode == 'first-person' ) {
 
           // Rotates Earth to match origin latitude and longitude
 
@@ -1099,7 +1088,7 @@ let app = {
             if ( response == 'granted' ) {
 
               // Activates first-person mode
-              app.options.mode = 'first-person';
+              app.element.dataset.mode = 'first-person';
 
               window.addEventListener( 'deviceorientation', app.orientation.handle );
               app.steps.next();
