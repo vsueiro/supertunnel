@@ -885,11 +885,11 @@ let app = {
           country.material[ 0 ].color.set( app.color( 'neutral-50' ) );
           country.material[ 1 ].color.set( app.color( 'neutral-75' ) );
 
-          // Makes external-facing side of countries invisible on first-person mode
+          // Hides all countries on first-person mode
           if ( app.element.dataset.mode === 'first-person' )
-            country.material[ 1 ].side = THREE.BackSide;
+            country.visible = false
           else
-            country.material[ 1 ].side = THREE.FrontSide;
+            country.visible = true
 
           let intersections = app.three.raycaster.intersectObject( country );
 
@@ -927,6 +927,10 @@ let app = {
             // Highlights country
             match.object.material[ 0 ].color.set( app.color( 'accent-50'  ) );
             match.object.material[ 1 ].color.set( app.color( 'accent-100' ) );
+
+            // Hides all countries on first-person mode
+            if ( app.element.dataset.mode === 'first-person' )
+              match.object.visible = true
 
           }
 
