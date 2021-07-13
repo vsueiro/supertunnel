@@ -88,9 +88,9 @@ let app = {
 
         let material = new THREE.MeshBasicMaterial( {
           color: app.color( 'accent-100' ),
-          wireframe: true,
+          // wireframe: true,
           opacity: 1,
-          transparent: true
+          // transparent: true
         } );
 
         app.three.cylinder = new THREE.Mesh( geometry, material );
