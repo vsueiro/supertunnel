@@ -645,7 +645,7 @@ let app = {
         let excess = 0;
 
         // Calculates increase for mobile version
-        if ( window.innerWidth <= 1024 ) {
+        if ( window.innerWidth <= 1024 && app.element.dataset.mode === 'third-person' ) {
 
           let height               = {};
           let target               = {};
