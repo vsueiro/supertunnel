@@ -934,6 +934,10 @@ strong.land {
 .app[data-mode="first-person"] .label-origin {
   border: none;
 }
+
+.app[data-mode="first-person"] .background .label-destination,
+.app[data-mode="first-person"] .background .label-distance {
+  display: none;
 }
 
 /* Media queries */
