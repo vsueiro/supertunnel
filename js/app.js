@@ -663,8 +663,8 @@ let app = {
         let fov = 90
 
         // Decreases field of view on mobile (makes everything appear a bit bigger)
-        if ( window.innerWidth <= 1024 )
-          fov = 80
+        // if ( window.innerWidth <= 1024 )
+        //  fov = 80
 
         // Visually “scales” fov to match both width and height (diagonal)
         diagonal = ( fov, aspect ) => {
