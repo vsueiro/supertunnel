@@ -729,6 +729,10 @@ let app = {
           // Tilts it slightly so the Equator does not look like a flat horizontal line
           app.three.camera.position.y = app.data.earth.radius.crust / 3;
 
+          // Resets previous tilt on first-person mode, so camera looks straight down
+          if ( app.element.dataset.mode === 'first-person' )
+            app.three.camera.position.y = 0;
+
           // Forces camera to look at the center of the scene
           app.three.camera.lookAt( 0, 0, 0 );
 
