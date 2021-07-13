@@ -1076,6 +1076,7 @@ let app = {
 
     success : ( position ) => {
 
+      app.element.dataset.search = 'unsearched';
       app.element.dataset.geolocation = 'located';
 
       app.data.user.latitude  = position.coords.latitude;
@@ -1147,6 +1148,7 @@ let app = {
       app.steps.set( 3 );
 
       app.element.dataset.search = 'searched';
+      app.element.dataset.geolocation = 'unlocated';
 
     },
 
