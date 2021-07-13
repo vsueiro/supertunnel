@@ -931,8 +931,9 @@ strong.land {
   100% { box-shadow: 0 0 0 calc( var(--basis) * 2.4 ) rgba( var(--success-100-rgb), 0 ) }
 }
 
-.app[data-mode="first-person"] {
-  
+.app[data-mode="first-person"] .label-origin {
+  border: none;
+}
 }
 
 /* Media queries */
