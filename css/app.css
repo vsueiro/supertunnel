@@ -118,6 +118,8 @@ a {
 }
 
 .canvas {
+  position: absolute;
+  bottom: 0;
   width: 100%;
   height: 100%;
   display: block;
@@ -949,6 +951,11 @@ strong.land {
 
   button span {
     justify-content: center;
+  }
+
+  /* Moves center of 3D scene up a bit (by half of 16% of viewport height) */
+  .canvas {
+    height: calc( 100% + 16% );
   }
 
   .steps {
