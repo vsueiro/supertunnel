@@ -1076,7 +1076,6 @@ let app = {
 
     success : ( position ) => {
 
-      app.element.dataset.search = 'unsearched';
       app.element.dataset.geolocation = 'located';
 
       app.data.user.latitude  = position.coords.latitude;
@@ -1213,13 +1212,13 @@ let app = {
 
     clear : () => {
 
-      app.elements.address.value = '';
       app.element.dataset.search = 'unsearched';
 
       // Removes class 'default', so value can be replaced by fill function
-      app.elements.address.forEach( address =>
-        address.classList.remove( 'default' )
-      )
+      app.elements.address.forEach( address => {
+        address.classList.remove( 'default' );
+        address.value = '';
+      } )
 
     },
 
