@@ -75,8 +75,8 @@ let app = {
       cylinder : () => {
 
         let geometry = new THREE.CylinderGeometry(
-          app.data.earth.radius.crust / 40,
-          app.data.earth.radius.crust / 40,
+          app.data.earth.radius.crust / 100,
+          app.data.earth.radius.crust / 100,
           app.data.earth.radius.crust * 2,
           6,
           32,
