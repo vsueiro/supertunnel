@@ -857,7 +857,8 @@ strong.land {
 
 .label {
   text-align: center;
-  max-width: 50%;
+  width: 50%;
+  max-width: calc( var(--basis) * 38.4 );
   line-height: 1.25;
 }
 
@@ -881,13 +882,12 @@ strong.land {
 }
 
 .label-destination {
-  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: space-between;
-  height: calc( var(--basis) * 5.4 );
-  margin-top: calc( var(--basis) * -2.7 );
+  justify-content: flex-end;
+  height: calc( var(--basis) * 19.2 );
+  margin-top: calc( var(--basis) * -9.6 );
   font-size: calc( var(--basis) * 3.6 );
 }
 
