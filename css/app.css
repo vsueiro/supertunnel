@@ -839,10 +839,7 @@ strong.land {
   align-items: center;
 	width: calc( 100% - var(--basis) * 4.8 );
   font-size: calc( var(--basis) * 4.8 );
-}
-
-.label-destination.fixed::after {
-	display: none;
+  display: none;
 }
 
 .background .label-distance {
