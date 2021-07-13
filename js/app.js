@@ -721,7 +721,12 @@ let app = {
           return THREE.MathUtils.radToDeg( 2 * Math.atan( Math.tan( THREE.MathUtils.degToRad( fov ) * .5 ) / length ) );
         }
 
-        app.three.camera.fov = diagonal( fov, app.three.camera.aspect );
+        let target = diagonal( fov, app.three.camera.aspect );
+        let diff   = target - app.three.camera.fov;
+        let factor = 0.05;
+
+        // Changes fov gradually, to create a growing/shrinking effect
+        app.three.camera.fov = app.three.camera.fov + diff * factor;
 
         if ( reset ) {
 
