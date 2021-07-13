@@ -631,7 +631,7 @@ button:disabled {
   cursor: default;
 }
 
-button:not(:disabled):hover {
+button:not(:disabled):not(.success):hover {
   background: var(--accent-100);
   color: var(--neutral-0);
 }
