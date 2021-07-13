@@ -711,7 +711,7 @@ let app = {
           if ( window.innerWidth <= 1024) {
 
             // Decreases basis field of view on mobile (makes everything appear a bit bigger)
-            fov = 60;
+            fov = 50;
 
           }
 
