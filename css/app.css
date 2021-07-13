@@ -641,93 +641,6 @@ input[type="search"] + button:not(:hover) {
   background: transparent;
 }
 
-/* Status */
-
-.app[data-grabbing="true"] {
-  user-select: none;
-}
-
-.app[data-geolocation="unlocated"] .find span:nth-of-type(1) {
-  display: flex;
-}
-
-.app[data-geolocation="locating"] .find span:nth-of-type(2) {
-  display: flex;
-}
-
-.app[data-geolocation="located"] .find span:nth-of-type(3) {
-  display: flex;
-}
-
-.app[data-geolocation="locating"] button.find {
-  pointer-events: none;
-  background: rgba( var(--accent-100-rgb), .2 );
-  color: var(--accent-100);
-}
-
-.app[data-geolocation="located"] button.find {
-  pointer-events: none;
-  background: rgba( var(--success-100-rgb), .25 );
-  color: var(--success-100);
-}
-
-.app[data-loading="false"] .background,
-.app[data-loading="false"] .foreground {
-  opacity: 1;
-}
-
-.app[data-search="searching"] .loader,
-.app[data-geolocation="locating"] .loader {
-  opacity: 1;
-  pointer-events: all;
-}
-
-.app[data-search="searching"] .loader::before,
-.app[data-geolocation="locating"] .loader::before {
-  animation-play-state: running;
-}
-
-.app[data-search="searching"] .draggable-handle::before,
-.app[data-geolocation="locating"] .draggable-handle::before {
-  animation-play-state: paused;
-}
-
-.app[data-search="searched"] .step:nth-child(3),
-.app[data-geolocation="located"] .step:nth-child(3) {
-  border-color: var(--success-100)
-}
-
-.app[data-search="searched"] .search-container,
-.next.success {
-  background: rgba( var(--success-100-rgb), .25 );
-}
-
-.app[data-search="searched"] input[type="search"],
-.next.success {
-  color: var(--success-100);
-}
-
-.app[data-search="searched"] input[type="search"] + button {
-  color: var(--success-100);
-  pointer-events: none;
-}
-
-.app .step:nth-child(4) > div p {
-  display: none;
-}
-
-.app[data-type="water"] .step:nth-child(4) > div p:nth-child(1) {
-  display: block;
-}
-
-.app[data-type="land"] .step:nth-child(4) > div p:nth-child(2) {
-  display: block;
-}
-
-.app[data-type="air"] {
-
-}
-
 /* Steps (for mobile) */
 
 .steps {
@@ -845,28 +758,6 @@ strong.land {
   100% { visibility: hidden  }
 }
 
-.app[data-step="1"] .step:nth-child(1),
-.app[data-step="2"] .step:nth-child(2),
-.app[data-step="3"] .step:nth-child(3),
-.app[data-step="4"] .step:nth-child(4),
-.app[data-step="5"] .step:nth-child(5),
-.app[data-step="6"] .step:nth-child(6),
-.app[data-step="7"] .step:nth-child(7) {
-  display: flex;
-  opacity: 1;
-  pointer-events: all;
-  transform: translateY( 0 );
-}
-
-.app[data-step="3"] .label-origin {
-  animation: located 1.2s 1;
-}
-
-@keyframes located {
-  0%   { box-shadow: 0 0 0 calc( var(--basis) *   0 ) rgba( var(--success-100-rgb), 1 ) }
-  100% { box-shadow: 0 0 0 calc( var(--basis) * 2.4 ) rgba( var(--success-100-rgb), 0 ) }
-}
-
 /* Labels */
 
 .label {
@@ -886,8 +777,6 @@ strong.land {
   border: calc( var(--basis) * .2 ) solid;
   transition: border-color .4s linear;
 }
-
-/*  */
 
 .label-origin::after {
   content: '';
@@ -931,6 +820,119 @@ strong.land {
 
 .label-angle {
   font-variant-numeric: tabular-nums;
+}
+
+/* Status */
+
+.app[data-grabbing="true"] {
+  user-select: none;
+}
+
+.app[data-geolocation="unlocated"] .find span:nth-of-type(1) {
+  display: flex;
+}
+
+.app[data-geolocation="locating"] .find span:nth-of-type(2) {
+  display: flex;
+}
+
+.app[data-geolocation="located"] .find span:nth-of-type(3) {
+  display: flex;
+}
+
+.app[data-geolocation="locating"] button.find {
+  pointer-events: none;
+  background: rgba( var(--accent-100-rgb), .2 );
+  color: var(--accent-100);
+}
+
+.app[data-geolocation="located"] button.find {
+  pointer-events: none;
+  background: rgba( var(--success-100-rgb), .25 );
+  color: var(--success-100);
+}
+
+.app[data-loading="false"] .background,
+.app[data-loading="false"] .foreground {
+  opacity: 1;
+}
+
+.app[data-search="searching"] .loader,
+.app[data-geolocation="locating"] .loader {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.app[data-search="searching"] .loader::before,
+.app[data-geolocation="locating"] .loader::before {
+  animation-play-state: running;
+}
+
+.app[data-search="searching"] .draggable-handle::before,
+.app[data-geolocation="locating"] .draggable-handle::before {
+  animation-play-state: paused;
+}
+
+.app[data-search="searched"] .step:nth-child(3),
+.app[data-geolocation="located"] .step:nth-child(3) {
+  border-color: var(--success-100)
+}
+
+.app[data-search="searched"] .search-container,
+.next.success {
+  background: rgba( var(--success-100-rgb), .25 );
+}
+
+.app[data-search="searched"] input[type="search"],
+.next.success {
+  color: var(--success-100);
+}
+
+.app[data-search="searched"] input[type="search"] + button {
+  color: var(--success-100);
+  pointer-events: none;
+}
+
+.app .step:nth-child(4) > div p {
+  display: none;
+}
+
+.app[data-type="water"] .step:nth-child(4) > div p:nth-child(1) {
+  display: block;
+}
+
+.app[data-type="land"] .step:nth-child(4) > div p:nth-child(2) {
+  display: block;
+}
+
+.app[data-type="air"] {
+
+}
+
+.app[data-step="1"] .step:nth-child(1),
+.app[data-step="2"] .step:nth-child(2),
+.app[data-step="3"] .step:nth-child(3),
+.app[data-step="4"] .step:nth-child(4),
+.app[data-step="5"] .step:nth-child(5),
+.app[data-step="6"] .step:nth-child(6),
+.app[data-step="7"] .step:nth-child(7) {
+  display: flex;
+  opacity: 1;
+  pointer-events: all;
+  transform: translateY( 0 );
+}
+
+.app[data-step="3"] .label-origin {
+  animation: located 1.2s 1;
+}
+
+@keyframes located {
+  0%   { box-shadow: 0 0 0 calc( var(--basis) *   0 ) rgba( var(--success-100-rgb), 1 ) }
+  100% { box-shadow: 0 0 0 calc( var(--basis) * 2.4 ) rgba( var(--success-100-rgb), 0 ) }
+}
+
+.app[data-mode="first-person"] {
+  
 }
 
 /* Media queries */
