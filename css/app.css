@@ -851,9 +851,22 @@ strong.land {
 }
 
 .label-origin {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: calc( var(--basis) * 4.8 );
   height: calc( var(--basis) * 4.8 );
   border: calc( var(--basis) * .2 ) solid;
+}
+
+.label-origin::after {
+  content: '';
+  display: flex;
+  width: calc( var(--basis) * .8 );
+  height: calc( var(--basis) * .8 );
+  border-radius: 50%;
+  background: var(--accent-100);
 }
 
 .label-destination {
