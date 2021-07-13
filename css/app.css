@@ -115,6 +115,12 @@ a {
   transition: opacity .6s linear;
 }
 
+.background {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .foreground,
 .foreground header,
 .foreground main,
@@ -620,7 +626,12 @@ button,
   background: rgba( var(--accent-100-rgb), .2 );
 }
 
-button:hover {
+button:disabled {
+  background: transparent;
+  cursor: default;
+}
+
+button:not(:disabled):hover {
   background: var(--accent-100);
   color: var(--neutral-0);
 }
@@ -760,14 +771,11 @@ strong.land {
 }
 
 .step:nth-child(6) {
-  top: 0;
-  background: transparent;
-  border: none;
+
 }
 
 .step:nth-child(6) > div {
-  height: 100%;
-  justify-content: flex-end;
+  margin-bottom: calc( var(--basis) * -1.2 );
 }
 
 /* Labels */
@@ -799,17 +807,17 @@ strong.land {
   background: var(--accent-100);
 }
 
-.label-destination {
+.label-destination:not(.fixed) {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-end;
   height: calc( var(--basis) * 19.2 );
   margin-top: calc( var(--basis) * -9.6 );
-  font-size: calc( var(--basis) * 3.6 );
+
 }
 
-.label-destination::after {
+.label-destination:not(.fixed)::after {
   content: '';
   display: flex;
   transform: translateY( calc( var(--basis) * .4 ) );
@@ -823,25 +831,30 @@ strong.land {
   display: none;
 }
 
-.foreground .label-destination {
-  position: absolute;
-	height: initial;
-	margin: 0;
-  top: 50%;
-	left: 0;
-	width: 100%;
-  transform: translateY( -50% );
+.label-destination.fixed {
+  position: relative;
+  z-index: 4;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+	width: calc( 100% - var(--basis) * 4.8 );
+  font-size: calc( var(--basis) * 4.8 );
 }
 
-.foreground .label-destination::after {
+.label-destination.fixed::after {
 	display: none;
 }
 
-.label-distance {
+.background .label-distance {
   font-size: calc( var(--basis) * 1.2 );
   letter-spacing: calc( var(--basis) * .3 );
   text-transform: uppercase;
   font-variant-numeric: tabular-nums;
+}
+
+.foreground .label-distance:not(:empty)::before {
+  content: 'Length: ';
+  white-space: pre;
 }
 
 .label-angle {
@@ -956,17 +969,14 @@ strong.land {
   100% { box-shadow: 0 0 0 calc( var(--basis) * 2.4 ) rgba( var(--success-100-rgb), 0 ) }
 }
 
-.app[data-mode="first-person"] .label-origin {
-  border: none;
-}
-
 .app[data-mode="first-person"] .background .label-destination,
-.app[data-mode="first-person"] .background .label-distance {
+.app[data-mode="first-person"] .background .label-distance,
+.app[data-mode="first-person"] .background .label-origin {
   display: none;
 }
 
-.app[data-mode="first-person"] .foreground header {
-  display: none;
+.app[data-mode="first-person"] .background .label-destination.fixed {
+  display: flex;
 }
 
 /* Media queries */

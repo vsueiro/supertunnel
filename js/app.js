@@ -1603,8 +1603,8 @@ let app = {
 
         app.labels.destination.forEach( destination => {
 
-        	// Checks if label is a child of of the background element
-        	if ( destination.closest( '.background' ) ) {
+        	// Selects label that is not the fixed one
+        	if ( !destination.classList.contains( 'fixed' ) ) {
 
             // Creates 2D object
             let label = new THREE.CSS2DObject( destination );

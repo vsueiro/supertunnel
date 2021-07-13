@@ -23,8 +23,9 @@
         <canvas class="canvas"></canvas>
 
         <span class="label label-origin"></span>
-        <span class="label label-destination"></span>
         <span class="label label-distance"></span>
+        <span class="label label-destination"></span>
+        <span class="label label-destination fixed"></span>
 
       </div>
 
@@ -181,27 +182,16 @@
 
             <li class="step">
               <div>
-                <span class="label label-destination"></span>
-
-                <div>
-
-                  <figure>
-                    <div class="compass">
-                      <div class="needle"></div>
-                    </div>
-                  </figure>
-
-                  <span class="label label-distance"></span>
-                  
-                </div>
-
+                <figure>
+                  <div class="compass">
+                    <div class="needle"></div>
+                  </div>
+                </figure>
                 <!--<p class="note">Tip: it’s easier when you’re facing North</p>-->
               </div>
-              <!--
-              <button class="next">
-                <span>Got it</span>
+              <button class="track" disabled>
+                <span class="label label-distance"></span>
               </button>
-              -->
             </li>
 
           </ol>
