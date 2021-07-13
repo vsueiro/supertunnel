@@ -1460,11 +1460,11 @@ let app = {
 
   labels : {
 
-    coordinates : document.querySelector( '.label-coordinates' ),
-    direction   : document.querySelector( '.label-direction'   ),
-    origin      : document.querySelector( '.label-origin'      ),
-    destination : document.querySelector( '.label-destination' ),
-    distance    : document.querySelector( '.label-distance'    ),
+    coordinates : document.querySelector(    '.label-coordinates' ),
+    direction   : document.querySelector(    '.label-direction'   ),
+    origin      : document.querySelector(    '.label-origin'      ),
+    destination : document.querySelectorAll( '.label-destination' ),
+    distance    : document.querySelectorAll( '.label-distance'    ),
 
     update : {
 
@@ -1517,9 +1517,13 @@ let app = {
 
       destination : () => {
 
-        // Updates label if value is different
-        if ( app.element.dataset.destination !== app.labels.destination.textContent )
-          app.labels.destination.textContent = app.element.dataset.destination;
+        app.labels.destination.forEach( destination => {
+
+          // Updates label if value is different
+          if ( app.element.dataset.destination !== destination.textContent )
+            destination.textContent = app.element.dataset.destination;
+
+        } );
 
       },
 
@@ -1546,9 +1550,13 @@ let app = {
 
         }
 
-        // Updates label if value is different
-        if ( value !== app.labels.distance.textContent )
-          app.labels.distance.textContent = value;
+        app.labels.distance.forEach( distance => {
+
+          // Updates label if value is different
+          if ( value !== distance.textContent )
+            distance.textContent = value;
+
+        } )
 
       }
 
@@ -1569,23 +1577,40 @@ let app = {
 
       destination : () => {
 
-        // Creates 2D object
-        let label = new THREE.CSS2DObject( app.labels.destination );
+        app.labels.destination.forEach( destination => {
 
-        // Attach object to end of cylinder
-        label.position.set( 0, app.data.earth.radius.crust * -2, 0 );
-        app.three.cylinder.add( label );
+        	// Checks if label is a child of of the background element
+        	if ( destination.closest( '.background' ) ) {
+
+            // Creates 2D object
+            let label = new THREE.CSS2DObject( destination );
+
+            // Attach object to end of cylinder
+            label.position.set( 0, app.data.earth.radius.crust * -2, 0 );
+            app.three.cylinder.add( label );
+
+        	}
+
+        } );
 
       },
 
       distance : () => {
 
-        // Creates 2D object
-        let label = new THREE.CSS2DObject( app.labels.distance );
+        app.labels.distance.forEach( distance => {
 
-        // Attach object to middle of cylinder
-        label.position.set( 0, app.data.earth.radius.crust * -1, 0 );
-        app.three.cylinder.add( label );
+          // Checks if label is a child of of the background element
+          if ( distance.closest( '.background' ) ) {
+
+            // Creates 2D object
+            let label = new THREE.CSS2DObject( distance );
+
+            // Attach object to middle of cylinder
+            label.position.set( 0, app.data.earth.radius.crust * -1, 0 );
+            app.three.cylinder.add( label );
+          }
+
+        } );
 
       }
 
