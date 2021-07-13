@@ -700,7 +700,7 @@ input[type="search"] + button:not(:hover) {
 }
 
 .app[data-type="land"] .step:nth-child(4) > div p:nth-child(2) {
-  display: flex;
+  display: block;
 }
 
 .app[data-type="air"] {
