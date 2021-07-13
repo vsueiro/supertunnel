@@ -411,7 +411,7 @@ let app = {
         } );
 
         let geometry = new THREE.SphereGeometry(
-          app.data.earth.radius.crust * 0.01
+          app.data.earth.radius.crust * 0.015
         );
 
         let amount = 10000;
