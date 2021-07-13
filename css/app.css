@@ -4,6 +4,7 @@
 
 :root {
 
+  /* Colors */
   --neutral-100:         #FADFD4;
   --neutral-75:          #CAB1AD;
   --neutral-50:          #9A8387;
@@ -25,7 +26,11 @@
   --accent-100-rgb:  226, 54, 64;
   --success-100-rgb:  54,226,222;
 
+  /* Value that controls scale of UI */
   --basis:                  10px;
+
+  /* Value to center 3D scene on mobile (updated in JS) */
+  --excess-height:            0%;
 
 }
 
@@ -129,6 +134,7 @@ a {
   width: 100%;
   height: 100%;
   display: block;
+  transition: height .4s;
 }
 
 .background > div {
@@ -988,9 +994,9 @@ strong.land {
     justify-content: center;
   }
 
-  /* Moves center of 3D scene up a bit (by half of 16% of viewport height) */
+  /* Moves center of 3D scene up a bit to center it on mobile */
   .canvas {
-    height: calc( 100% + 16% );
+    height: calc( 100% + var(--excess-height) );
   }
 
   .steps {

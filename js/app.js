@@ -11,7 +11,12 @@ let app = {
 
   elements : {
 
+    root        : document.documentElement,
+
     background  : document.querySelector(    '.background'             ),
+    foreground  : document.querySelector(    '.foreground'             ),
+    header      : document.querySelector(    '.foreground > header'    ),
+    steps       : document.querySelector(    '.steps'                  ),
     canvas      : document.querySelector(    '.canvas'                 ),
     compass     : document.querySelector(    '.needle'                 ),
     area        : document.querySelector(    '.draggable-area'         ),
@@ -62,8 +67,20 @@ let app = {
   color : ( name ) => {
 
     // Gets color from CSS variable
-    let style = getComputedStyle( document.documentElement );
+    let style = getComputedStyle( app.elements.root );
     let value = style.getPropertyValue( '--' + name ).trim();
+    return value;
+
+  },
+
+  style : ( element, property, type = 'float' ) => {
+
+    let style = getComputedStyle( element );
+    let value = style.getPropertyValue( property );
+
+    if ( type === 'float' )
+      return parseFloat( value );
+
     return value;
 
   },
@@ -629,8 +646,43 @@ let app = {
 
       dimensions : () => {
 
+        // Centers globe within available space on mobile
+
+        // Sets default increase
+        let excess = 0;
+
+        // Calculates increase for mobile version
+        if ( window.innerWidth <= 1024 ) {
+
+          let height               = {};
+          let target               = {};
+          let step                 = app.steps.current.element();
+
+          height.window            = window.innerHeight;
+          height.padding           = app.style( app.elements.foreground, 'padding-bottom' );
+          height.top               = app.elements.header.getBoundingClientRect().bottom;
+          height.bottom            = height.window - step.offsetHeight - height.padding;
+          height.available         = height.bottom - height.top;
+
+          target.center            = height.available / 2 + height.top;
+          target.height            = {};
+          target.height.pixels     = ( height.window - target.center ) * 2;
+          target.height.percentage = target.height.pixels * 100 / height.window
+
+          excess = target.height.percentage - 100;
+
+        }
+
+        // Updates CSS variable to change canvas height
+        app.elements.root.style.setProperty( '--excess-height', excess + '%' );
+
+
+
+        // Resize canvas drawing dimensions to match new dimension
+
         let c = app.elements.canvas;
 
+        // Defines default pixel ratio
         let px = 1;
 
         // Renders more pixels for HD-DPI displays
@@ -653,8 +705,6 @@ let app = {
             c.clientHeight,
             false
           );
-
-          app.three.update.camera();
 
         }
 
@@ -946,6 +996,9 @@ let app = {
 
       // Makes canvas responsive
       app.three.update.dimensions();
+
+      // Updates camera
+      app.three.update.camera();
 
       // Controls tunnel using motion sensor
       app.three.update.tunnel();
@@ -1554,6 +1607,19 @@ let app = {
   },
 
   steps : {
+
+    current : {
+
+      element : () => {
+
+        let number = parseInt( app.element.dataset.step );
+        let step = app.elements.steps.querySelector( '.step:nth-child( ' + number + ' )' );
+
+        return step;
+
+      }
+
+    },
 
     set : ( number, delay = 0 ) => {
 
