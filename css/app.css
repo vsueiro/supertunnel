@@ -849,19 +849,13 @@ strong.land {
 }
 
 .app[data-step="3"] .label-origin {
-  border-color: var(--success-100);
-  animation: located 1.2s infinite;
+  animation: located 1.2s 1;
 }
 
 @keyframes located {
   0%   { box-shadow: 0 0 0 calc( var(--basis) *   0 ) rgba( var(--success-100-rgb), 1 ) }
   100% { box-shadow: 0 0 0 calc( var(--basis) * 2.4 ) rgba( var(--success-100-rgb), 0 ) }
 }
-
-/* .app[data-step="3"] .label-origin,
-.app[data-step="3"] .label-distance {
-  opacity: 0;
-} */
 
 /* Labels */
 
