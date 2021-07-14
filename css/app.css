@@ -112,7 +112,7 @@ a {
 .background,
 .foreground {
   opacity: 0;
-  transition: opacity .6s linear;
+  transition: opacity .4s linear, transform .4s ease-in-out;
 }
 
 .background {
@@ -970,10 +970,14 @@ strong.land {
   100% { box-shadow: 0 0 0 calc( var(--basis) * 2.4 ) rgba( var(--success-100-rgb), 0 ) }
 }
 
-.app[data-step="5"] .background .label-destination,
-.app[data-step="5"] .background .label-distance,
-.app[data-step="5"] .background .label-origin {
-  display: none;
+.app[data-step="5"] .background {
+  opacity: 0;
+  transform: scale( .8 );
+  pointer-events: none;
+}
+
+.app[data-step="6"] .background {
+  opacity: 1;
 }
 
 .app[data-step="6"] .background .label-destination,

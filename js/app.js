@@ -647,9 +647,11 @@ let app = {
         // Calculates increase for mobile version
         if ( window.innerWidth <= 1024 && app.element.dataset.mode === 'third-person' ) {
 
+          // Prevents centering on step 5 (keeping same position as on step 4)
+          let step = app.steps.current() === 5 ? app.steps.element( 4 ) : app.steps.element();
+
           let height               = {};
           let target               = {};
-          let step                 = app.steps.current.element();
 
           height.window            = window.innerHeight;
           height.padding           = app.style( app.elements.foreground, 'padding-bottom' );
@@ -1677,16 +1679,21 @@ let app = {
 
   steps : {
 
-    current : {
+    element : ( number ) => {
 
-      element : () => {
+      if ( number === undefined )
+        number = app.steps.current();
 
-        let number = parseInt( app.element.dataset.step );
-        let step = app.elements.steps.querySelector( '.step:nth-child( ' + number + ' )' );
+      let selector = '.step:nth-child( ' + number + ' )';
+      let step = app.elements.steps.querySelector( selector );
 
-        return step;
+      return step;
 
-      }
+    },
+
+    current : () => {
+
+      return parseInt( app.element.dataset.step );
 
     },
 
