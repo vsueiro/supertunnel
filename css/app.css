@@ -654,7 +654,7 @@ input[type="search"] + button:not(:hover) {
 
 /* Steps (for mobile) */
 
-.steps {
+.foreground main .steps {
   position: relative;
   width: 100%;
   height: 100%;
@@ -662,6 +662,7 @@ input[type="search"] + button:not(:hover) {
   flex-direction: column;
   align-self: flex-end;
   max-width: calc( var(--basis) * 4.8 * 8 );
+  pointer-events: none;
 }
 
 .steps {
