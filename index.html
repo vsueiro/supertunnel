@@ -9,15 +9,23 @@
   </head>
   <body>
 
-    <div class="app" data-loading="true" data-step="1" data-grabbing="false" data-search="unsearched" data-geolocation="unlocated">
+    <div class="app"
+
+      data-loading="true"
+      data-step="1"
+      data-grabbing="false"
+      data-search="unsearched"
+      data-geolocation="unlocated"
+      data-mode="third-person">
 
       <div class="background">
 
         <canvas class="canvas"></canvas>
 
         <span class="label label-origin"></span>
-        <span class="label label-destination"></span>
         <span class="label label-distance"></span>
+        <span class="label label-destination"></span>
+        <span class="label label-destination fixed"></span>
 
       </div>
 
@@ -179,10 +187,10 @@
                     <div class="needle"></div>
                   </div>
                 </figure>
-                <p class="note">Tip: it’s easier when you’re facing North</p>
+                <!--<p class="note">Tip: it’s easier when you’re facing North</p>-->
               </div>
-              <button class="next">
-                <span>Got it</span>
+              <button class="track" disabled>
+                <span class="label label-distance"></span>
               </button>
             </li>
 

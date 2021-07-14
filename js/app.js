@@ -1,12 +1,5 @@
 let app = {
 
-  options : {
-
-    mode : 'third-person',
-    hd  : true,
-
-  },
-
   element : document.querySelector( '.app' ),
 
   elements : {
@@ -652,11 +645,13 @@ let app = {
         let excess = 0;
 
         // Calculates increase for mobile version
-        if ( window.innerWidth <= 1024 ) {
+        if ( window.innerWidth <= 1024 && app.element.dataset.mode === 'third-person' ) {
+
+          // Prevents centering on step 5 (keeping same position as on step 4)
+          let step = app.steps.current() === 5 ? app.steps.element( 4 ) : app.steps.element();
 
           let height               = {};
           let target               = {};
-          let step                 = app.steps.current.element();
 
           height.window            = window.innerHeight;
           height.padding           = app.style( app.elements.foreground, 'padding-bottom' );
@@ -676,18 +671,12 @@ let app = {
         // Updates CSS variable to change canvas height
         app.elements.root.style.setProperty( '--excess-height', excess + '%' );
 
-
-
         // Resize canvas drawing dimensions to match new dimension
 
         let c = app.elements.canvas;
 
-        // Defines default pixel ratio
-        let px = 1;
-
         // Renders more pixels for HD-DPI displays
-        if ( app.options.hd )
-          px = window.devicePixelRatio;
+        let px = window.devicePixelRatio;
 
         // If canvas dimensions are different from window dimensios
         if ( c.width !== c.clientWidth * px || c.height !== c.clientHeight * px ) {
@@ -715,11 +704,28 @@ let app = {
         let c = app.elements.canvas;
 
         // Defines basis field of view for camera
-        let fov = 90
+        let fov = 90;
 
-        // Decreases field of view on mobile (makes everything appear a bit bigger)
-        // if ( window.innerWidth <= 1024 )
-        //  fov = 80
+        // Checks if first-person mode is on
+        if ( app.element.dataset.mode === 'first-person' ) {
+
+          // Checks if mobile version is on
+          if ( window.innerWidth <= 1024) {
+
+            // Decreases basis field of view on mobile (makes everything appear a bit bigger)
+            fov = 60;
+
+          }
+
+          // Hides globe graticule
+          app.three.graticule.visible = false;
+
+        } else {
+
+          // Displays globe graticule
+          app.three.graticule.visible = true;
+
+        }
 
         // Visually “scales” fov to match both width and height (diagonal)
         diagonal = ( fov, aspect ) => {
@@ -727,7 +733,33 @@ let app = {
           return THREE.MathUtils.radToDeg( 2 * Math.atan( Math.tan( THREE.MathUtils.degToRad( fov ) * .5 ) / length ) );
         }
 
-        app.three.camera.fov = diagonal( fov, app.three.camera.aspect );
+        // Checks if mobile version is on
+        if ( window.innerWidth <= 1024 ) {
+
+          // Makes scene smaller when there is less space available
+
+          // Gets float that represents current increase of canvas height, in percentage
+          let excess = app.style( app.elements.root, '--excess-height' );
+
+          // Defines percentage from which a balance needs to be performed
+          let threshold = 18;
+
+          // Prevents scene from increasing
+          if ( excess > threshold ) {
+
+            // Balances fov with available height
+            fov = fov + ( excess - threshold ) * 1.25;
+
+          }
+
+        }
+
+        let target = diagonal( fov, app.three.camera.aspect );
+        let diff   = target - app.three.camera.fov;
+        let factor = 0.05;
+
+        // Changes fov gradually, to create a growing/shrinking effect
+        app.three.camera.fov = app.three.camera.fov + diff * factor;
 
         if ( reset ) {
 
@@ -739,6 +771,10 @@ let app = {
 
           // Tilts it slightly so the Equator does not look like a flat horizontal line
           app.three.camera.position.y = app.data.earth.radius.crust / 3;
+
+          // Resets previous tilt on first-person mode, so camera looks straight down
+          if ( app.element.dataset.mode === 'first-person' )
+            app.three.camera.position.y = 0;
 
           // Forces camera to look at the center of the scene
           app.three.camera.lookAt( 0, 0, 0 );
@@ -754,7 +790,7 @@ let app = {
       tunnel : () => {
 
         // Enables first-person view
-        if ( app.options.mode == 'first-person' ) {
+        if ( app.element.dataset.mode == 'first-person' ) {
 
           // Rotates Earth to always match real-world North
           app.three.earth.rotation.y    = THREE.Math.degToRad( app.data.orientation.alpha * -1 );
@@ -814,7 +850,7 @@ let app = {
       coordinates : () => {
 
         // Enables first-person view
-        if ( app.options.mode == 'first-person' ) {
+        if ( app.element.dataset.mode == 'first-person' ) {
 
           // Rotates Earth to match origin latitude and longitude
 
@@ -896,6 +932,12 @@ let app = {
           country.material[ 0 ].color.set( app.color( 'neutral-50' ) );
           country.material[ 1 ].color.set( app.color( 'neutral-75' ) );
 
+          // Hides all countries on first-person mode
+          if ( app.element.dataset.mode === 'first-person' )
+            country.visible = false
+          else
+            country.visible = true
+
           let intersections = app.three.raycaster.intersectObject( country );
 
           // If ray instersects with anything
@@ -932,6 +974,10 @@ let app = {
             // Highlights country
             match.object.material[ 0 ].color.set( app.color( 'accent-50'  ) );
             match.object.material[ 1 ].color.set( app.color( 'accent-100' ) );
+
+            // Hides all countries on first-person mode
+            if ( app.element.dataset.mode === 'first-person' )
+              match.object.visible = true
 
           }
 
@@ -1099,7 +1145,7 @@ let app = {
             if ( response == 'granted' ) {
 
               // Activates first-person mode
-              app.options.mode = 'first-person';
+              app.element.dataset.mode = 'first-person';
 
               window.addEventListener( 'deviceorientation', app.orientation.handle );
               app.steps.next();
@@ -1461,11 +1507,11 @@ let app = {
 
   labels : {
 
-    coordinates : document.querySelector( '.label-coordinates' ),
-    direction   : document.querySelector( '.label-direction'   ),
-    origin      : document.querySelector( '.label-origin'      ),
-    destination : document.querySelector( '.label-destination' ),
-    distance    : document.querySelector( '.label-distance'    ),
+    coordinates : document.querySelector(    '.label-coordinates' ),
+    direction   : document.querySelector(    '.label-direction'   ),
+    origin      : document.querySelector(    '.label-origin'      ),
+    destination : document.querySelectorAll( '.label-destination' ),
+    distance    : document.querySelectorAll( '.label-distance'    ),
 
     update : {
 
@@ -1518,9 +1564,13 @@ let app = {
 
       destination : () => {
 
-        // Updates label if value is different
-        if ( app.element.dataset.destination !== app.labels.destination.textContent )
-          app.labels.destination.textContent = app.element.dataset.destination;
+        app.labels.destination.forEach( destination => {
+
+          // Updates label if value is different
+          if ( app.element.dataset.destination !== destination.textContent )
+            destination.textContent = app.element.dataset.destination;
+
+        } );
 
       },
 
@@ -1547,9 +1597,13 @@ let app = {
 
         }
 
-        // Updates label if value is different
-        if ( value !== app.labels.distance.textContent )
-          app.labels.distance.textContent = value;
+        app.labels.distance.forEach( distance => {
+
+          // Updates label if value is different
+          if ( value !== distance.textContent )
+            distance.textContent = value;
+
+        } )
 
       }
 
@@ -1570,23 +1624,40 @@ let app = {
 
       destination : () => {
 
-        // Creates 2D object
-        let label = new THREE.CSS2DObject( app.labels.destination );
+        app.labels.destination.forEach( destination => {
 
-        // Attach object to end of cylinder
-        label.position.set( 0, app.data.earth.radius.crust * -2, 0 );
-        app.three.cylinder.add( label );
+        	// Selects label that is not the fixed one
+        	if ( !destination.classList.contains( 'fixed' ) ) {
+
+            // Creates 2D object
+            let label = new THREE.CSS2DObject( destination );
+
+            // Attach object to end of cylinder
+            label.position.set( 0, app.data.earth.radius.crust * -2, 0 );
+            app.three.cylinder.add( label );
+
+        	}
+
+        } );
 
       },
 
       distance : () => {
 
-        // Creates 2D object
-        let label = new THREE.CSS2DObject( app.labels.distance );
+        app.labels.distance.forEach( distance => {
 
-        // Attach object to middle of cylinder
-        label.position.set( 0, app.data.earth.radius.crust * -1, 0 );
-        app.three.cylinder.add( label );
+          // Checks if label is a child of of the background element
+          if ( distance.closest( '.background' ) ) {
+
+            // Creates 2D object
+            let label = new THREE.CSS2DObject( distance );
+
+            // Attach object to middle of cylinder
+            label.position.set( 0, app.data.earth.radius.crust * -1, 0 );
+            app.three.cylinder.add( label );
+          }
+
+        } );
 
       }
 
@@ -1608,16 +1679,21 @@ let app = {
 
   steps : {
 
-    current : {
+    element : ( number ) => {
 
-      element : () => {
+      if ( number === undefined )
+        number = app.steps.current();
 
-        let number = parseInt( app.element.dataset.step );
-        let step = app.elements.steps.querySelector( '.step:nth-child( ' + number + ' )' );
+      let selector = '.step:nth-child( ' + number + ' )';
+      let step = app.elements.steps.querySelector( selector );
 
-        return step;
+      return step;
 
-      }
+    },
+
+    current : () => {
+
+      return parseInt( app.element.dataset.step );
 
     },
 
@@ -1628,7 +1704,7 @@ let app = {
 
         // Automatically advances from “found you” message
         if ( number === 3 )
-          app.steps.next( 1600 );
+          app.steps.next( 2400 );
 
       }, delay )
 
