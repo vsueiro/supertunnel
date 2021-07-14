@@ -970,9 +970,15 @@ strong.land {
   100% { box-shadow: 0 0 0 calc( var(--basis) * 2.4 ) rgba( var(--success-100-rgb), 0 ) }
 }
 
-.app[data-mode="first-person"] .background .label-destination,
-.app[data-mode="first-person"] .background .label-distance,
-.app[data-mode="first-person"] .background .label-origin {
+.app[data-step="5"] .background .label-destination,
+.app[data-step="5"] .background .label-distance,
+.app[data-step="5"] .background .label-origin {
+  display: none;
+}
+
+.app[data-step="6"] .background .label-destination,
+.app[data-step="6"] .background .label-distance,
+.app[data-step="6"] .background .label-origin {
   display: none;
 }
 
