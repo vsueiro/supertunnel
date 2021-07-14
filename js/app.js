@@ -1697,7 +1697,7 @@ let app = {
 
         // Automatically advances from “found you” message
         if ( number === 3 )
-          app.steps.next( 1600 );
+          app.steps.next( 2400 );
 
       }, delay )
 
