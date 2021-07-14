@@ -814,7 +814,7 @@ strong.land {
   justify-content: flex-end;
   height: calc( var(--basis) * 19.2 );
   margin-top: calc( var(--basis) * -9.6 );
-
+  font-size: calc( var(--basis) * 3.6 );
 }
 
 .label-destination:not(.fixed)::after {
