@@ -711,7 +711,7 @@ let app = {
           if ( window.innerWidth <= 1024) {
 
             // Decreases basis field of view on mobile (makes everything appear a bit bigger)
-            fov = 50;
+            fov = 60;
 
           }
 
@@ -729,6 +729,27 @@ let app = {
         diagonal = ( fov, aspect ) => {
           let length = Math.sqrt( 1 + aspect * aspect );
           return THREE.MathUtils.radToDeg( 2 * Math.atan( Math.tan( THREE.MathUtils.degToRad( fov ) * .5 ) / length ) );
+        }
+
+        // Checks if mobile version is on
+        if ( window.innerWidth <= 1024 ) {
+
+          // Makes scene smaller when there is less space available
+
+          // Gets float that represents current increase of canvas height, in percentage
+          let excess = app.style( app.elements.root, '--excess-height' );
+
+          // Defines percentage from which a balance needs to be performed
+          let threshold = 18;
+
+          // Prevents scene from increasing
+          if ( excess > threshold ) {
+
+            // Balances fov with available height
+            fov = fov + ( excess - threshold ) * 1.25;
+
+          }
+
         }
 
         let target = diagonal( fov, app.three.camera.aspect );
