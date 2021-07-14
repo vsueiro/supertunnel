@@ -210,8 +210,8 @@ h1 {
 }
 
 h2 {
-  font-size: calc( var(--basis) * 1.2 );
-  letter-spacing: calc( var(--basis) * .3 );
+  font-size: calc( var(--basis) * 1.4 );
+  letter-spacing: calc( var(--basis) * .2 );
   text-transform: uppercase;
 }
 
@@ -349,6 +349,7 @@ nav a i {
 
 .logo h1 {
   display: flex;
+  align-items: baseline;
 }
 
 .logo h1 span:first-child {
@@ -438,7 +439,7 @@ main section.direction {
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: calc( var(--basis) * 1.2 );
+  font-size: calc( var(--basis) * 1.4 );
   letter-spacing: 0;
   text-transform: uppercase;
   font-weight: 700;
@@ -579,8 +580,8 @@ form > *,
 
 form p,
 form label {
-  font-size: calc( var(--basis) * 1.2 );
-  letter-spacing: calc( var(--basis) * .3 );
+  font-size: calc( var(--basis) * 1.4 );
+  letter-spacing: calc( var(--basis) * .2 );
   text-transform: uppercase;
   font-weight: 700;
 }
@@ -590,12 +591,11 @@ input[type="search"] {
   font-family: 'Poppins', sans-serif;
   font-weight: 700;
   line-height: 150%;
-  font-size: calc( var(--basis) * 1.2 );
+  font-size: calc( var(--basis) * 1.4 );
   height: calc( var(--basis) * 4.8 );
   padding: calc( var(--basis) * .8 );
-  letter-spacing: calc( var(--basis) * .4 );
+  letter-spacing: calc( var(--basis) * .2 );
   text-transform: uppercase;
-  font-weight: 700;
   cursor: pointer;
   color: var(--accent-100);
 }
@@ -851,8 +851,8 @@ strong.land {
 }
 
 .background .label-distance {
-  font-size: calc( var(--basis) * 1.2 );
-  letter-spacing: calc( var(--basis) * .3 );
+  font-size: calc( var(--basis) * 1.4 );
+  letter-spacing: calc( var(--basis) * .2 );
   text-transform: uppercase;
   font-variant-numeric: tabular-nums;
 }
