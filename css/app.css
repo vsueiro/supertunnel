@@ -854,6 +854,10 @@ strong.land {
   white-space: pre;
 }
 
+.foreground .label-distance:empty::after {
+  content: '...';
+}
+
 .label-angle {
   font-variant-numeric: tabular-nums;
 }
