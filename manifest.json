@@ -1,12 +1,12 @@
 {
-  "name": "Tunnel Simulator",
-  "short_name": "Tunnel Simulator",
+  "name": "SuperTunnel Simulator",
+  "short_name": "SuperTunnel",
   "theme_color": "#E2363F",
   "background_color": "#3D283A",
   "display": "standalone",
   "orientation": "portrait",
   "scope": "/",
-  "start_url": "https://vsueiro.com/tunnel-simulator/",
+  "start_url": "https://supertunnel.app",
   "icons": [
     {
       "src": "assets/icons/icon-72x72.png",
