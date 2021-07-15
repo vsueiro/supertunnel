@@ -734,6 +734,10 @@ strong.land {
   min-width: calc( var(--basis) * 25.6 );
 }
 
+.illustrations img {
+  width: 100%;
+}
+
 .illustrations .placeholder {
   position: relative;
   display: flex;
