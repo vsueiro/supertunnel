@@ -1299,6 +1299,9 @@ let app = {
         app.search.parameters = new URLSearchParams( app.search.query ).toString();
         app.search.url        = app.search.api + '?' + app.search.parameters;
 
+        // Hides virtual keyboard away on mobile (just after form submission)
+        app.elements.address.forEach( address => address.blur() );
+
         // Requests search results from API
         fetch( app.search.url )
          .then( response => response.json() )
