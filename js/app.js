@@ -1175,6 +1175,8 @@ let app = {
 
     success : ( position ) => {
 
+      clearTimeout( app.geolocation.timeout );
+
       app.element.dataset.geolocation = 'located';
 
       app.data.user.latitude  = position.coords.latitude;
@@ -1188,6 +1190,12 @@ let app = {
     },
 
     error : () => {
+
+      clearTimeout( app.geolocation.timeout );
+
+      // Displays alert on desktop version
+      if ( window.innerWidth > 1024 )
+        alert( 'Unable to find your location. Please type in your address.' );
 
       app.element.dataset.geolocation = 'unlocated';
       app.steps.set( 2 );
@@ -1204,6 +1212,9 @@ let app = {
           app.geolocation.success,
           app.geolocation.error
         );
+
+        // Waits 10 seconds before throwing an error
+        app.geolocation.timeout = setTimeout( app.geolocation.error, 10 * 1000 );
 
       } else {
 
