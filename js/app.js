@@ -673,6 +673,10 @@ let app = {
 
           excess = target.height.percentage - 100;
 
+          // Prevents big changes (e.g., when mobile keyboard opens and viewport shrinks)
+          if ( excess > 25 )
+            excess = 25;
+
         }
 
         // Updates CSS variable to change canvas height
@@ -1301,6 +1305,9 @@ let app = {
         app.search.query.q    = address;
         app.search.parameters = new URLSearchParams( app.search.query ).toString();
         app.search.url        = app.search.api + '?' + app.search.parameters;
+
+        // Hides virtual keyboard away on mobile (just after form submission)
+        app.elements.address.forEach( address => address.blur() );
 
         // Requests search results from API
         fetch( app.search.url )
