@@ -1145,7 +1145,13 @@ let app = {
 
     },
 
-    request : () => {
+    request : ( event ) => {
+
+      console.log( event );
+
+      alert(
+        'DeviceMotionEvent = ' + DeviceMotionEvent +
+        ', typeof DeviceMotionEvent.requestPermission = ' + typeof DeviceMotionEvent.requestPermission );
 
       // Requests permission for iOS 13+ devices
       if ( DeviceMotionEvent && typeof DeviceMotionEvent.requestPermission === 'function' ) {
