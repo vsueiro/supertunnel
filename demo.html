@@ -7,20 +7,11 @@
     <title>JavaScript Sensor Access Demo</title>
 </head>
 <body>
-<main role="main" class="container">
 
-<h1 align="left">JavaScript Sensor Access Demo</h1>
-<p><b>This demo page should be run from a mobile phone or a tablet.</b></p>
-<p>This demo page shows how websites can access sensor data from mobile devices using <a href="https://developer.mozilla.org/en-US/docs/Web/Events/devicemotion"><i>deviceorientation</i></a> and <a href="https://developer.mozilla.org/en-US/docs/Web/Events/deviceorientation"><i>devicemotion</i></a> events.</p>
 
-<p><i>deviceorientation</i> provides <i>alpha</i>, <i>beta</i> and <i>gamma</i> components which correspond to orientation along the Z, X and Y axes, respectively.</p><p><i>devicemotion</i> provides acceleration and rotation rate along three axes using MEMS accelerometers and gyroscopes.</p>
-
-<p>The sensor data shown below does not leave your browser: it is not collected, shared or transmitted. However this may not be true for other websites that you visit. For more information, see the companion page for our study: <a href="https://sensor-js.xyz/">"The Web's Sixth Sense: A Study of Scripts Accessing Smartphone Sensors"</a>.</p>
-
-<div class="p-3 mb-2 bg-secondary" id="demo-div">
 <a id="start_demo" class="btn btn-lg btn-success py-1" href="#" role="button">Start the demo</a>
-<p style="margin-top:1rem;">Num. of datapoints: <span class="badge badge-warning" id="num-observed-events">0</span></p>
 
+<p style="margin-top:1rem;">Num. of datapoints: <span class="badge badge-warning" id="num-observed-events">0</span></p>
 
 <h4 style="margin-top:0.75rem;">Orientation</h4>
 <ul>
@@ -52,14 +43,6 @@
   <li>Z-axis: <span id="Gyroscope_z">0</span><span>&deg;/s</span></li>
 </ul>
 
-</div>
-</main>
-<footer class="footer">
-  <div class="container">
-    <span class="text-muted small">This page is hosted on GitHub Pages, please see GitHub's privacy statement
-    <a href="https://help.github.com/articles/github-privacy-statement/">here</a>.</span>
-  </div>
-</footer>
 <script>
 
 function handleOrientation(event) {
