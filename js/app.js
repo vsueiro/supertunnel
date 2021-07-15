@@ -553,10 +553,10 @@ let app = {
         // Makes camera move automatically
         app.three.controls.autoRotate      = true;
 
-        // Makes 1 orbit in 240 seconds
-        app.three.controls.autoRotateSpeed =   2; // 1 orbit in 30 seconds
-        app.three.controls.autoRotateSpeed = .25; // 1 orbit in 240 seconds
-        app.three.controls.autoRotateSpeed =  .5; // 1 orbit in 120 seconds
+        // Defines duration (in seconds) of a complete orbit (at 60fps)
+        let duration = 60;
+        let fps = 60;
+        app.three.controls.autoRotateSpeed = fps / duration;
 
         // Moves with inertia
         app.three.controls.enableDamping = true;
