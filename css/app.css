@@ -718,7 +718,7 @@ input[type="search"] + button:not(:hover) {
 
 .note {
   margin-top: calc( var(--basis) * .8 );
-  font-size: calc( var(--basis) * 1.2 );
+  font-size: calc( var(--basis) * 1.4 );
   color: var(--accent-100);
 }
 
