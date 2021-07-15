@@ -1145,39 +1145,49 @@ let app = {
 
     },
 
-    request : ( event ) => {
+    initialize : () => {
 
-      console.log( event );
+      // Activates first-person mode
+      app.element.dataset.mode = 'first-person';
 
-      alert(
-        'DeviceMotionEvent = ' + DeviceMotionEvent +
-        ', typeof DeviceMotionEvent.requestPermission = ' + typeof DeviceMotionEvent.requestPermission );
+      // Begins reading sensor values
+      window.addEventListener( 'deviceorientation', app.orientation.handle );
 
-      // Requests permission for iOS 13+ devices
-      if ( DeviceMotionEvent && typeof DeviceMotionEvent.requestPermission === 'function' ) {
+      // Advances to the next step on mobile
+      app.steps.next();
 
-        DeviceMotionEvent.requestPermission()
-          .then( response => {
+    },
 
-            if ( response == 'granted' ) {
+    request : () => {
 
-              // Activates first-person mode
-              app.element.dataset.mode = 'first-person';
+      // Checks if browsers supports motion events
+      if ( DeviceMotionEvent ) {
 
-              window.addEventListener( 'deviceorientation', app.orientation.handle );
-              app.steps.next();
+        // Requests permission for browsers that require it (e.g., iOS 13+ devices)
+        if ( typeof DeviceMotionEvent.requestPermission === 'function' ) {
 
-            } else {
+          DeviceMotionEvent.requestPermission()
+            .then( response => {
 
-              app.orientation.error( 'not granted' );
+              if ( response == 'granted' )
+                app.orientation.initialize();
+              else
+                app.orientation.error( 'not granted' );
 
-            }
+            } );
 
-          } );
+        }
+
+        // Handles browsers that offer sensor values without permission
+        else {
+
+          app.orientation.initialize();
+
+        }
 
       }
 
-      // If feature is not supported
+      // Handles browsers in which motion events are not supported
       else {
 
         app.orientation.error( 'not supported' );
