@@ -1791,7 +1791,7 @@ let app = {
 
     motion : () => {
 
-      app.elements.trackButton.addEventListener( 'click', app.orientation.request );
+      app.elements.trackButton.addEventListener( 'click', app.orientation.request, true );
 
     },
 

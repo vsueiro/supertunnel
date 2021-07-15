@@ -810,7 +810,7 @@
         initialize : () => {
 
           // Tracks phone’s orientation when clicked
-          app.elements.trackButton.addEventListener( 'click', app.orientation.request );
+          app.elements.trackButton.addEventListener( 'click', app.orientation.request, true );
 
           // Finds user’s location when button is clicked
           app.elements.findButton.forEach( button => button.addEventListener( 'click', app.geolocation.request ) );
