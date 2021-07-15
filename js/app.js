@@ -666,6 +666,10 @@ let app = {
 
           excess = target.height.percentage - 100;
 
+          // Prevents big changes (e.g., when mobile keyboard opens and viewport shrinks)
+          if ( excess > 25 )
+            excess = 25;
+
         }
 
         // Updates CSS variable to change canvas height
