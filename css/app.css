@@ -703,6 +703,10 @@ input[type="search"] + button:not(:hover) {
   text-align: center;
   width: 100%;
   padding: calc( var(--basis) * 1.2 );
+  margin-bottom: calc( var(--basis) * .8 );
+}
+
+.step > div:last-of-type {
   margin-bottom: calc( var(--basis) * .4 );
 }
 
@@ -714,7 +718,7 @@ input[type="search"] + button:not(:hover) {
 
 .note {
   margin-top: calc( var(--basis) * .8 );
-  font-size: calc( var(--basis) * 1.2 );
+  font-size: calc( var(--basis) * 1.4 );
   color: var(--accent-100);
 }
 
@@ -732,6 +736,10 @@ strong.land {
   justify-content: center;
   width: 100%;
   min-width: calc( var(--basis) * 25.6 );
+}
+
+.illustrations img {
+  width: 100%;
 }
 
 .illustrations .placeholder {
