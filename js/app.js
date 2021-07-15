@@ -22,6 +22,13 @@ let app = {
 
   },
 
+  mobile : () => {
+
+    // Returns true if mobile version is currently being displayed
+    return window.innerWidth <= 1024;
+
+  },
+
   data : {
 
     orientation : {
@@ -645,7 +652,7 @@ let app = {
         let excess = 0;
 
         // Calculates increase for mobile version
-        if ( window.innerWidth <= 1024 && app.element.dataset.mode === 'third-person' ) {
+        if ( app.mobile() && app.element.dataset.mode === 'third-person' ) {
 
           // Prevents centering on step 5 (keeping same position as on step 4)
           let step = app.steps.current() === 5 ? app.steps.element( 4 ) : app.steps.element();
@@ -710,7 +717,7 @@ let app = {
         if ( app.element.dataset.mode === 'first-person' ) {
 
           // Checks if mobile version is on
-          if ( window.innerWidth <= 1024) {
+          if ( app.mobile() ) {
 
             // Decreases basis field of view on mobile (makes everything appear a bit bigger)
             fov = 60;
@@ -734,7 +741,7 @@ let app = {
         }
 
         // Checks if mobile version is on
-        if ( window.innerWidth <= 1024 ) {
+        if ( app.mobile() ) {
 
           // Makes scene smaller when there is less space available
 
@@ -1194,7 +1201,7 @@ let app = {
       clearTimeout( app.geolocation.timeout );
 
       // Displays alert on desktop version
-      if ( window.innerWidth > 1024 )
+      if ( !app.mobile() )
         alert( 'Unable to find your location. Please type in your address.' );
 
       app.element.dataset.geolocation = 'unlocated';
