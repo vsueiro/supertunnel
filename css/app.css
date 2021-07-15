@@ -703,7 +703,7 @@ input[type="search"] + button:not(:hover) {
   text-align: center;
   width: 100%;
   padding: calc( var(--basis) * 1.2 );
-  margin-bottom: calc( var(--basis) * 1.2 );
+  margin-bottom: calc( var(--basis) * .8 );
 }
 
 .step > div:last-of-type {
