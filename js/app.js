@@ -50,8 +50,17 @@ let app = {
 
     load : () => {
 
-      // Gets countries geometries
-      fetch( './assets/countries-lo.json' )
+      let path = './assets/';
+
+      // Defines high-resolution file by default
+      let file = 'countries-hi';
+
+      // Uses low-resolution file if user is on mobile
+      if ( app.mobile() )
+        file = 'countries-lo';
+
+      // Loads countries geometries
+      fetch( path + file + '.json' )
         .then( response => response.json() )
         .then( json => {
 
