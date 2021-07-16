@@ -784,13 +784,18 @@ let app = {
 
         }
 
+        // Calculates new fov
         let target = diagonal( fov, app.three.camera.aspect );
-        let diff   = target - app.three.camera.fov;
+
+        // Defines a “speed” for the transition (1 is abruptly, values closer to 0 are slower)
         let factor = 0.05;
 
         // Changes fov gradually, to create a growing/shrinking effect
-        app.three.camera.fov = app.three.camera.fov + diff * factor;
-
+        app.three.camera.fov = app.data.smooth(
+          app.three.camera.fov,
+          target,
+          factor
+        );
         if ( reset ) {
 
           // Positions it away from Earth (3x its radius)
