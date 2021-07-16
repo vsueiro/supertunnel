@@ -1145,33 +1145,49 @@ let app = {
 
     },
 
+    initialize : () => {
+
+      // Activates first-person mode
+      app.element.dataset.mode = 'first-person';
+
+      // Begins reading sensor values
+      window.addEventListener( 'deviceorientation', app.orientation.handle );
+
+      // Advances to the next step on mobile
+      app.steps.next();
+
+    },
+
     request : () => {
 
-      // Requests permission for iOS 13+ devices
-      if ( DeviceMotionEvent && typeof DeviceMotionEvent.requestPermission === 'function' ) {
+      // Checks if browsers supports motion events
+      if ( DeviceMotionEvent ) {
 
-        DeviceMotionEvent.requestPermission()
-          .then( response => {
+        // Requests permission for browsers that require it (e.g., iOS 13+ devices)
+        if ( typeof DeviceMotionEvent.requestPermission === 'function' ) {
 
-            if ( response == 'granted' ) {
+          DeviceMotionEvent.requestPermission()
+            .then( response => {
 
-              // Activates first-person mode
-              app.element.dataset.mode = 'first-person';
+              if ( response == 'granted' )
+                app.orientation.initialize();
+              else
+                app.orientation.error( 'not granted' );
 
-              window.addEventListener( 'deviceorientation', app.orientation.handle );
-              app.steps.next();
+            } );
 
-            } else {
+        }
 
-              app.orientation.error( 'not granted' );
+        // Handles browsers that offer sensor values without permission
+        else {
 
-            }
+          app.orientation.initialize();
 
-          } );
+        }
 
       }
 
-      // If feature is not supported
+      // Handles browsers in which motion events are not supported
       else {
 
         app.orientation.error( 'not supported' );
@@ -1791,7 +1807,7 @@ let app = {
 
     motion : () => {
 
-      app.elements.trackButton.addEventListener( 'click', app.orientation.request );
+      app.elements.trackButton.addEventListener( 'click', app.orientation.request, true );
 
     },
 
