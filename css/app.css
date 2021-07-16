@@ -4,7 +4,7 @@
 
 :root {
 
-  /* Colors */
+  /* Defines color palette */
   --neutral-100:         #FADFD4;
   --neutral-75:          #CAB1AD;
   --neutral-50:          #9A8387;
@@ -26,10 +26,10 @@
   --accent-100-rgb:  226, 54, 64;
   --success-100-rgb:  54,226,222;
 
-  /* Value that controls scale of UI */
+  /* Controls scale of UI */
   --basis:                  10px;
 
-  /* Value to center 3D scene on mobile (updated in JS) */
+  /* Centers 3D scene on mobile (updated in JS) */
   --excess-height:            0%;
 
 }
