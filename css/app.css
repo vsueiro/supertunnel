@@ -273,6 +273,13 @@ nav a i {
   margin-right: 0;
 }
 
+footer a {
+  border-bottom: calc( var(--basis) * .2 ) solid rgba( var(--neutral-100-rgb), .1 );
+}
+
+footer a:hover {
+  border-bottom: calc( var(--basis) * .2 ) solid rgba( var(--neutral-100-rgb), 1 );
+}
 .compass {
   position: relative;
   width: calc( var(--basis) * 6.4 );
