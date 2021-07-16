@@ -811,6 +811,7 @@ strong.land {
   width: 50%;
   max-width: calc( var(--basis) * 38.4 );
   line-height: 1.25;
+  transition: opacity .4s linear;
 }
 
 .label-origin {
@@ -921,6 +922,11 @@ strong.land {
 .app[data-loading="false"] .background,
 .app[data-loading="false"] .foreground {
   opacity: 1;
+}
+
+.app[data-search="searching"] .background .label,
+.app[data-geolocation="locating"] .background .label {
+  opacity: 0;
 }
 
 .app[data-search="searching"] .loader,
