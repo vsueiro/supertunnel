@@ -76,6 +76,7 @@ let app = {
   color : ( name ) => {
 
     // Gets color from CSS variable
+
     let style = getComputedStyle( app.elements.root );
     let value = style.getPropertyValue( '--' + name ).trim();
     return value;
@@ -83,6 +84,8 @@ let app = {
   },
 
   style : ( element, property, type = 'float' ) => {
+
+    // Gets CSS style of element by property name
 
     let style = getComputedStyle( element );
     let value = style.getPropertyValue( property );
@@ -1816,6 +1819,7 @@ let app = {
 
     motion : () => {
 
+      // Tries to access motion events when button is clicked
       app.elements.trackButton.addEventListener( 'click', app.orientation.request, true );
 
     },
