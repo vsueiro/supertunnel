@@ -252,7 +252,7 @@ main {
   align-items: center;
   width: 100%;
   height: 100%;
-  padding-bottom: calc( ( var(--basis) * 4.8 ) + ( var(--basis) * .4 ) ); /* To account for .2 border */
+  padding-bottom: calc( var(--basis) * 4.8 );
 }
 
 nav {
