@@ -48,6 +48,16 @@ let app = {
       longitude : -70.6693,
     },
 
+    smooth : ( current, target, factor = 0.25 ) => {
+
+      // Changes current value gradually (making it closer to the target value at every iteration)
+      let difference = target - current;
+      let increment  = difference * factor;
+
+      return current + increment;
+
+    },
+
     load : () => {
 
       let path = './assets/';
@@ -822,11 +832,27 @@ let app = {
           app.elements.compass.style.transform = 'rotate(' + app.data.orientation.alpha + 'deg)';
 
           // Rotates tunnel on two axes (based on device motion)
-          app.three.cylinder.rotation.x = THREE.Math.degToRad( app.data.orientation.beta  );
-          app.three.cylinder.rotation.z = THREE.Math.degToRad( app.data.orientation.gamma );
-          app.three.chord.rotation.x    = THREE.Math.degToRad( app.data.orientation.beta  );
-          app.three.chord.rotation.z    = THREE.Math.degToRad( app.data.orientation.gamma );
-          app.three.tunnel.rotation.y   = THREE.Math.degToRad( 0 );
+
+          // Changes values gradually
+          app.three.cylinder.rotation.x = app.data.smooth(
+            app.three.cylinder.rotation.x,
+            THREE.Math.degToRad( app.data.orientation.beta )
+          );
+          app.three.cylinder.rotation.z = app.data.smooth(
+            app.three.cylinder.rotation.z,
+            THREE.Math.degToRad( app.data.orientation.gamma )
+          );
+          app.three.chord.rotation.x = app.data.smooth(
+            app.three.chord.rotation.x,
+            THREE.Math.degToRad( app.data.orientation.beta )
+          );
+          app.three.chord.rotation.z = app.data.smooth(
+            app.three.chord.rotation.z,
+            THREE.Math.degToRad( app.data.orientation.gamma )
+          );
+
+          // Makes North be up
+          app.three.tunnel.rotation.y = THREE.Math.degToRad( 0 );
 
           // Resets handle control
           app.drag.reset();
@@ -849,16 +875,27 @@ let app = {
           app.three.stars.rotation.y    = THREE.Math.degToRad( 0 );
 
           // Rotates tunnel on two axes (based on drag control)
-          app.three.cylinder.rotation.x = THREE.Math.degToRad( app.drag.value.y );
-          app.three.cylinder.rotation.z = THREE.Math.degToRad( app.drag.value.x );
-          app.three.chord.rotation.x    = THREE.Math.degToRad( app.drag.value.y );
-          app.three.chord.rotation.z    = THREE.Math.degToRad( app.drag.value.x );
-          app.three.tunnel.rotation.y   = THREE.Math.degToRad( 0 );
 
-          // Rotates tunnel on all axes (based on device motion)
-          // app.three.cylinder.rotation.x = THREE.Math.degToRad( app.data.orientation.beta  );
-          // app.three.tunnel.rotation.y   = THREE.Math.degToRad( app.data.orientation.alpha );
-          // app.three.cylinder.rotation.z = THREE.Math.degToRad( app.data.orientation.gamma );
+          // Changes values gradually
+          app.three.cylinder.rotation.x = app.data.smooth(
+            app.three.cylinder.rotation.x,
+            THREE.Math.degToRad( app.drag.value.y )
+          );
+          app.three.cylinder.rotation.z = app.data.smooth(
+            app.three.cylinder.rotation.z,
+            THREE.Math.degToRad( app.drag.value.x )
+          );
+          app.three.chord.rotation.x = app.data.smooth(
+            app.three.chord.rotation.x,
+            THREE.Math.degToRad( app.drag.value.y )
+          );
+          app.three.chord.rotation.z = app.data.smooth(
+            app.three.chord.rotation.z,
+            THREE.Math.degToRad( app.drag.value.x )
+          );
+
+          // Makes North be up
+          app.three.tunnel.rotation.y = THREE.Math.degToRad( 0 );
 
           // Activates camera controls
           app.three.controls.enabled = true;
