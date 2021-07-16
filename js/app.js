@@ -51,7 +51,11 @@ let app = {
     smooth : ( current, target, factor = 0.25 ) => {
 
       // Changes current value gradually (making it closer to the target value at every iteration)
+
+      // Calculates gap from current value to target value
       let difference = target - current;
+
+      // Calculates transition “speed”, as defined by factor (1 is abruptly, values closer to 0 are slower)
       let increment  = difference * factor;
 
       return current + increment;
