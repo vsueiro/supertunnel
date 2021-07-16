@@ -644,10 +644,10 @@ let app = {
       // Animates 3D elements
       requestAnimationFrame( app.three.render );
 
-      // Removes loading state
+      // Removes loading state after 1.2 seconds
       setTimeout( () => {
         app.element.dataset.loading = false;
-      }, 800 )
+      }, 1200 )
 
     },
 
