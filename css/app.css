@@ -280,6 +280,9 @@ footer a {
 footer a:hover {
   border-bottom: calc( var(--basis) * .2 ) solid rgba( var(--neutral-100-rgb), 1 );
 }
+
+/* Compass */
+
 .compass {
   position: relative;
   width: calc( var(--basis) * 6.4 );
