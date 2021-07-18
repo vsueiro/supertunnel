@@ -875,6 +875,10 @@ let app = {
           // Resets camera position
           app.three.update.camera( 'reset' );
 
+          // Stores readings on history, if this option is enabled
+          if ( app.element.dataset.record == 'true' )
+            app.orientation.record()
+
         }
 
         // Enables third-person view
@@ -1154,6 +1158,28 @@ let app = {
   },
 
   orientation : {
+
+    record : ( timestamp = Date.now() ) => {
+
+      // Creates list to house all readings, if it does not exist
+      if ( app.data.orientation.history === undefined )
+        app.data.orientation.history = [];
+
+      // Calculates time elapsed since first reading, if it exists
+      if ( app.data.orientation.history[ 0 ] )
+        timestamp = timestamp - app.data.orientation.history[ 0 ].t;
+
+      let reading = {
+        t : timestamp,
+        a : app.data.orientation.alpha,
+        b : app.data.orientation.beta,
+        g : app.data.orientation.gamma,
+      }
+
+      // Adds most recent reading to history
+      app.data.orientation.history.push( reading );
+
+    },
 
     handle : () => {
 
