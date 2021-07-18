@@ -163,6 +163,8 @@ let app = {
 
   parameters : {
 
+    coordinates : false,
+
     allow : [
 
       'step',
@@ -185,16 +187,22 @@ let app = {
         // Checks if current URL contains one of the allowed parameters
         if ( parameters.has( key ) ) {
 
-          // Assigns coordinates to a specific object
-          if ( key == 'latitude' || key == 'longitude' )
+          // Checks if at least one of the coordinates below has been set
+          if ( key == 'latitude' || key == 'longitude' ) {
+
+            // Changes flag (to prevent default locations from being used)
+            app.parameters.coordinates = true;
+
+            // Assigns coordinates to a specific object
             app.data.user[ key ] = parseFloat( parameters.get( key ) );
+
+          }
 
           // Handles all other parameters as data attributes
           else
             app.element.dataset[ key ] = parameters.get( key );
 
         }
-
 
       }
 
@@ -1546,17 +1554,22 @@ let app = {
 
     initialize : () => {
 
-      // Picks a random antipode (from a selected list)
-      let antipodes = app.data.antipodes;
-      let random    = Math.floor( Math.random() * antipodes.length );
-      let antipode  = antipodes[ random ];
+      // Makes sure no latitude or longitude were passed as URL parameters
+      if ( !app.parameters.coordinates ) {
 
-      // Uses the antipode origin as the default user location
-      app.data.user.latitude  = antipode.latitude;
-      app.data.user.longitude = antipode.longitude;
+        // Picks a random antipode (from a selected list)
+        let antipodes = app.data.antipodes;
+        let random    = Math.floor( Math.random() * antipodes.length );
+        let antipode  = antipodes[ random ];
 
-      // Displays name of location within search input
-      app.search.fill( antipode.address );
+        // Uses the antipode origin as the default user location
+        app.data.user.latitude  = antipode.latitude;
+        app.data.user.longitude = antipode.longitude;
+
+        // Displays name of location within search input
+        app.search.fill( antipode.address );
+
+      }
 
     }
 
