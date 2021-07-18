@@ -93,20 +93,35 @@ let app = {
     allow : [
 
       'step',
+      'mode',
       'record',
-      'mode'
+      'latitude',
+      'longitude'
 
     ],
 
     initialize : () => {
 
+      // Retrieves all parameters of current URL
       let query = window.location.search;
       let parameters = new URLSearchParams( query );
 
+      // Loops through all allowed parameters
       for ( let key of app.parameters.allow ) {
 
-        if ( parameters.has( key ) )
-          app.element.dataset[ key ] = parameters.get( key );
+        // Checks if current URL contains one of the allowed parameters
+        if ( parameters.has( key ) ) {
+
+          // Assigns coordinates to a specific object
+          if ( key == 'latitude' || key == 'longitude' )
+            app.data.user[ key ] = parseFloat( parameters.get( key ) );
+
+          // Handles all other parameters as data attributes
+          else
+            app.element.dataset[ key ] = parameters.get( key );
+
+        }
+
 
       }
 
