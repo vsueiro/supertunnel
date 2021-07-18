@@ -88,6 +88,32 @@ let app = {
 
   },
 
+  parameters : {
+
+    allow : [
+
+      'step',
+      'record',
+      'mode'
+
+    ],
+
+    initialize : () => {
+
+      let query = window.location.search;
+      let parameters = new URLSearchParams( query );
+
+      for ( let key of app.parameters.allow ) {
+
+        if ( parameters.has( key ) )
+          app.element.dataset[ key ] = parameters.get( key );
+
+      }
+
+    }
+
+  },
+
   color : ( name ) => {
 
     // Gets color from CSS variable
@@ -2018,6 +2044,7 @@ let app = {
 
   initialize : () => {
 
+    app.parameters.initialize();
     app.three.initialize();
     app.events.initialize();
     app.labels.initialize();
