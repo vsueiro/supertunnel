@@ -1928,6 +1928,13 @@ let app = {
 
     },
 
+    download : () => {
+
+      // Calls download method when download button is clicked
+      app.elements.download.addEventListener( 'click', app.orientation.download );
+
+    },
+
     initialize : () => {
 
       // Enables drag on handle to control tunnel angles on desktop
@@ -1938,6 +1945,9 @@ let app = {
 
       // Tracks phone’s motion when button is clicked
       app.events.motion();
+
+      // Enables download button (for debugging of orientation data)
+      app.events.download();
 
     }
 
