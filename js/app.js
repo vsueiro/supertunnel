@@ -15,6 +15,7 @@ let app = {
     area        : document.querySelector(    '.draggable-area'         ),
     handle      : document.querySelector(    '.draggable-handle'       ),
     trackButton : document.querySelector(    '.track'                  ),
+    download    : document.querySelector(    'a[download]'             ),
     findButton  : document.querySelectorAll( '.find'                   ),
     nextButton  : document.querySelectorAll( '.next'                   ),
     form        : document.querySelectorAll( 'form'                    ),
@@ -1158,6 +1159,37 @@ let app = {
   },
 
   orientation : {
+
+    download : () => {
+
+      // Converts list of objects to string
+      let content = JSON.stringify( app.data.orientation.history );
+
+      // Creates file
+      let file = new Blob( [ content ], { type: 'text/plain' } );
+
+      // Populates download link with content
+      app.elements.download.href = URL.createObjectURL( file );
+
+      // Creates unique filename from location coordinates and timestamp
+      let name = '';
+
+      name += app.data.user.latitude;
+      name += '_';
+      name += app.data.user.longitude;
+      name += '_';
+      name += app.data.orientation.history[ 0 ].t;
+
+      // Assigns filename to download link
+      app.elements.download.download = name;
+
+      // Simulates click on download link
+      app.elements.download.click();
+
+      // Stops recording
+      app.element.dataset.record = 'false';
+
+    },
 
     record : ( timestamp = Date.now() ) => {
 
