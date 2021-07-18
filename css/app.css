@@ -807,6 +807,10 @@ strong.land {
   margin-bottom: calc( var(--basis) * -1.2 );
 }
 
+a[download] {
+  display: none;
+}
+
 /* Labels */
 
 .label {
@@ -1022,6 +1026,10 @@ strong.land {
 }
 
 .app[data-mode="first-person"] .background .label-destination.fixed {
+  display: flex;
+}
+
+.app[data-record="true"] a[download] {
   display: flex;
 }
 
