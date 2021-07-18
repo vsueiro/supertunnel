@@ -832,8 +832,8 @@ let app = {
 
       tunnel : () => {
 
-        // Enables first-person view
-        if ( app.element.dataset.mode == 'first-person' ) {
+        // Enables first-person view (or simulates it if records are being played)
+        if ( app.element.dataset.mode == 'first-person' || app.orientation.playing ) {
 
           // Rotates Earth to always match real-world North
           app.three.earth.rotation.y    = THREE.Math.degToRad( app.data.orientation.alpha * -1 );
@@ -1211,6 +1211,68 @@ let app = {
 
       // Adds most recent reading to history
       app.data.orientation.history.push( reading );
+
+    },
+
+    play : ( file ) => {
+
+      // Defines path that contains records
+      let path = './assets/records/';
+
+      // Uses this filename for demo
+      file = file || '-23.50929645679305_-46.876645990569784_1626623241011';
+
+      // Splits filename into parts, separated by an underscore
+      let parts = file.split( '_' );
+
+      // Extracts coordinates of user location
+      let latitude  = parseFloat( parts[ 0 ] );
+      let longitude = parseFloat( parts[ 1 ]  );
+
+      // Extracts timestamp of when the recording started
+      let start     = parseInt( parts[ 2 ] );
+
+      // Uses the coordinates in recording as the user location
+      app.data.user = {
+        latitude  : latitude,
+        longitude : longitude,
+      };
+
+      // Activates first-person mode
+      app.element.dataset.mode = 'first-person';
+
+      // Goes to first-person screen (step number 6)
+      app.element.dataset.step = 6;
+
+      // Loads list of all sensor readings
+      fetch( path + file + '.json' )
+        .then( response => response.json() )
+        .then( records => {
+
+          // Signals render function that records are currently being played
+          app.orientation.playing = true;
+
+          // Resets first reading to begin at time 0;
+          records[ 0 ].t = 0;
+
+          // Loops through every record
+          for ( let record of records ) {
+
+            // Schedules a change in orientation data (based on their timestamp)
+            setTimeout( () => {
+
+              // Updates data (that will be used to render the scene)
+              app.data.orientation = {
+                alpha : record.a,
+                beta  : record.b,
+                gamma : record.g,
+              }
+
+            }, record.t );
+
+          }
+
+        } );
 
     },
 
