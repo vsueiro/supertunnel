@@ -597,6 +597,7 @@ form label {
 }
 
 button,
+.button,
 input[type="search"] {
   font-family: 'Poppins', sans-serif;
   font-weight: 700;
@@ -624,7 +625,8 @@ input[type="search"] {
   color: rgba( var(--accent-100-rgb), .5 );
 }
 
-button span {
+button span,
+.button span {
   display: flex;
   justify-content: flex-start;
   width: 100%;
@@ -636,6 +638,7 @@ button.find span {
 }
 
 button,
+.button,
 .search-container {
   display: flex;
   justify-content: center;
@@ -1079,11 +1082,13 @@ strong.land {
   }
 
   button,
+  .button,
   input[type="search"] {
     font-size: calc( var(--basis) * 1.6 );
   }
 
-  button span {
+  button span,
+  .button span {
     justify-content: center;
   }
 
