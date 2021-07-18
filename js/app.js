@@ -92,6 +92,16 @@ let app = {
         address   : 'Saigon, Vietnam',
         latitude  : 10.7715512,
         longitude : 106.6983801,
+      },
+      {
+        address   : 'Manila, Philippines',
+        latitude  : 14.5907332,
+        longitude : 120.9809674,
+      },
+      {
+        address   : 'Singapore',
+        latitude  : 1.357107,
+        longitude : 103.8194992,
       }
     ],
 
