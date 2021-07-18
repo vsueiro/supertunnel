@@ -32,6 +32,69 @@ let app = {
 
   data : {
 
+    antipodes : [
+      {
+        address   : 'Santiago, Chile',
+        latitude  : -33.4377756,
+        longitude : -70.6504502,
+      },
+      {
+        address   : 'Madrid, Spain',
+        latitude  : 40.4167047,
+        longitude : -3.7035825,
+      },
+      {
+        address   : 'Lima, Peru',
+        latitude  : -12.0621065,
+        longitude : -77.0365256,
+      },
+      {
+        address   : 'Jakarta, Indonesia',
+        latitude  : -6.1753942,
+        longitude : 106.827183,
+      },
+      {
+        address   : 'Honolulu, Hawaii',
+        latitude  : 21.304547,
+        longitude : -157.855676,
+      },
+      {
+        address   : 'Shanghai, China',
+        latitude  : 31.2322758,
+        longitude : 121.4692071,
+      },
+      {
+        address   : 'Taipei, Taiwan',
+        latitude  : 25.0375198,
+        longitude : 121.5636796,
+      },
+      {
+        address   : 'Suva, Fiji',
+        latitude  : -18.1415884,
+        longitude : 178.4421662,
+      },
+      {
+        address   : 'Nukuʻalofa, Tonga',
+        latitude  : -21.1343401,
+        longitude : -175.2018085,
+      },
+      {
+        address   : 'French Polynesia',
+        latitude  : -17.5373835,
+        longitude : -149.5659964,
+      },
+      {
+        address   : 'Ushuaia, Argentina',
+        latitude  : -54.8069332,
+        longitude : -68.3073246,
+      },
+      {
+        address   : 'Saigon, Vietnam',
+        latitude  : 10.7715512,
+        longitude : 106.6983801,
+      }
+    ],
+
     orientation : {
       alpha : 0,
       beta  : 0,
@@ -45,8 +108,8 @@ let app = {
     },
 
     user : {
-      latitude  : -33.4489,
-      longitude : -70.6693,
+      latitude  : 0,
+      longitude : 0,
     },
 
     smooth : ( current, target, factor = 0.25 ) => {
@@ -1469,6 +1532,22 @@ let app = {
 
       }
 
+    },
+
+    initialize : () => {
+
+      // Picks a random antipode (from a selected list)
+      let antipodes = app.data.antipodes;
+      let random    = Math.floor( Math.random() * antipodes.length );
+      let antipode  = antipodes[ random ];
+
+      // Uses the antipode origin as the default user location
+      app.data.user.latitude  = antipode.latitude;
+      app.data.user.longitude = antipode.longitude;
+
+      // Displays name of location within search input
+      app.search.fill( antipode.address );
+
     }
 
   },
@@ -1574,11 +1653,17 @@ let app = {
 
       app.element.dataset.search = 'unsearched';
 
-      // Removes class 'default', so value can be replaced by fill function
       app.elements.address.forEach( address => {
-        address.classList.remove( 'default' );
         address.value = '';
-      } )
+      } );
+
+    },
+
+    fill : ( string = '' ) => {
+
+      app.elements.address.forEach( address => {
+        address.value = string;
+      } );
 
     },
 
@@ -1590,7 +1675,7 @@ let app = {
       // Removes class 'default', so value can be replaced by fill function
       app.elements.address.forEach( address =>
         address.classList.remove( 'default' )
-      )
+      );
 
     }
 
@@ -2060,6 +2145,7 @@ let app = {
   initialize : () => {
 
     app.parameters.initialize();
+    app.geolocation.initialize();
     app.three.initialize();
     app.events.initialize();
     app.labels.initialize();
