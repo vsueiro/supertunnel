@@ -1179,6 +1179,7 @@ let app = {
       name += app.data.user.longitude;
       name += '_';
       name += app.data.orientation.history[ 0 ].t;
+      name += '.json';
 
       // Assigns filename to download link
       app.elements.download.download = name;
