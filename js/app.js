@@ -88,6 +88,47 @@ let app = {
 
   },
 
+  parameters : {
+
+    allow : [
+
+      'step',
+      'mode',
+      'record',
+      'latitude',
+      'longitude'
+
+    ],
+
+    initialize : () => {
+
+      // Retrieves all parameters of current URL
+      let query = window.location.search;
+      let parameters = new URLSearchParams( query );
+
+      // Loops through all allowed parameters
+      for ( let key of app.parameters.allow ) {
+
+        // Checks if current URL contains one of the allowed parameters
+        if ( parameters.has( key ) ) {
+
+          // Assigns coordinates to a specific object
+          if ( key == 'latitude' || key == 'longitude' )
+            app.data.user[ key ] = parseFloat( parameters.get( key ) );
+
+          // Handles all other parameters as data attributes
+          else
+            app.element.dataset[ key ] = parameters.get( key );
+
+        }
+
+
+      }
+
+    }
+
+  },
+
   color : ( name ) => {
 
     // Gets color from CSS variable
@@ -2018,6 +2059,7 @@ let app = {
 
   initialize : () => {
 
+    app.parameters.initialize();
     app.three.initialize();
     app.events.initialize();
     app.labels.initialize();
