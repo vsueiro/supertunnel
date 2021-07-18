@@ -15,6 +15,7 @@ let app = {
     area        : document.querySelector(    '.draggable-area'         ),
     handle      : document.querySelector(    '.draggable-handle'       ),
     trackButton : document.querySelector(    '.track'                  ),
+    download    : document.querySelector(    'a[download]'             ),
     findButton  : document.querySelectorAll( '.find'                   ),
     nextButton  : document.querySelectorAll( '.next'                   ),
     form        : document.querySelectorAll( 'form'                    ),
@@ -831,8 +832,8 @@ let app = {
 
       tunnel : () => {
 
-        // Enables first-person view
-        if ( app.element.dataset.mode == 'first-person' ) {
+        // Enables first-person view (or simulates it if records are being played)
+        if ( app.element.dataset.mode == 'first-person' || app.orientation.playing ) {
 
           // Rotates Earth to always match real-world North
           app.three.earth.rotation.y    = THREE.Math.degToRad( app.data.orientation.alpha * -1 );
@@ -874,6 +875,10 @@ let app = {
 
           // Resets camera position
           app.three.update.camera( 'reset' );
+
+          // Stores readings on history, if this option is enabled
+          if ( app.element.dataset.record == 'true' )
+            app.orientation.record()
 
         }
 
@@ -1154,6 +1159,122 @@ let app = {
   },
 
   orientation : {
+
+    download : () => {
+
+      // Converts list of objects to string
+      let content = JSON.stringify( app.data.orientation.history );
+
+      // Creates file
+      let file = new Blob( [ content ], { type: 'text/plain' } );
+
+      // Populates download link with content
+      app.elements.download.href = URL.createObjectURL( file );
+
+      // Creates unique filename from location coordinates and timestamp
+      let name = '';
+
+      name += app.data.user.latitude;
+      name += '_';
+      name += app.data.user.longitude;
+      name += '_';
+      name += app.data.orientation.history[ 0 ].t;
+      name += '.json';
+
+      // Assigns filename to download link
+      app.elements.download.download = name;
+
+      // Simulates click on download link
+      app.elements.download.click();
+
+      // Stops recording
+      app.element.dataset.record = 'false';
+
+    },
+
+    record : ( timestamp = Date.now() ) => {
+
+      // Creates list to house all readings, if it does not exist
+      if ( app.data.orientation.history === undefined )
+        app.data.orientation.history = [];
+
+      // Calculates time elapsed since first reading, if it exists
+      if ( app.data.orientation.history[ 0 ] )
+        timestamp = timestamp - app.data.orientation.history[ 0 ].t;
+
+      let reading = {
+        t : timestamp,
+        a : app.data.orientation.alpha,
+        b : app.data.orientation.beta,
+        g : app.data.orientation.gamma,
+      }
+
+      // Adds most recent reading to history
+      app.data.orientation.history.push( reading );
+
+    },
+
+    play : ( file ) => {
+
+      // Defines path that contains records
+      let path = './assets/records/';
+
+      // Uses this filename for demo
+      file = file || '-23.50929645679305_-46.876645990569784_1626623241011';
+
+      // Splits filename into parts, separated by an underscore
+      let parts = file.split( '_' );
+
+      // Extracts coordinates of user location
+      let latitude  = parseFloat( parts[ 0 ] );
+      let longitude = parseFloat( parts[ 1 ]  );
+
+      // Extracts timestamp of when the recording started
+      let start     = parseInt( parts[ 2 ] );
+
+      // Uses the coordinates in recording as the user location
+      app.data.user = {
+        latitude  : latitude,
+        longitude : longitude,
+      };
+
+      // Activates first-person mode
+      app.element.dataset.mode = 'first-person';
+
+      // Goes to first-person screen (step number 6)
+      app.element.dataset.step = 6;
+
+      // Loads list of all sensor readings
+      fetch( path + file + '.json' )
+        .then( response => response.json() )
+        .then( records => {
+
+          // Signals render function that records are currently being played
+          app.orientation.playing = true;
+
+          // Resets first reading to begin at time 0;
+          records[ 0 ].t = 0;
+
+          // Loops through every record
+          for ( let record of records ) {
+
+            // Schedules a change in orientation data (based on their timestamp)
+            setTimeout( () => {
+
+              // Updates data (that will be used to render the scene)
+              app.data.orientation = {
+                alpha : record.a,
+                beta  : record.b,
+                gamma : record.g,
+              }
+
+            }, record.t );
+
+          }
+
+        } );
+
+    },
 
     handle : () => {
 
@@ -1870,6 +1991,13 @@ let app = {
 
     },
 
+    download : () => {
+
+      // Calls download method when download button is clicked
+      app.elements.download.addEventListener( 'click', app.orientation.download );
+
+    },
+
     initialize : () => {
 
       // Enables drag on handle to control tunnel angles on desktop
@@ -1880,6 +2008,9 @@ let app = {
 
       // Tracks phone’s motion when button is clicked
       app.events.motion();
+
+      // Enables download button (for debugging of orientation data)
+      app.events.download();
 
     }
 
