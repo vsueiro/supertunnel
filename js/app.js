@@ -2004,13 +2004,25 @@ let app = {
 
         app.labels.destination.forEach( destination => {
 
-        	// Selects label that is not the fixed one
-        	if ( !destination.classList.contains( 'fixed' ) ) {
+        	// Handles label that is the fixed one
+        	if ( destination.classList.contains( 'fixed' ) ) {
 
             // Creates 2D object
             let label = new THREE.CSS2DObject( destination );
 
-            // Attach object to end of cylinder
+            // Attaches object to the center of the scene
+            label.position.set( 0, 0, 0 );
+            app.three.scene.add( label );
+
+        	}
+
+          // Handles label that is not the fixed one
+          else {
+
+            // Creates 2D object
+            let label = new THREE.CSS2DObject( destination );
+
+            // Attaches object to end of cylinder
             label.position.set( 0, app.data.earth.radius.crust * -2, 0 );
             app.three.cylinder.add( label );
 
