@@ -801,7 +801,7 @@ let app = {
         let excess = 0;
 
         // Calculates increase for mobile version
-        if ( app.mobile() && app.element.dataset.mode === 'third-person' ) {
+        if ( app.mobile() /* && app.element.dataset.mode === 'third-person' */ ) {
 
           // Prevents centering on step 5 (keeping same position as on step 4)
           let step = app.steps.current() === 5 ? app.steps.element( 4 ) : app.steps.element();
