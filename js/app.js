@@ -1583,8 +1583,8 @@ let app = {
         app.data.user.latitude  = antipode.latitude;
         app.data.user.longitude = antipode.longitude;
 
-        // Displays name of location within search input
-        app.search.fill( antipode.address );
+        // Displays name of location within search input (only on desktop version)
+        app.elements.address[ 0 ].value = antipode.address;
 
       }
 
@@ -1695,14 +1695,6 @@ let app = {
 
       app.elements.address.forEach( address => {
         address.value = '';
-      } );
-
-    },
-
-    fill : ( string = '' ) => {
-
-      app.elements.address.forEach( address => {
-        address.value = string;
       } );
 
     },
