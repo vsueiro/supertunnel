@@ -872,13 +872,23 @@ let app = {
           // Checks if mobile version is on
           if ( app.mobile() ) {
 
-            // Decreases basis field of view on mobile (makes everything appear a bit bigger)
-            fov = 60;
+            fov = 90;
+
+            // Checks if current difficulty level is hard
+            if ( app.element.dataset.level == 'hard' ) {
+
+              // Hides globe graticule
+              app.three.graticule.visible = false;
+
+              // Decreases basis field of view on mobile (makes everything appear a bit bigger)
+              fov = 60;
+
+            }
+
 
           }
 
-          // Hides globe graticule
-          app.three.graticule.visible = false;
+
 
         } else {
 
@@ -1128,11 +1138,11 @@ let app = {
           country.material[ 0 ].color.set( app.color( 'neutral-50' ) );
           country.material[ 1 ].color.set( app.color( 'neutral-75' ) );
 
-          // Hides all countries on first-person mode
-          if ( app.element.dataset.mode === 'first-person' )
-            country.visible = false
+          // Hides all countries on hard mode
+          if ( app.element.dataset.level == 'hard' && app.element.dataset.mode == 'first-person' )
+            country.visible = false;
           else
-            country.visible = true
+            country.visible = true;
 
           let intersections = app.three.raycaster.intersectObject( country );
 
