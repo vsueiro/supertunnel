@@ -169,6 +169,7 @@ let app = {
 
       'step',
       'mode',
+      'level',
       'record',
       'latitude',
       'longitude'
