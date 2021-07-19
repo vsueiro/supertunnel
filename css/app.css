@@ -1028,17 +1028,14 @@ a[download] {
   pointer-events: none;
 }
 
-.app[data-step="6"] .background {
-  opacity: 1;
-}
-
-.app[data-step="6"] .background .label-destination,
 .app[data-step="6"] .background .label-distance,
-.app[data-step="6"] .background .label-origin {
+.app[data-step="6"][data-level="hard"] .background .label-destination,
+.app[data-step="6"][data-level="hard"] .background .label-origin {
   display: none;
 }
 
-.app[data-mode="first-person"] .background .label-destination.fixed {
+.app[data-mode="first-person"][data-level="hard"] .background .label-destination.fixed,
+.app[data-mode="first-person"][data-type="air"] .background .label-destination.fixed {
   display: flex;
 }
 
