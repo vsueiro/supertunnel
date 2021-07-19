@@ -965,6 +965,12 @@ let app = {
 
       tunnel : () => {
 
+        // Hides tunnel if device is pointing to the air (not to the ground)
+        if ( app.element.dataset.type == 'air' )
+          app.three.tunnel.visible = false;
+        else
+          app.three.tunnel.visible = true;
+
         // Enables first-person view (or simulates it if records are being played)
         if ( app.element.dataset.mode == 'first-person' || app.orientation.playing ) {
 
