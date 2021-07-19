@@ -1234,7 +1234,7 @@ let app = {
 
     },
 
-    render : ( time ) => {
+    render : () => {
 
       // Makes canvas responsive
       app.three.update.dimensions();
