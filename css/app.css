@@ -877,20 +877,16 @@ a[download] {
 }
 
 .label-destination.fixed:empty::after {
-  content: 'Point device to ground';
+  content: ' Hmmm…\00000a Try pointing to the ground';
+  white-space: pre-wrap;
   justify-content: center;
   align-items: center;
   font-weight: 700;
   line-height: 150%;
-  height: calc( var(--basis) * 14.4 );
-  width: calc( var(--basis) * 14.4 );
-  border-radius: calc( var(--basis) * 7.2 );
-  background: var(--accent-100);
-  padding: calc( var(--basis) * .8 );
+  width: calc( var(--basis) * 16.8 );
   font-size: calc( var(--basis) * 1.6 );
   letter-spacing: calc( var(--basis) * .2 );
   text-transform: uppercase;
-  display: none;
 }
 
 .background .label-distance {
