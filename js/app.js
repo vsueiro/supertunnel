@@ -1443,7 +1443,7 @@ let app = {
                 app.drag.value = {
                   x : record.g,
                   y : record.b,
-                  // z : record.a
+                  z : record.a
                 }
 
               }
