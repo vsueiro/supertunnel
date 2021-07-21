@@ -1050,26 +1050,15 @@ let app = {
             THREE.Math.degToRad( app.drag.value.x )
           );
 
-          // Handles alpha rotation (when playing recorded orientation data )
+          // Checks if recorded orientation data is being played
           if ( app.orientation.playing ) {
 
-            app.three.cylinder.rotation.y = app.data.smooth(
-              app.three.cylinder.rotation.y,
-              THREE.Math.degToRad( app.drag.value.z )
-            );
-            app.three.chord.rotation.y = app.data.smooth(
-              app.three.chord.rotation.y,
-              THREE.Math.degToRad( app.drag.value.z )
-            );
-
-            app.three.tunnel.rotation.y = app.data.smooth(
-              app.three.tunnel.rotation.y,
-              THREE.Math.degToRad( app.drag.value.z )
-            );
+            // Makes tunnel rotate just like the user did while recording
+            app.three.tunnel.rotation.y = THREE.Math.degToRad( app.drag.value.z );
 
           } else {
 
-            // Makes North be up
+            // Makes North be always up
             app.three.tunnel.rotation.y = THREE.Math.degToRad( 0 );
 
           }
