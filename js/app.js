@@ -971,8 +971,8 @@ let app = {
         else
           app.three.tunnel.visible = true;
 
-        // Enables first-person view (or simulates it if records are being played)
-        if ( app.element.dataset.mode == 'first-person' || app.orientation.playing ) {
+        // Enables first-person view
+        if ( app.element.dataset.mode == 'first-person' ) {
 
           // Rotates Earth to always match real-world North
           app.three.earth.rotation.y    = THREE.Math.degToRad( app.data.orientation.alpha * -1 );
@@ -1050,8 +1050,29 @@ let app = {
             THREE.Math.degToRad( app.drag.value.x )
           );
 
-          // Makes North be up
-          app.three.tunnel.rotation.y = THREE.Math.degToRad( 0 );
+          // Handles alpha rotation (when playing recorded orientation data )
+          if ( app.orientation.playing ) {
+
+            app.three.cylinder.rotation.y = app.data.smooth(
+              app.three.cylinder.rotation.y,
+              THREE.Math.degToRad( app.drag.value.z )
+            );
+            app.three.chord.rotation.y = app.data.smooth(
+              app.three.chord.rotation.y,
+              THREE.Math.degToRad( app.drag.value.z )
+            );
+
+            // app.three.tunnel.rotation.y = app.data.smooth(
+            //   app.three.tunnel.rotation.y,
+            //   THREE.Math.degToRad( app.drag.value.z )
+            // );
+
+          } else {
+
+            // Makes North be up
+            app.three.tunnel.rotation.y = THREE.Math.degToRad( 0 );
+
+          }
 
           // Activates camera controls
           app.three.controls.enabled = true;
@@ -1358,7 +1379,7 @@ let app = {
       // Defines path that contains records
       let path = './assets/records/';
 
-      // Uses this filename for demo
+      // Uses this default filename for demo
       file = file || '-23.50929645679305_-46.876645990569784_1626623241011';
 
       // Splits filename into parts, separated by an underscore
@@ -1377,12 +1398,6 @@ let app = {
         longitude : longitude,
       };
 
-      // Activates first-person mode
-      app.element.dataset.mode = 'first-person';
-
-      // Goes to first-person screen (step number 6)
-      app.element.dataset.step = 6;
-
       // Loads list of all sensor readings
       fetch( path + file + '.json' )
         .then( response => response.json() )
@@ -1400,11 +1415,37 @@ let app = {
             // Schedules a change in orientation data (based on their timestamp)
             setTimeout( () => {
 
-              // Updates data (that will be used to render the scene)
-              app.data.orientation = {
-                alpha : record.a,
-                beta  : record.b,
-                gamma : record.g,
+              // Handles mobile version
+              if ( app.mobile() ) {
+
+                // Activates first-person mode
+                app.element.dataset.mode = 'first-person';
+
+                // Goes to first-person screen (step number 6)
+                app.element.dataset.step = 6;
+
+                // Updates data (that will be used to render the scene)
+                app.data.orientation = {
+                  alpha : record.a,
+                  beta  : record.b,
+                  gamma : record.g,
+                }
+
+              }
+
+              // Handles desktop version
+              else {
+
+                // Activates third-person mode
+                app.element.dataset.mode = 'third-person';
+
+                // Updates data (that will be used to render the scene)
+                app.drag.value = {
+                  x : record.g,
+                  y : record.b,
+                  // z : record.a
+                }
+
               }
 
             }, record.t );
@@ -1723,6 +1764,8 @@ let app = {
 
       x : 0, // Float from -90 to 90
       y : 0, // Float from -90 to 90
+
+      // z : 0, // Float from 0 to 360 (used only when playing recorded data)
 
     },
 
