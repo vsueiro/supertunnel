@@ -1062,10 +1062,10 @@ let app = {
               THREE.Math.degToRad( app.drag.value.z )
             );
 
-            // app.three.tunnel.rotation.y = app.data.smooth(
-            //   app.three.tunnel.rotation.y,
-            //   THREE.Math.degToRad( app.drag.value.z )
-            // );
+            app.three.tunnel.rotation.y = app.data.smooth(
+              app.three.tunnel.rotation.y,
+              THREE.Math.degToRad( app.drag.value.z )
+            );
 
           } else {
 
@@ -1765,7 +1765,7 @@ let app = {
       x : 0, // Float from -90 to 90
       y : 0, // Float from -90 to 90
 
-      // z : 0, // Float from 0 to 360 (used only when playing recorded data)
+      z : 0, // Float from 0 to 360 (used only when playing recorded data)
 
     },
 
