@@ -170,6 +170,8 @@ let app = {
       'step',
       'mode',
       'level',
+      'globe',
+      'shovel',
       'record',
       'latitude',
       'longitude'
