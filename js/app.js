@@ -257,6 +257,13 @@ let app = {
 
         // Updates tunnel orientation based on shovel motion
         app.data.orientation = data
+
+        // Updates data for desktop controls
+        app.drag.value = {
+          x : data.gamma,
+          y : data.beta,
+          z : data.alpha
+        }
         
       }
 
@@ -2346,7 +2353,6 @@ let app = {
     app.three.initialize();
     app.events.initialize();
     app.labels.initialize();
-
 
   }
 
