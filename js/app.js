@@ -244,12 +244,16 @@ let app = {
 
       user : ( data ) => {
 
+        console.log( 'user', data )
+
         // Updates location based on shovel coordinates
         app.data.user = data
 
       },
 
       orientation : ( data ) => {
+
+        console.log( 'orientation', data )
 
         // Updates tunnel orientation based on shovel motion
         app.data.orientation = data
@@ -270,6 +274,8 @@ let app = {
             app.connection.server,
             app.connection.options
           )
+
+          alert('Connected to WebSocket server!')
           
         }
         
