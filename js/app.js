@@ -208,7 +208,7 @@ let app = {
 
             app.element.dataset[ key ] = parameters.get( key );
 
-            /* Set flag variables to easily check them */
+            // Set flag variables to easily check them
             if ( key == 'shovel' || key == 'globe' )
               app.parameters[ key ] = true
             
@@ -271,12 +271,12 @@ let app = {
 
     initialize : () => {
 
-      /* Check for ?shovel or ?globe URL parameters */
+      // Checks for ?shovel or ?globe URL parameters
       if ( app.parameters.shovel || app.parameters.globe ) {
 
         try {
 
-          /* Initialize WebSocket connection */
+          // Initializes WebSocket connection
           app.connection.socket = io(
             app.connection.server,
             app.connection.options
@@ -288,7 +288,7 @@ let app = {
         
         catch(error) {
 
-          /* Send error message */
+          // Sends error message
           alert('Unable to connect to WebSocket server.');
           console.error( error )
 
