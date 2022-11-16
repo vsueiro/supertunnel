@@ -174,6 +174,7 @@ let app = {
       'level',
       'globe',
       'shovel',
+      'server',
       'record',
       'latitude',
       'longitude'
@@ -200,6 +201,14 @@ let app = {
 
             // Assigns coordinates to a specific object
             app.data.user[ key ] = parseFloat( parameters.get( key ) );
+
+          }
+
+          // Checks if custom (local) server is preferred
+          else if ( key == 'server' ) {
+
+            // Overrides default server
+            app.connection.server = server
 
           }
 
