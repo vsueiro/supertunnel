@@ -208,7 +208,7 @@ let app = {
           else if ( key == 'server' ) {
 
             // Overrides default server
-            app.connection.server = server
+            app.connection.server = parameters.get( key );
 
           }
 
