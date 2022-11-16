@@ -164,6 +164,8 @@ let app = {
   parameters : {
 
     coordinates : false,
+    shovel :      false,
+    globe :       false,
 
     allow : [
 
@@ -202,8 +204,80 @@ let app = {
           }
 
           // Handles all other parameters as data attributes
-          else
+          else {
+
             app.element.dataset[ key ] = parameters.get( key );
+
+            /* Set flag variables to easily check them */
+            if ( key == 'shovel' || key == 'globe' )
+              app.parameters[ key ] = true
+            
+          }
+            
+
+        }
+
+      }
+
+    }
+
+  },
+
+  connection : {
+
+    server : 'https://server.supertunnel.app/',
+
+    options : {
+      transports : [ 'websocket' ]
+    },
+
+    socket : undefined,
+
+    send : ( name, data ) => {
+
+      if ( app.connection.socket )
+        app.connection.socket.emit( name, data )
+
+    },
+
+    receive : {
+
+      user : ( data ) => {
+
+        // Updates location based on shovel coordinates
+        app.data.user = data
+
+      },
+
+      orientation : ( data ) => {
+
+        // Updates tunnel orientation based on shovel motion
+        app.data.orientation = data
+        
+      }
+
+    },
+
+    initialize : () => {
+
+      /* Check for ?shovel or ?globe URL parameters */
+      if ( app.parameters.shovel || app.parameters.globe ) {
+
+        try {
+
+          /* Initialize WebSocket connection */
+          app.connection.socket = io(
+            app.connection.server,
+            app.connection.options
+          )
+          
+        }
+        
+        catch(error) {
+
+          /* Send error message */
+          alert('Unable to connect to WebSocket server.');
+          console.error( error )
 
         }
 
@@ -1475,6 +1549,14 @@ let app = {
       app.data.orientation.beta  = event.beta;
       app.data.orientation.gamma = event.gamma * -1;
 
+      // If user is using a physical shovel
+      if ( app.parameters.shovel ) {
+
+        // Send data from shovel to globe
+        app.connection.send( 'orientation', app.data.orientation )
+
+      }
+
     },
 
     error : ( type ) => {
@@ -1563,6 +1645,10 @@ let app = {
       app.search.clear();
 
       app.steps.set( 3 );
+
+      // If user is using a shovel, send coordinates to globe
+      if ( app.parameters.shovel )
+        app.connection.send( 'user', app.data.user )
 
     },
 
@@ -1656,6 +1742,10 @@ let app = {
 
       app.element.dataset.search = 'searched';
       app.element.dataset.geolocation = 'unlocated';
+
+      // If user is using a shovel, send coordinates to globe
+      if ( app.parameters.shovel )
+        app.connection.send( 'user', app.data.user )
 
     },
 
@@ -2202,6 +2292,25 @@ let app = {
 
     },
 
+    connection : () => {
+
+      // Checks for the ?globe URL parameter
+      if ( app.parameters.globe ) {
+
+        if ( app.connection.socket ) {
+
+          // Handles incoming messages named “user”
+          app.connection.socket.on( 'user', app.connection.receive.user )
+          
+          // Handles incoming messages named “orientation”
+          app.connection.socket.on( 'orientation', app.connection.receive.orientation )
+
+        }
+
+      }
+
+    },
+
     initialize : () => {
 
       // Enables drag on handle to control tunnel angles on desktop
@@ -2216,6 +2325,9 @@ let app = {
       // Enables download button (for debugging of orientation data)
       app.events.download();
 
+      // Enables globe to receive data from shovel
+      app.events.connection();
+
     }
 
   },
@@ -2223,10 +2335,12 @@ let app = {
   initialize : () => {
 
     app.parameters.initialize();
+    app.connection.initialize();
     app.geolocation.initialize();
     app.three.initialize();
     app.events.initialize();
     app.labels.initialize();
+
 
   }
 
