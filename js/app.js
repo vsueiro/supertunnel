@@ -182,12 +182,6 @@ let app = {
             app.data.user[key] = parseFloat(parameters.get(key));
           }
 
-          // Checks if custom (local) server is preferred
-          else if (key == "server") {
-            // Overrides default server
-            app.connection.server = parameters.get(key);
-          }
-
           // Handles all other parameters as data attributes
           else {
             app.element.dataset[key] = parameters.get(key);
@@ -195,62 +189,6 @@ let app = {
             // Set flag variables to easily check them
             if (key == "shovel" || key == "globe") app.parameters[key] = true;
           }
-        }
-      }
-    },
-  },
-
-  connection: {
-    server: "https://server.supertunnel.app/",
-
-    options: {
-      transports: ["websocket"],
-    },
-
-    socket: undefined,
-
-    send: (name, data) => {
-      if (app.connection.socket) app.connection.socket.emit(name, data);
-    },
-
-    receive: {
-      user: (data) => {
-        console.log("user", data);
-
-        // Updates location based on shovel coordinates
-        app.data.user = data;
-      },
-
-      orientation: (data) => {
-        console.log("orientation", data);
-
-        // Updates tunnel orientation based on shovel motion
-        app.data.orientation = data;
-
-        // Updates data for desktop controls
-        app.drag.value = {
-          x: data.gamma,
-          y: data.beta,
-          z: data.alpha,
-        };
-      },
-    },
-
-    initialize: () => {
-      // Checks for ?shovel or ?globe URL parameters
-      if (app.parameters.shovel || app.parameters.globe) {
-        try {
-          // Initializes WebSocket connection
-          app.connection.socket = io(
-            app.connection.server,
-            app.connection.options
-          );
-
-          alert("Connected to WebSocket server!");
-        } catch (error) {
-          // Sends error message
-          alert("Unable to connect to WebSocket server.");
-          console.error(error);
         }
       }
     },
@@ -1384,12 +1322,6 @@ let app = {
       app.data.orientation.alpha = north;
       app.data.orientation.beta = event.beta;
       app.data.orientation.gamma = event.gamma * -1;
-
-      // If user is using a physical shovel
-      if (app.parameters.shovel) {
-        // Send data from shovel to globe
-        app.connection.send("orientation", app.data.orientation);
-      }
     },
 
     error: (type) => {
@@ -1450,9 +1382,6 @@ let app = {
       app.search.clear();
 
       app.steps.set(3);
-
-      // If user is using a shovel, send coordinates to globe
-      if (app.parameters.shovel) app.connection.send("user", app.data.user);
     },
 
     error: () => {
@@ -1528,9 +1457,6 @@ let app = {
 
       app.element.dataset.search = "searched";
       app.element.dataset.geolocation = "unlocated";
-
-      // If user is using a shovel, send coordinates to globe
-      if (app.parameters.shovel) app.connection.send("user", app.data.user);
     },
 
     error: () => {
@@ -1974,22 +1900,6 @@ let app = {
       app.elements.download.addEventListener("click", app.orientation.download);
     },
 
-    connection: () => {
-      // Checks for the ?globe URL parameter
-      if (app.parameters.globe) {
-        if (app.connection.socket) {
-          // Handles incoming messages named “user”
-          app.connection.socket.on("user", app.connection.receive.user);
-
-          // Handles incoming messages named “orientation”
-          app.connection.socket.on(
-            "orientation",
-            app.connection.receive.orientation
-          );
-        }
-      }
-    },
-
     initialize: () => {
       // Enables drag on handle to control tunnel angles on desktop
       app.events.drag();
@@ -2002,15 +1912,11 @@ let app = {
 
       // Enables download button (for debugging of orientation data)
       app.events.download();
-
-      // Enables globe to receive data from shovel
-      app.events.connection();
     },
   },
 
   initialize: () => {
     app.parameters.initialize();
-    app.connection.initialize();
     app.geolocation.initialize();
     app.three.initialize();
     app.events.initialize();
