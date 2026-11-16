@@ -1,192 +1,352 @@
-THREE.CSS2DObject = function ( element ) {
+import {
+	Matrix4,
+	Object3D,
+	Vector2,
+	Vector3
+} from 'three';
 
-	THREE.Object3D.call( this );
+/**
+ * The only type of 3D object that is supported by {@link CSS2DRenderer}.
+ *
+ * @augments Object3D
+ * @three_import import { CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+ */
+class CSS2DObject extends Object3D {
 
-	this.element = element || document.createElement( 'div' );
+	/**
+	 * Constructs a new CSS2D object.
+	 *
+	 * @param {HTMLElement} [element] - The DOM element.
+	 */
+	constructor( element = document.createElement( 'div' ) ) {
 
-	this.element.style.position = 'absolute';
+		super();
 
-	this.addEventListener( 'removed', function () {
+		/**
+		 * This flag can be used for type testing.
+		 *
+		 * @type {boolean}
+		 * @readonly
+		 * @default true
+		 */
+		this.isCSS2DObject = true;
 
-		this.traverse( function ( object ) {
+		/**
+		 * The DOM element which defines the appearance of this 3D object.
+		 *
+		 * @type {HTMLElement}
+		 * @readonly
+		 * @default true
+		 */
+		this.element = element;
 
-			if ( object.element instanceof Element && object.element.parentNode !== null ) {
+		this.element.style.position = 'absolute';
+		this.element.style.userSelect = 'none';
 
-				object.element.parentNode.removeChild( object.element );
+		this.element.setAttribute( 'draggable', false );
 
-			}
+		/**
+		 * The object's anchor point, and the point around which the object rotates.
+		 * A value of `(0.5, 0.5)` corresponds to the midpoint of the object. A value
+		 * of `(0, 0)` corresponds to the upper left corner of the object.
+		 *
+		 * @type {Vector2}
+		 * @default (0.5,0.5)
+		 */
+		this.center = new Vector2( 0.5, 0.5 );
+
+		/**
+		 * The object's angle of rotation, counterclockwise, in radians.
+		 *
+		 * @type {number}
+		 * @default 0
+		 */
+		this.rotation2D = 0;
+
+		this.addEventListener( 'removed', function () {
+
+			this.traverse( function ( object ) {
+
+				if (
+					object.element &&
+					object.element instanceof object.element.ownerDocument.defaultView.Element &&
+					object.element.parentNode !== null
+				) {
+
+					object.element.remove();
+
+				}
+
+			} );
 
 		} );
 
-	} );
+	}
 
-};
+	copy( source, recursive ) {
 
-THREE.CSS2DObject.prototype = Object.assign( Object.create( THREE.Object3D.prototype ), {
-
-	constructor: THREE.CSS2DObject,
-
-	copy: function ( source, recursive ) {
-
-		THREE.Object3D.prototype.copy.call( this, source, recursive );
+		super.copy( source, recursive );
 
 		this.element = source.element.cloneNode( true );
+
+		this.center = source.center;
+
+		this.rotation2D = source.rotation2D;
 
 		return this;
 
 	}
 
-} );
+}
 
 //
 
-THREE.CSS2DRenderer = function () {
+const _vector = new Vector3();
+const _viewMatrix = new Matrix4();
+const _viewProjectionMatrix = new Matrix4();
+const _a = new Vector3();
+const _b = new Vector3();
 
-	var _this = this;
+/**
+ * This renderer is a simplified version of {@link CSS3DRenderer}. The only transformations that
+ * are supported are translation and 2D rotation.
+ *
+ * The renderer is very useful if you want to combine HTML based labels with 3D objects. Here too,
+ * the respective DOM elements are wrapped into an instance of {@link CSS2DObject} and added to the
+ * scene graph. All other types of renderable 3D objects (like meshes or point clouds) are ignored.
+ *
+ * `CSS2DRenderer` only supports 100% browser and display zoom.
+ *
+ * @three_import import { CSS2DRenderer } from 'three/addons/renderers/CSS2DRenderer.js';
+ */
+class CSS2DRenderer {
 
-	var _width, _height;
-	var _widthHalf, _heightHalf;
+	/**
+	 * Constructs a new CSS2D renderer.
+	 *
+	 * @param {CSS2DRenderer~Parameters} [parameters] - The parameters.
+	 */
+	constructor( parameters = {} ) {
 
-	var vector = new THREE.Vector3();
-	var viewMatrix = new THREE.Matrix4();
-	var viewProjectionMatrix = new THREE.Matrix4();
+		const _this = this;
 
-	var cache = {
-		objects: new WeakMap()
-	};
+		let _width, _height;
+		let _widthHalf, _heightHalf;
 
-	var domElement = document.createElement( 'div' );
-	domElement.style.overflow = 'hidden';
-
-	this.domElement = domElement;
-
-	this.getSize = function () {
-
-		return {
-			width: _width,
-			height: _height
+		const cache = {
+			objects: new WeakMap()
 		};
 
-	};
+		const domElement = parameters.element !== undefined ? parameters.element : document.createElement( 'div' );
 
-	this.setSize = function ( width, height ) {
+		domElement.style.overflow = 'hidden';
 
-		_width = width;
-		_height = height;
+		/**
+		 * The DOM where the renderer appends its child-elements.
+		 *
+		 * @type {HTMLElement}
+		 */
+		this.domElement = domElement;
 
-		_widthHalf = _width / 2;
-		_heightHalf = _height / 2;
+		/**
+		 * Controls whether the renderer assigns `z-index` values to CSS2DObject DOM elements.
+		 * If set to `true`, z-index values are assigned first based on the `renderOrder`
+		 * and secondly - the distance to the camera. If set to `false`, no z-index values are assigned.
+		 *
+		 * @type {boolean}
+		 * @default true
+		 */
+		this.sortObjects = true;
 
-		domElement.style.width = width + 'px';
-		domElement.style.height = height + 'px';
+		/**
+		 * Returns an object containing the width and height of the renderer.
+		 *
+		 * @return {{width:number,height:number}} The size of the renderer.
+		 */
+		this.getSize = function () {
 
-	};
-
-	var renderObject = function ( object, scene, camera ) {
-
-		if ( object instanceof THREE.CSS2DObject ) {
-
-			object.onBeforeRender( _this, scene, camera );
-
-			vector.setFromMatrixPosition( object.matrixWorld );
-			vector.applyMatrix4( viewProjectionMatrix );
-
-			var element = object.element;
-			var style = 'translate(-50%,-50%) translate(' + ( vector.x * _widthHalf + _widthHalf ) + 'px,' + ( - vector.y * _heightHalf + _heightHalf ) + 'px)';
-
-			element.style.WebkitTransform = style;
-			element.style.MozTransform = style;
-			element.style.oTransform = style;
-			element.style.transform = style;
-
-			element.style.display = ( object.visible && vector.z >= - 1 && vector.z <= 1 ) ? '' : 'none';
-
-			var objectData = {
-				distanceToCameraSquared: getDistanceToSquared( camera, object )
+			return {
+				width: _width,
+				height: _height
 			};
 
-			cache.objects.set( object, objectData );
+		};
 
-			if ( element.parentNode !== domElement ) {
+		/**
+		 * Renders the given scene using the given camera.
+		 *
+		 * @param {Object3D} scene - A scene or any other type of 3D object.
+		 * @param {Camera} camera - The camera.
+		 */
+		this.render = function ( scene, camera ) {
 
-				domElement.appendChild( element );
+			if ( scene.matrixWorldAutoUpdate === true ) scene.updateMatrixWorld();
+			if ( camera.parent === null && camera.matrixWorldAutoUpdate === true ) camera.updateMatrixWorld();
+
+			_viewMatrix.copy( camera.matrixWorldInverse );
+			_viewProjectionMatrix.multiplyMatrices( camera.projectionMatrix, _viewMatrix );
+
+			renderObject( scene, scene, camera );
+			if ( this.sortObjects ) zOrder( scene );
+
+		};
+
+		/**
+		 * Resizes the renderer to the given width and height.
+		 *
+		 * @param {number} width - The width of the renderer.
+		 * @param {number} height - The height of the renderer.
+		 */
+		this.setSize = function ( width, height ) {
+
+			_width = width;
+			_height = height;
+
+			_widthHalf = _width / 2;
+			_heightHalf = _height / 2;
+
+			domElement.style.width = width + 'px';
+			domElement.style.height = height + 'px';
+
+		};
+
+		function hideObject( object ) {
+
+			if ( object.isCSS2DObject ) object.element.style.display = 'none';
+
+			for ( let i = 0, l = object.children.length; i < l; i ++ ) {
+
+				hideObject( object.children[ i ] );
 
 			}
 
-			object.onAfterRender( _this, scene, camera );
+		}
+
+		function renderObject( object, scene, camera ) {
+
+			if ( object.visible === false ) {
+
+				hideObject( object );
+
+				return;
+
+			}
+
+			if ( object.isCSS2DObject ) {
+
+				_vector.setFromMatrixPosition( object.matrixWorld );
+				_vector.applyMatrix4( _viewProjectionMatrix );
+
+				const visible = ( _vector.z >= - 1 && _vector.z <= 1 ) && ( object.layers.test( camera.layers ) === true );
+
+				const element = object.element;
+				element.style.display = visible === true ? '' : 'none';
+
+				if ( visible === true ) {
+
+					object.onBeforeRender( _this, scene, camera );
+
+					// pivot point
+					const cx = 100 * object.center.x;
+					const cy = 100 * object.center.y;
+					element.style.transformOrigin = `${cx}% ${cy}%`;
+
+					// angle of rotation, counter-clockwise convention
+					const angle = - object.rotation2D;
+
+					// coordinates
+					const tx = _vector.x * _widthHalf + _widthHalf;
+					const ty = - _vector.y * _heightHalf + _heightHalf;
+
+					// transform
+					element.style.transform = `translate(${- cx}%, ${- cy}%) translate(${tx}px, ${ty}px) rotate(${angle}rad)`;
+
+					if ( element.parentNode !== domElement ) {
+
+						domElement.appendChild( element );
+
+					}
+
+					object.onAfterRender( _this, scene, camera );
+
+				}
+
+				const objectData = {
+					distanceToCameraSquared: getDistanceToSquared( camera, object )
+				};
+
+				cache.objects.set( object, objectData );
+
+			}
+
+			for ( let i = 0, l = object.children.length; i < l; i ++ ) {
+
+				renderObject( object.children[ i ], scene, camera );
+
+			}
 
 		}
 
-		for ( var i = 0, l = object.children.length; i < l; i ++ ) {
+		function getDistanceToSquared( object1, object2 ) {
 
-			renderObject( object.children[ i ], scene, camera );
+			_a.setFromMatrixPosition( object1.matrixWorld );
+			_b.setFromMatrixPosition( object2.matrixWorld );
 
-		}
-
-	};
-
-	var getDistanceToSquared = function () {
-
-		var a = new THREE.Vector3();
-		var b = new THREE.Vector3();
-
-		return function ( object1, object2 ) {
-
-			a.setFromMatrixPosition( object1.matrixWorld );
-			b.setFromMatrixPosition( object2.matrixWorld );
-
-			return a.distanceToSquared( b );
-
-		};
-
-	}();
-
-	var filterAndFlatten = function ( scene ) {
-
-		var result = [];
-
-		scene.traverse( function ( object ) {
-
-			if ( object instanceof THREE.CSS2DObject ) result.push( object );
-
-		} );
-
-		return result;
-
-	};
-
-	var zOrder = function ( scene ) {
-
-		var sorted = filterAndFlatten( scene ).sort( function ( a, b ) {
-
-			var distanceA = cache.objects.get( a ).distanceToCameraSquared;
-			var distanceB = cache.objects.get( b ).distanceToCameraSquared;
-
-			return distanceA - distanceB;
-
-		} );
-
-		var zMax = sorted.length;
-
-		for ( var i = 0, l = sorted.length; i < l; i ++ ) {
-
-			sorted[ i ].element.style.zIndex = zMax - i;
+			return _a.distanceToSquared( _b );
 
 		}
 
-	};
+		function filterAndFlatten( scene ) {
 
-	this.render = function ( scene, camera ) {
+			const result = [];
 
-		if ( scene.autoUpdate === true ) scene.updateMatrixWorld();
-		if ( camera.parent === null ) camera.updateMatrixWorld();
+			scene.traverseVisible( function ( object ) {
 
-		viewMatrix.copy( camera.matrixWorldInverse );
-		viewProjectionMatrix.multiplyMatrices( camera.projectionMatrix, viewMatrix );
+				if ( object.isCSS2DObject ) result.push( object );
 
-		renderObject( scene, scene, camera );
-		zOrder( scene );
+			} );
 
-	};
+			return result;
 
-};
+		}
+
+		function zOrder( scene ) {
+
+			const sorted = filterAndFlatten( scene ).sort( function ( a, b ) {
+
+				if ( a.renderOrder !== b.renderOrder ) {
+
+					return b.renderOrder - a.renderOrder;
+
+				}
+
+				const distanceA = cache.objects.get( a ).distanceToCameraSquared;
+				const distanceB = cache.objects.get( b ).distanceToCameraSquared;
+
+				return distanceA - distanceB;
+
+			} );
+
+			const zMax = sorted.length;
+
+			for ( let i = 0, l = sorted.length; i < l; i ++ ) {
+
+				sorted[ i ].element.style.zIndex = zMax - i;
+
+			}
+
+		}
+
+	}
+
+}
+
+/**
+ * Constructor parameters of `CSS2DRenderer`.
+ *
+ * @typedef {Object} CSS2DRenderer~Parameters
+ * @property {HTMLElement} [element] - A DOM element where the renderer appends its child-elements.
+ * If not passed in here, a new div element will be created.
+ **/
+
+export { CSS2DObject, CSS2DRenderer };

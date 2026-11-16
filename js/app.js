@@ -1,3 +1,7 @@
+import * as THREE from "three";
+import { OrbitControls } from "./OrbitControls.js";
+import { CSS2DRenderer, CSS2DObject } from "./CSS2DRenderer.js";
+
 let app = {
   element: document.querySelector(".app"),
 
@@ -13,6 +17,7 @@ let app = {
     area: document.querySelector(".draggable-area"),
     handle: document.querySelector(".draggable-handle"),
     trackButton: document.querySelector(".track"),
+    rotateSwitch: document.querySelector(".rotate input"),
     download: document.querySelector("a[download]"),
     findButton: document.querySelectorAll(".find"),
     nextButton: document.querySelectorAll(".next"),
@@ -278,8 +283,8 @@ let app = {
         );
 
         // Rotates sphere so default location is at latitude 0 and longitude 0
-        geometry.rotateX(THREE.Math.degToRad(-90));
-        geometry.rotateZ(THREE.Math.degToRad(90));
+        geometry.rotateX(THREE.MathUtils.degToRad(-90));
+        geometry.rotateZ(THREE.MathUtils.degToRad(90));
 
         let material = new THREE.MeshBasicMaterial();
 
@@ -315,18 +320,18 @@ let app = {
         });
 
         let createArc = (radius, segments, full) => {
-          let geometry = new THREE.CircleGeometry(
+          let curve = new THREE.EllipseCurve(
+            0,
+            0,
             radius,
-            segments,
+            radius,
             Math.PI / 2,
-            full ? Math.PI * 2 : Math.PI
+            Math.PI / 2 + (full ? Math.PI * 2 : Math.PI)
           );
 
-          geometry.vertices.shift();
-
-          if (full) geometry.vertices.push(geometry.vertices[0].clone());
-
-          return geometry;
+          return new THREE.BufferGeometry().setFromPoints(
+            curve.getPoints(segments)
+          );
         };
 
         app.three.graticule = new THREE.Group();
@@ -385,7 +390,7 @@ let app = {
         }
 
         // Rotates sphere so default location is at latitude 0 and longitude 0
-        app.three.graticule.rotation.x = THREE.Math.degToRad(-90);
+        app.three.graticule.rotation.x = THREE.MathUtils.degToRad(-90);
       },
 
       land: () => {
@@ -399,20 +404,17 @@ let app = {
         );
 
         // Rotates sphere so default location is at latitude 0 and longitude 0
-        app.three.land.rotation.x = THREE.Math.degToRad(-90);
-        app.three.land.rotation.y = THREE.Math.degToRad(180);
+        app.three.land.rotation.x = THREE.MathUtils.degToRad(-90);
+        app.three.land.rotation.y = THREE.MathUtils.degToRad(180);
       },
 
-      map3DGeometry: function (data) {
-        THREE.Geometry.call(this);
-
-        // data.vertices = [lat, lon, ...]
-        // data.polygons = [[poly indices, hole i-s, ...], ...]
+      map3DGeometry: (data) => {
+        // data.vertices = [lon, lat, ...]
         // data.triangles = [tri i-s, ...]
 
-        let i,
-          uvs = [];
-        for (i = 0; i < data.vertices.length; i += 2) {
+        let positions = [];
+
+        for (let i = 0; i < data.vertices.length; i += 2) {
           let lon = data.vertices[i];
           let lat = data.vertices[i + 1];
 
@@ -427,66 +429,35 @@ let app = {
           let wz = Math.cos(the) * Math.sin(phi);
           let wy = Math.cos(phi);
 
-          // Equirectangular projection
-          let wu = 0.25 + lon / 360.0;
-          let wv = 0.5 + lat / 180.0;
-
-          this.vertices.push(new THREE.Vector3(wx, wy, wz));
-
-          uvs.push(new THREE.Vector2(wu, wv));
+          positions.push(wx, wy, wz);
         }
 
-        let n = this.vertices.length;
+        let geometry = new THREE.BufferGeometry();
 
-        for (i = 0; i < n; i++) {
-          let v = this.vertices[i];
-          this.vertices.push(v.clone().multiplyScalar(0));
-        }
+        geometry.setAttribute(
+          "position",
+          new THREE.Float32BufferAttribute(positions, 3)
+        );
+        geometry.setIndex(data.triangles);
 
-        for (i = 0; i < data.triangles.length; i += 3) {
-          let a = data.triangles[i];
-          let b = data.triangles[i + 1];
-          let c = data.triangles[i + 2];
+        // Draws every face twice (once for each material)
+        geometry.addGroup(0, data.triangles.length, 0);
+        geometry.addGroup(0, data.triangles.length, 1);
 
-          this.faces.push(
-            new THREE.Face3(a, b, c, [
-              this.vertices[a],
-              this.vertices[b],
-              this.vertices[c],
-            ])
-          );
-          this.faceVertexUvs[0].push([uvs[a], uvs[b], uvs[c]]);
-        }
+        // Speeds up collision checks by raycaster
+        geometry.computeBoundingBox();
 
-        this.computeFaceNormals();
-
-        this.boundingSphere = new THREE.Sphere(new THREE.Vector3(), 1);
+        return geometry;
       },
 
       countries: (json) => {
         // Uses data and logic based on this repository:
         // https://github.com/makc/makc.github.io/tree/master/three.js/map2globe
 
-        app.three.create.map3DGeometry.prototype = Object.create(
-          THREE.Geometry.prototype
-        );
-
         let countries = app.data.countries;
 
         for (let name in countries) {
-          let geometry = new app.three.create.map3DGeometry(countries[name]);
-
-          // Duplicates every face of the geometry
-          let faces = [];
-
-          for (let face of geometry.faces) {
-            let newFace = face.clone();
-            newFace.materialIndex = 1;
-            faces.push(newFace);
-          }
-
-          // Adds the newly cloned face to array of original faces
-          for (let face of faces) geometry.faces.push(face);
+          let geometry = app.three.create.map3DGeometry(countries[name]);
 
           // Creates list of two materials
           let materials = [
@@ -526,8 +497,11 @@ let app = {
           color: app.color("neutral-25"),
         });
 
+        // Uses few segments (the defaults became much higher in recent versions of three.js)
         let geometry = new THREE.SphereGeometry(
-          app.data.earth.radius.crust * 0.015
+          app.data.earth.radius.crust * 0.015,
+          8,
+          6
         );
 
         let amount = 10000;
@@ -595,7 +569,7 @@ let app = {
         );
 
         // Rotates all elements so Earth poles are on the Y axis
-        app.three.universe.rotation.x = THREE.Math.degToRad(90);
+        app.three.universe.rotation.x = THREE.MathUtils.degToRad(90);
       },
 
       renderer: () => {
@@ -608,7 +582,7 @@ let app = {
       },
 
       renderer2D: () => {
-        app.three.renderer2D = new THREE.CSS2DRenderer();
+        app.three.renderer2D = new CSS2DRenderer();
 
         app.elements.background.appendChild(app.three.renderer2D.domElement);
       },
@@ -631,7 +605,7 @@ let app = {
 
       controls: () => {
         // Makes camera move with mouse
-        app.three.controls = new THREE.OrbitControls(
+        app.three.controls = new OrbitControls(
           app.three.camera,
           app.elements.canvas
         );
@@ -709,6 +683,12 @@ let app = {
       setTimeout(() => {
         app.element.dataset.loading = false;
       }, 1200);
+    },
+
+    autoRotate: (enabled) => {
+      // Turns automatic orbit on or off (keeping switch in sync)
+      app.three.controls.autoRotate = enabled;
+      app.elements.rotateSwitch.checked = enabled;
     },
 
     update: {
@@ -801,7 +781,7 @@ let app = {
         }
 
         // Visually “scales” fov to match both width and height (diagonal)
-        diagonal = (fov, aspect) => {
+        let diagonal = (fov, aspect) => {
           let length = Math.sqrt(1 + aspect * aspect);
           return THREE.MathUtils.radToDeg(
             2 *
@@ -869,12 +849,12 @@ let app = {
         // Enables first-person view
         if (app.element.dataset.mode == "first-person") {
           // Rotates Earth to always match real-world North
-          app.three.earth.rotation.y = THREE.Math.degToRad(
+          app.three.earth.rotation.y = THREE.MathUtils.degToRad(
             app.data.orientation.alpha * -1
           );
 
           // Rotates stars so they behave just like Earth
-          app.three.stars.rotation.y = THREE.Math.degToRad(
+          app.three.stars.rotation.y = THREE.MathUtils.degToRad(
             app.data.orientation.alpha * -1
           );
 
@@ -887,23 +867,23 @@ let app = {
           // Changes values gradually
           app.three.cylinder.rotation.x = app.data.smooth(
             app.three.cylinder.rotation.x,
-            THREE.Math.degToRad(app.data.orientation.beta)
+            THREE.MathUtils.degToRad(app.data.orientation.beta)
           );
           app.three.cylinder.rotation.z = app.data.smooth(
             app.three.cylinder.rotation.z,
-            THREE.Math.degToRad(app.data.orientation.gamma)
+            THREE.MathUtils.degToRad(app.data.orientation.gamma)
           );
           app.three.chord.rotation.x = app.data.smooth(
             app.three.chord.rotation.x,
-            THREE.Math.degToRad(app.data.orientation.beta)
+            THREE.MathUtils.degToRad(app.data.orientation.beta)
           );
           app.three.chord.rotation.z = app.data.smooth(
             app.three.chord.rotation.z,
-            THREE.Math.degToRad(app.data.orientation.gamma)
+            THREE.MathUtils.degToRad(app.data.orientation.gamma)
           );
 
           // Makes North be up
-          app.three.tunnel.rotation.y = THREE.Math.degToRad(0);
+          app.three.tunnel.rotation.y = THREE.MathUtils.degToRad(0);
 
           // Resets handle control
           app.drag.reset();
@@ -921,38 +901,40 @@ let app = {
         // Enables third-person view
         else {
           // Keeps Earth still
-          app.three.earth.rotation.y = THREE.Math.degToRad(0);
+          app.three.earth.rotation.y = THREE.MathUtils.degToRad(0);
 
           // Rests stars rotation
-          app.three.stars.rotation.y = THREE.Math.degToRad(0);
+          app.three.stars.rotation.y = THREE.MathUtils.degToRad(0);
 
           // Rotates tunnel on two axes (based on drag control)
 
           // Changes values gradually
           app.three.cylinder.rotation.x = app.data.smooth(
             app.three.cylinder.rotation.x,
-            THREE.Math.degToRad(app.drag.value.y)
+            THREE.MathUtils.degToRad(app.drag.value.y)
           );
           app.three.cylinder.rotation.z = app.data.smooth(
             app.three.cylinder.rotation.z,
-            THREE.Math.degToRad(app.drag.value.x)
+            THREE.MathUtils.degToRad(app.drag.value.x)
           );
           app.three.chord.rotation.x = app.data.smooth(
             app.three.chord.rotation.x,
-            THREE.Math.degToRad(app.drag.value.y)
+            THREE.MathUtils.degToRad(app.drag.value.y)
           );
           app.three.chord.rotation.z = app.data.smooth(
             app.three.chord.rotation.z,
-            THREE.Math.degToRad(app.drag.value.x)
+            THREE.MathUtils.degToRad(app.drag.value.x)
           );
 
           // Checks if recorded orientation data is being played
           if (app.orientation.playing) {
             // Makes tunnel rotate just like the user did while recording
-            app.three.tunnel.rotation.y = THREE.Math.degToRad(app.drag.value.z);
+            app.three.tunnel.rotation.y = THREE.MathUtils.degToRad(
+              app.drag.value.z
+            );
           } else {
             // Makes North be always up
-            app.three.tunnel.rotation.y = THREE.Math.degToRad(0);
+            app.three.tunnel.rotation.y = THREE.MathUtils.degToRad(0);
           }
 
           // Activates camera controls
@@ -966,31 +948,31 @@ let app = {
           // Rotates Earth to match origin latitude and longitude
 
           // Rotates sphere so the user location coincides with the tunnel beginning
-          app.three.sphere.rotation.x = THREE.Math.degToRad(
+          app.three.sphere.rotation.x = THREE.MathUtils.degToRad(
             app.data.user.latitude
           );
-          app.three.sphere.rotation.z = THREE.Math.degToRad(
+          app.three.sphere.rotation.z = THREE.MathUtils.degToRad(
             app.data.user.longitude
           );
 
           // Rotates graticule so the user location coincides with the tunnel beginning
-          app.three.graticule.rotation.x = THREE.Math.degToRad(
+          app.three.graticule.rotation.x = THREE.MathUtils.degToRad(
             -90 + app.data.user.latitude
           );
-          app.three.graticule.rotation.y = THREE.Math.degToRad(
+          app.three.graticule.rotation.y = THREE.MathUtils.degToRad(
             app.data.user.longitude * -1
           );
 
           // Rotates countries so the user location coincides with the tunnel beginning
-          app.three.land.rotation.x = THREE.Math.degToRad(
+          app.three.land.rotation.x = THREE.MathUtils.degToRad(
             -90 + app.data.user.latitude
           );
-          app.three.land.rotation.y = THREE.Math.degToRad(
+          app.three.land.rotation.y = THREE.MathUtils.degToRad(
             180 + app.data.user.longitude * -1
           );
 
           // Resets Tunnel rotation
-          app.three.tunnel.rotation.x = THREE.Math.degToRad(0);
+          app.three.tunnel.rotation.x = THREE.MathUtils.degToRad(0);
         }
 
         // Enables third-person view
@@ -998,31 +980,31 @@ let app = {
           // Rotates Earth to match origin longitude
 
           // Rotates sphere so the user location coincides with the tunnel beginning
-          app.three.sphere.rotation.z = THREE.Math.degToRad(
+          app.three.sphere.rotation.z = THREE.MathUtils.degToRad(
             app.data.user.longitude
           );
 
           // Rotates graticule so the user location coincides with the tunnel beginning
-          app.three.graticule.rotation.y = THREE.Math.degToRad(
+          app.three.graticule.rotation.y = THREE.MathUtils.degToRad(
             app.data.user.longitude * -1
           );
 
           // Rotates countries so the user location coincides with the tunnel beginning
-          app.three.land.rotation.y = THREE.Math.degToRad(
+          app.three.land.rotation.y = THREE.MathUtils.degToRad(
             180 + app.data.user.longitude * -1
           );
 
           // Rotates Tunnel to match origin latitude
-          app.three.tunnel.rotation.x = THREE.Math.degToRad(
+          app.three.tunnel.rotation.x = THREE.MathUtils.degToRad(
             app.data.user.latitude * -1
           );
 
           // Resets Earth latitude rotation
-          app.three.sphere.rotation.x = THREE.Math.degToRad(0);
-          app.three.land.rotation.x = THREE.Math.degToRad(-90);
+          app.three.sphere.rotation.x = THREE.MathUtils.degToRad(0);
+          app.three.land.rotation.x = THREE.MathUtils.degToRad(-90);
 
           // Resets graticule
-          app.three.graticule.rotation.x = THREE.Math.degToRad(-90);
+          app.three.graticule.rotation.x = THREE.MathUtils.degToRad(-90);
         }
       },
 
@@ -1106,7 +1088,7 @@ let app = {
         // If ray instersects with anything
         if (intersections.length > 0) {
           // Gets farthest intersection
-          intersection = intersections[intersections.length - 1];
+          let intersection = intersections[intersections.length - 1];
 
           // Stores distance
           app.element.dataset.distance = parseInt(intersection.distance);
@@ -1762,7 +1744,7 @@ let app = {
     attach: {
       origin: () => {
         // Creates 2D object
-        let label = new THREE.CSS2DObject(app.labels.origin);
+        let label = new CSS2DObject(app.labels.origin);
 
         // Attach object to beginning of cylinder
         label.position.set(0, 0, 0);
@@ -1774,7 +1756,7 @@ let app = {
           // Handles label that is the fixed one
           if (destination.classList.contains("fixed")) {
             // Creates 2D object
-            let label = new THREE.CSS2DObject(destination);
+            let label = new CSS2DObject(destination);
 
             // Attaches object to the center of the scene
             label.position.set(0, 0, 0);
@@ -1784,7 +1766,7 @@ let app = {
           // Handles label that is not the fixed one
           else {
             // Creates 2D object
-            let label = new THREE.CSS2DObject(destination);
+            let label = new CSS2DObject(destination);
 
             // Attaches object to end of cylinder
             label.position.set(0, app.data.earth.radius.crust * -2, 0);
@@ -1798,7 +1780,7 @@ let app = {
           // Checks if label is a child of of the background element
           if (distance.closest(".background")) {
             // Creates 2D object
-            let label = new THREE.CSS2DObject(distance);
+            let label = new CSS2DObject(distance);
 
             // Attach object to middle of cylinder
             label.position.set(0, app.data.earth.radius.crust * -1, 0);
@@ -1900,6 +1882,18 @@ let app = {
       app.elements.download.addEventListener("click", app.orientation.download);
     },
 
+    rotation: () => {
+      // Stops auto-rotation as soon as user grabs the globe
+      app.three.controls.addEventListener("start", () =>
+        app.three.autoRotate(false)
+      );
+
+      // Turns auto-rotation on or off when switch is toggled
+      app.elements.rotateSwitch.addEventListener("change", () =>
+        app.three.autoRotate(app.elements.rotateSwitch.checked)
+      );
+    },
+
     initialize: () => {
       // Enables drag on handle to control tunnel angles on desktop
       app.events.drag();
@@ -1912,6 +1906,9 @@ let app = {
 
       // Enables download button (for debugging of orientation data)
       app.events.download();
+
+      // Lets user turn auto-rotation off and on again
+      app.events.rotation();
     },
   },
 
@@ -1925,3 +1922,6 @@ let app = {
 };
 
 app.data.load();
+
+// Exposes app for debugging in the console (e.g., app.orientation.play())
+window.app = app;

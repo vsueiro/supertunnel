@@ -263,7 +263,8 @@ nav {
   position: relative;
 }
 
-nav a {
+nav a,
+nav .rotate {
   align-items: center;
   display: flex;
   height: 100%;
@@ -273,6 +274,33 @@ nav a {
 nav a i {
   margin: calc(var(--basis) * 1.2);
   margin-right: 0;
+}
+
+/* Auto-rotation switch */
+
+nav .rotate {
+  cursor: pointer;
+  margin-right: calc(var(--basis) * 1.2);
+}
+
+nav .rotate input {
+  /* Hides checkbox (while keeping it accessible) */
+  height: 0;
+  opacity: 0;
+  position: absolute;
+  width: 0;
+}
+
+nav .rotate svg {
+  transition: opacity 0.2s linear;
+}
+
+nav .rotate input:not(:checked) + svg {
+  opacity: 0.4;
+}
+
+.app[data-mode="first-person"] .rotate {
+  display: none;
 }
 
 footer a {
