@@ -280,7 +280,8 @@ nav a i {
 
 nav .rotate {
   cursor: pointer;
-  margin-right: calc(var(--basis) * 1.2);
+  font-size: calc(var(--basis) * 1.2);
+  margin-right: calc(var(--basis) * 2.4);
 }
 
 nav .rotate input {
@@ -291,12 +292,27 @@ nav .rotate input {
   width: 0;
 }
 
-nav .rotate svg {
-  transition: opacity 0.2s linear;
+nav .rotate .switch {
+  height: calc(var(--basis) * 2);
+  margin-right: calc(var(--basis) * 0.8);
+  width: calc(var(--basis) * 3.6);
 }
 
-nav .rotate input:not(:checked) + svg {
-  opacity: 0.4;
+nav .rotate .pill {
+  fill: none;
+  stroke: var(--neutral-50);
+  stroke-width: 1.5;
+}
+
+nav .rotate .knob {
+  fill: var(--neutral-50);
+  transform: translate(10px, 10px);
+  transition: fill 0.2s linear, transform 0.2s ease-in-out;
+}
+
+nav .rotate input:checked ~ .switch .knob {
+  fill: var(--neutral-100);
+  transform: translate(26px, 10px);
 }
 
 .app[data-mode="first-person"] .rotate {
@@ -1145,6 +1161,15 @@ a[download] {
 
   .logo h1 span:last-child {
     display: none;
+  }
+
+  /* Keeps only the switch */
+  nav .rotate span {
+    display: none;
+  }
+
+  nav .rotate .switch {
+    margin-right: 0;
   }
 
   main {

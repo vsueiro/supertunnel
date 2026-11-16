@@ -511,40 +511,13 @@ let app = {
         // Creates instance
         app.three.stars = new THREE.InstancedMesh(geometry, material, amount);
 
-        // Checks if a given point is inside a sphere
-        let insideCircle = function (coordinates, radius) {
-          let sum = 0;
-
-          sum += Math.pow(coordinates.x, 2);
-          sum += Math.pow(coordinates.y, 2);
-          sum += Math.pow(coordinates.z, 2);
-
-          let boolean = sum < Math.pow(radius, 2);
-
-          return boolean;
-        };
-
-        let randomPosition = function (max) {
-          let value = Math.random() * max * 2 - max;
-
-          return parseInt(value);
-        };
-
+        // Picks a random point between the inner and outer radii (uniformly distributed in volume)
         let getCoordinates = function () {
-          let coordinates = {
-            x: randomPosition(outerRadius),
-            y: randomPosition(outerRadius),
-            z: randomPosition(outerRadius),
-          };
+          let min = Math.pow(innerRadius, 3);
+          let max = Math.pow(outerRadius, 3);
+          let radius = Math.cbrt(min + Math.random() * (max - min));
 
-          if (
-            insideCircle(coordinates, outerRadius) &&
-            !insideCircle(coordinates, innerRadius)
-          ) {
-            return coordinates;
-          } else {
-            return getCoordinates();
-          }
+          return new THREE.Vector3().randomDirection().multiplyScalar(radius);
         };
 
         // Positions each star at a randon location
@@ -1360,6 +1333,9 @@ let app = {
       app.data.user.latitude = position.coords.latitude;
       app.data.user.longitude = position.coords.longitude;
 
+      // Resumes auto-rotation to show the new location
+      app.three.autoRotate(true);
+
       app.labels.update.coordinates();
       app.search.clear();
 
@@ -1430,6 +1406,9 @@ let app = {
 
       // Resets drag handle position
       app.drag.reset();
+
+      // Resumes auto-rotation to show the new location
+      app.three.autoRotate(true);
 
       // Updates label with newly received coordinates
       app.labels.update.coordinates();
