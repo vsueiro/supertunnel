@@ -45,7 +45,7 @@ const rename = {
   "Republic of the Congo": "Congo",
   "Turkish Republic of Northern Cyprus": "Northern Cyprus",
   "United States of America": "United States",
-  "United States Virgin Islands": "Virgin Islands",
+  "United States Virgin Islands": "US Virgin Islands",
 };
 
 const round = (value) => Math.round(value * 100) / 100;

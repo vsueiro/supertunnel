@@ -3,8 +3,10 @@ SuperTunnel is an educational tool that simulates a hole through Earth, indicati
 
 Check it live → [supertunnel.app](https://supertunnel.app)
 
-## Country data
-Country shapes come from [Natural Earth](https://www.naturalearthdata.com/) 1:50m Admin 0 – Countries (public domain), and are built with [scripts/build-countries.js](scripts/build-countries.js).
+## Countries and territories
+The globe shows 242 countries and territories, including some disputed or unclaimed areas (such as Antarctica). For brevity, this section calls all of them “countries”.
+
+Their shapes come from [Natural Earth](https://www.naturalearthdata.com/) 1:50m Admin 0 – Countries (public domain), and are built with [scripts/build-countries.js](scripts/build-countries.js).
 
 Polygons smaller than 250 km² (measured before simplification) are left out, smallest first, as long as each country keeps at least 90% of its area. Every country is still shown, though some of its smaller islands may be missing.
 
@@ -18,7 +20,7 @@ Most names are Natural Earth’s English names, but a few are replaced by their 
 | Republic of the Congo | Congo |
 | Turkish Republic of Northern Cyprus | Northern Cyprus |
 | United States of America | United States |
-| United States Virgin Islands | Virgin Islands |
+| United States Virgin Islands | US Virgin Islands |
 
 Out of 1,620 polygons in 242 countries, 966 are kept and 654 are left out (from 96 countries). The same polygons are left out of both the desktop (high-resolution) and mobile (low-resolution) versions.
 
