@@ -8,6 +8,18 @@ Country shapes come from [Natural Earth](https://www.naturalearthdata.com/) 1:50
 
 Polygons smaller than 250 km² (measured before simplification) are left out, smallest first, as long as each country keeps at least 90% of its area. Every country is still shown, though some of its smaller islands may be missing.
 
+Most names are Natural Earth’s English names, but a few are replaced by their more common or shorter form:
+
+| Natural Earth name | Name used |
+|---|---|
+| Democratic Republic of the Congo | DR Congo |
+| Federated States of Micronesia | Micronesia |
+| People's Republic of China | China |
+| Republic of the Congo | Congo |
+| Turkish Republic of Northern Cyprus | Northern Cyprus |
+| United States of America | United States |
+| United States Virgin Islands | Virgin Islands |
+
 Out of 1,620 polygons in 242 countries, 966 are kept and 654 are left out (from 96 countries). The same polygons are left out of both the desktop (high-resolution) and mobile (low-resolution) versions.
 
 <details>
@@ -40,7 +52,6 @@ Out of 1,620 polygons in 242 countries, 966 are kept and 654 are left out (from 
 | Estonia | 3 | 1 | 169 | 0.4% |
 | Falkland Islands | 2 | 4 | 492 | 4.3% |
 | Faroe Islands | 4 | 1 | 83 | 8.0% |
-| Federated States of Micronesia | 3 | 2 | 47 | 9.0% |
 | Fiji | 4 | 17 | 945 | 5.1% |
 | Finland | 1 | 7 | 840 | 0.3% |
 | France | 8 | 2 | 275 | 0.04% |
@@ -69,6 +80,7 @@ Out of 1,620 polygons in 242 countries, 966 are kept and 654 are left out (from 
 | Marshall Islands | 4 | 1 | 9.4 | 3.9% |
 | Mauritania | 1 | 1 | 196 | 0.02% |
 | Mexico | 7 | 9 | 1,177 | 0.06% |
+| Micronesia | 3 | 2 | 47 | 9.0% |
 | Myanmar | 7 | 12 | 1,528 | 0.2% |
 | Netherlands | 2 | 10 | 757 | 2.0% |
 | New Caledonia | 3 | 3 | 349 | 1.9% |

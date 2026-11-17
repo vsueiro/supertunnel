@@ -39,9 +39,13 @@ const resolutions = {
 
 // Natural Earth’s English names, with a few shortened for display
 const rename = {
+  "Democratic Republic of the Congo": "DR Congo",
+  "Federated States of Micronesia": "Micronesia",
   "People's Republic of China": "China",
+  "Republic of the Congo": "Congo",
   "Turkish Republic of Northern Cyprus": "Northern Cyprus",
   "United States of America": "United States",
+  "United States Virgin Islands": "Virgin Islands",
 };
 
 const round = (value) => Math.round(value * 100) / 100;
