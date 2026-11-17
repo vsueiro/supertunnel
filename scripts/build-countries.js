@@ -14,6 +14,10 @@
 // Delaunay triangulation (cdt2d). Extra points are inserted along long edges and
 // on a regular grid inside each polygon, so that no triangle spans more than a few
 // degrees: this keeps the flat triangles close to the surface of the sphere.
+//
+// Polygons smaller than the minimum area (mostly small islands) are removed,
+// smallest first, as long as each country keeps most of its area. Polygons that
+// would disappear when simplified are kept with a lighter simplification instead.
 
 const fs = require("fs");
 const path = require("path");
@@ -22,9 +26,15 @@ const cdt2d = require("cdt2d");
 
 const [input, output] = process.argv.slice(2);
 
+// Minimum area of a polygon, in km²
+const minimumArea = 250;
+
+// Maximum share of a country’s area that can be removed
+const maximumAreaRemoved = 0.1;
+
 const resolutions = {
-  hi: { simplify: "12%", spacing: 4 }, // Desktop
-  lo: { simplify: "5%", spacing: 8 }, // Mobile
+  hi: { simplify: "12%", light: "25%", spacing: 4 }, // Desktop
+  lo: { simplify: "5%", light: "25%", spacing: 8 }, // Mobile
 };
 
 // Natural Earth’s English names, with a few shortened for display
@@ -160,28 +170,76 @@ const triangulate = (name, rings, spacing, vertices, triangles) => {
 };
 
 (async () => {
-  for (const [name, { simplify, spacing }] of Object.entries(resolutions)) {
+  for (const [name, { simplify, light, spacing }] of Object.entries(
+    resolutions
+  )) {
     console.log(`Building countries-${name}.json`);
 
-    // Simplifies polygons (keeping small islands and avoiding self-intersections)
-    const command = `-i input.json -simplify weighted ${simplify} keep-shapes -clean -o output.json format=geojson`;
-    const { "output.json": simplified } = await mapshaper.applyCommands(
-      command,
-      {
-        "input.json": fs.readFileSync(input),
-      }
-    );
+    // Simplifies polygons (avoiding self-intersections), returning them by id.
+    // Each polygon is split into its own feature, so it can be tracked on its own
+    const simplifyPolygons = async (options) => {
+      const command = `-i input.json -explode -each 'polygon=this.id, area=this.area' -simplify weighted ${options} -clean -o output.json format=geojson`;
+      const { "output.json": simplified } = await mapshaper.applyCommands(
+        command,
+        {
+          "input.json": fs.readFileSync(input),
+        }
+      );
+      const features = {};
+      for (const feature of JSON.parse(simplified).features)
+        if (feature.geometry) features[feature.properties.polygon] = feature;
+      return features;
+    };
 
-    const features = JSON.parse(simplified).features;
+    // Keeps polygons that disappear when simplified, with a lighter simplification
+    const simplified = await simplifyPolygons(simplify);
+    const lightlySimplified = await simplifyPolygons(`${light} keep-shapes`);
+    const ids = new Set([
+      ...Object.keys(simplified),
+      ...Object.keys(lightlySimplified),
+    ]);
     const countries = {};
+    let restored = 0;
+    let removed = 0;
 
-    for (const feature of features) {
+    // Picks small polygons to remove (areas measured before simplification)
+    const area = (id) =>
+      (simplified[id] || lightlySimplified[id]).properties.area / 1e6;
+    const polygonsByCountry = {};
+    for (const id of ids)
+      (polygonsByCountry[
+        (simplified[id] || lightlySimplified[id]).properties.NAME_EN
+      ] ||= []).push(id);
+    const removable = new Set();
+    for (const countryIds of Object.values(polygonsByCountry)) {
+      const total = countryIds.reduce((sum, id) => sum + area(id), 0);
+      let removedArea = 0;
+      for (const id of countryIds.sort((a, b) => area(a) - area(b))) {
+        if (area(id) >= minimumArea) break;
+        if (removedArea + area(id) > total * maximumAreaRemoved) break;
+        removedArea += area(id);
+        removable.add(id);
+      }
+    }
+
+    for (const id of ids) {
+      const feature = simplified[id] || lightlySimplified[id];
+
+      // Removes small polygons
+      if (removable.has(id)) {
+        removed++;
+        continue;
+      }
+
+      if (!simplified[id]) restored++;
       const countryName =
         rename[feature.properties.NAME_EN] || feature.properties.NAME_EN;
       const { type, coordinates } = feature.geometry;
       const polygons = type === "MultiPolygon" ? coordinates : [coordinates];
-      const vertices = [];
-      const triangles = [];
+      const { vertices, triangles } = (countries[countryName] ||= {
+        vertices: [],
+        triangles: [],
+      });
 
       for (const polygon of polygons) {
         try {
@@ -190,9 +248,18 @@ const triangulate = (name, rings, spacing, vertices, triangles) => {
           console.warn(`  ${countryName}: ${error.message}`);
         }
       }
-
-      if (triangles.length) countries[countryName] = { vertices, triangles };
     }
+
+    for (const countryName in countries)
+      if (!countries[countryName].triangles.length)
+        delete countries[countryName];
+
+    console.log(
+      `  ${removed} polygons removed (smaller than ${minimumArea} km², up to ${
+        maximumAreaRemoved * 100
+      }% of each country’s area)`
+    );
+    console.log(`  ${restored} polygons kept with lighter simplification`);
 
     const sorted = Object.fromEntries(
       Object.entries(countries).sort(([a], [b]) => a.localeCompare(b))
