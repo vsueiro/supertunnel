@@ -959,7 +959,8 @@ a[download] {
   content: "...";
 }
 
-.label-angle {
+.label-coordinates,
+.label-direction {
   font-variant-numeric: tabular-nums;
 }
 
