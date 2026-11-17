@@ -765,11 +765,29 @@ input[type="search"] + button:not(:hover) {
   padding: calc(var(--basis) * 1.2);
   position: relative;
   text-align: center;
+  text-wrap: balance;
   width: 100%;
 }
 
 .step > div:last-of-type {
   margin-bottom: calc(var(--basis) * 0.4);
+}
+
+.step > div.split {
+  flex-direction: row;
+  gap: calc(var(--basis) * 0.4);
+  margin-bottom: 0;
+  padding: 0;
+}
+
+/* Sizes each button by its label, so the search one ends up smaller */
+.split > button {
+  flex: 1 1 auto;
+  width: auto;
+}
+
+.split > button span {
+  margin-left: 0;
 }
 
 .steps .search-container {
@@ -970,7 +988,8 @@ a[download] {
   user-select: none;
 }
 
-.app[data-geolocation="unlocated"] .find span:nth-of-type(1) {
+.app[data-geolocation="unlocated"] .find span:nth-of-type(1),
+.app[data-geolocation="skipped"] .find span:nth-of-type(1) {
   display: flex;
 }
 
@@ -1038,6 +1057,12 @@ a[download] {
 .app[data-search="searched"] input[type="search"] + button {
   color: var(--success-100);
   pointer-events: none;
+}
+
+/* Changes address prompt when user chooses to search instead of using geolocation */
+.app[data-geolocation="skipped"] .step:nth-child(2) > div p:nth-child(1),
+.app:not([data-geolocation="skipped"]) .step:nth-child(2) > div p:nth-child(2) {
+  display: none;
 }
 
 .app .step:nth-child(4) > div p {

@@ -20,6 +20,7 @@ let app = {
     rotateSwitch: document.querySelector(".rotate input"),
     download: document.querySelector("a[download]"),
     findButton: document.querySelectorAll(".find"),
+    searchButton: document.querySelectorAll("button.search"),
     nextButton: document.querySelectorAll(".next"),
     form: document.querySelectorAll("form"),
     address: document.querySelectorAll('input[name="address"]'),
@@ -1481,6 +1482,15 @@ let app = {
       }
     },
 
+    choose: () => {
+      // Skips geolocation and goes straight to the address search
+      app.element.dataset.geolocation = "skipped";
+      app.steps.set(2);
+
+      // Opens keyboard right away (needs to happen within the click)
+      app.steps.element(2).querySelector('input[type="search"]').focus();
+    },
+
     submit: (form) => {
       // Selects input that is a child of the submitted form (not the other one)
       let input = form.querySelector('input[type="search"]');
@@ -1850,6 +1860,11 @@ let app = {
       // Finds user’s location automatically when button is clicked
       app.elements.findButton.forEach((button) =>
         button.addEventListener("click", app.geolocation.request)
+      );
+
+      // Goes to the address search when search button is clicked
+      app.elements.searchButton.forEach((button) =>
+        button.addEventListener("click", app.search.choose)
       );
 
       // Find user’s location by searching for an address
