@@ -493,23 +493,51 @@ let app = {
       },
 
       stars: () => {
-        let material = new THREE.MeshBasicMaterial({
+        // Draws each star as a single point (much lighter than a mesh per star)
+        let material = new THREE.PointsMaterial({
           color: app.color("neutral-25"),
+          size: app.data.earth.radius.crust * 0.03,
+          transparent: true,
         });
 
-        // Uses few segments (the defaults became much higher in recent versions of three.js)
-        let geometry = new THREE.SphereGeometry(
-          app.data.earth.radius.crust * 0.015,
-          8,
-          6
-        );
+        // Extends the built-in shader: makes points round, matches the apparent size of a sphere
+        // and fades stars out towards the center of the screen, so they do not compete with the globe
+        // (fade is relative to the globe’s apparent radius: invisible at 0, fully visible at 1.5)
+        material.onBeforeCompile = (shader) => {
+          shader.uniforms.earthRadius = { value: app.data.earth.radius.crust };
+
+          shader.vertexShader = shader.vertexShader
+            .replace(
+              "#include <common>",
+              "#include <common>\nuniform float earthRadius;\nvarying float vFade;"
+            )
+            .replace(
+              "#include <fog_vertex>",
+              `#include <fog_vertex>
+              gl_PointSize *= projectionMatrix[1][1];
+              vec2 screen = gl_Position.xy / gl_Position.w;
+              screen.x *= projectionMatrix[1][1] / projectionMatrix[0][0];
+              float ratio = earthRadius / length(cameraPosition);
+              float globe = ratio / sqrt(1.0 - ratio * ratio) * projectionMatrix[1][1];
+              vFade = smoothstep(0.0, 1.5, length(screen) / globe);`
+            );
+
+          shader.fragmentShader = shader.fragmentShader
+            .replace(
+              "#include <common>",
+              "#include <common>\nvarying float vFade;"
+            )
+            .replace(
+              "#include <color_fragment>",
+              `#include <color_fragment>
+              if (length(gl_PointCoord - 0.5) > 0.5) discard;
+              diffuseColor.a *= vFade;`
+            );
+        };
 
         let amount = 10000;
         let innerRadius = app.data.earth.radius.crust * 6;
         let outerRadius = app.data.earth.radius.crust * 12;
-
-        // Creates instance
-        app.three.stars = new THREE.InstancedMesh(geometry, material, amount);
 
         // Picks a random point between the inner and outer radii (uniformly distributed in volume)
         let getCoordinates = function () {
@@ -521,15 +549,12 @@ let app = {
         };
 
         // Positions each star at a randon location
-        for (let i = 0; i < amount; i++) {
-          let matrix = new THREE.Matrix4();
+        let points = [];
+        for (let i = 0; i < amount; i++) points.push(getCoordinates());
 
-          let coordinates = getCoordinates();
+        let geometry = new THREE.BufferGeometry().setFromPoints(points);
 
-          matrix.makeTranslation(coordinates.x, coordinates.y, coordinates.z);
-
-          app.three.stars.setMatrixAt(i, matrix);
-        }
+        app.three.stars = new THREE.Points(geometry, material);
       },
 
       universe: () => {
